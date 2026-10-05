@@ -1,0 +1,19 @@
+{
+  "updated_utc": "2026-10-05T06:13:04.387136+00:00",
+  "state": "training",
+  "stage": "benchmark",
+  "model": "yolo26n",
+  "epoch": 22,
+  "epochs": 100,
+  "batch": 8,
+  "run": "D:\\BinSpa_AI\\runs\\phase1\\benchmark_yolo26n_e100_s42_b8_w0_cram",
+  "metrics": {
+    "metrics/precision(B)": 0.40482,
+    "metrics/recall(B)": 0.33752,
+    "metrics/mAP50(B)": 0.29005,
+    "metrics/mAP50-95(B)": 0.0959,
+    "val/box_loss": 2.44007,
+    "val/cls_loss": 2.01993,
+    "val/l1_loss": 0.00228
+  }
+}

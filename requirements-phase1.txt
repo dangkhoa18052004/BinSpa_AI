@@ -1,0 +1,11 @@
+# Install CUDA torch/torchvision first; see scripts/phase1/README.md.
+ultralytics>=8.4,<9
+pandas>=2.2
+pyarrow>=17
+Pillow>=10
+opencv-python>=4.10
+scikit-learn>=1.5
+matplotlib>=3.9
+seaborn>=0.13
+PyYAML>=6
+timm>=1.0
