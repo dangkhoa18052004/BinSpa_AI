@@ -1,0 +1,39 @@
+{
+  "model": "yolo11s_full100",
+  "chosen_config": "original protocol, patience=100",
+  "final_run": "E:\\Project\\BinSpa_AI\\runs\\phase1\\benchmark_yolo11s_e100_s42_b8_w0_cram_p100",
+  "completed": {
+    "model": "yolo11s",
+    "epochs": 100,
+    "patience": 100,
+    "actual_epochs": 100,
+    "best_epoch": {
+      "epoch": 90,
+      "val_mAP50": 0.42451,
+      "val_mAP50_95": 0.15678,
+      "val_precision": 0.52973,
+      "val_recall": 0.42042
+    },
+    "batch": 8,
+    "amp_enabled": true,
+    "seed": 42,
+    "manifest_sha256": "0a40262f24a967caccd4854df9649eddbb5790f73a1190c3fec51b05785e09d6",
+    "best_sha256": "2834926bf413c310fdda339a841679d22bc382e47c82fd6c414f099c726831d0",
+    "environment": {
+      "python": "3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]",
+      "packages": {
+        "torch": "2.11.0+cu128",
+        "torchvision": "0.26.0+cu128",
+        "ultralytics": "8.4.173"
+      },
+      "cuda_available": true,
+      "gpu": "NVIDIA GeForce RTX 5050 Laptop GPU",
+      "torch_cuda": "12.8"
+    },
+    "completed_utc": "2026-10-07T11:23:25.346426+00:00"
+  },
+  "deploy_weights": "E:\\Project\\BinSpa_AI\\runs\\phase1\\benchmark_yolo11s_e100_s42_b8_w0_cram_p100\\weights\\best.pt",
+  "deploy_sha256": "2834926bf413c310fdda339a841679d22bc382e47c82fd6c414f099c726831d0",
+  "locked_before_test": true,
+  "locked_utc": "2026-10-07T11:23:25.390064+00:00"
+}

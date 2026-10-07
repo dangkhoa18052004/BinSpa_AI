@@ -1,0 +1,50 @@
+{
+  "model": "rtdetr_full100",
+  "weights": "E:\\Project\\BinSpa_AI\\models\\phase1\\rtdetr_full100_best.pt",
+  "weights_sha256": "22920ceb2d5e45bc5364616e0c903b4b83a23c3bc01b95393b9440dac0c64acb",
+  "model_mb": 63.15636920928955,
+  "params_m": 32.808131,
+  "manifest_sha256": "0a40262f24a967caccd4854df9649eddbb5790f73a1190c3fec51b05785e09d6",
+  "imgsz": 640,
+  "raw_conf": 0.001,
+  "max_det": 500,
+  "nms_iou": 0.7,
+  "latency_protocol": "batch=1, FP32, CUDA, mean over all split images after 10 warm-up images; decode excluded",
+  "images": 175,
+  "gt_boxes": 5259,
+  "predictions": 52500,
+  "mAP50": 0.43884589647129313,
+  "mAP50_95": 0.1533694125725046,
+  "ultra_precision": 0.5467525610018764,
+  "ultra_recall": 0.4569309754706218,
+  "ultra_f1": 0.4978226143226044,
+  "split_max_f1_conf": 0.4894894894894895,
+  "operating_point": {
+    "conf": 0.4894894894894895,
+    "iou": 0.5,
+    "tp": 2403,
+    "fp": 1992,
+    "fn": 2856,
+    "precision": 0.5467576791808874,
+    "recall": 0.4569309754706218,
+    "f1": 0.4978247358607831
+  },
+  "fixed_conf_025": {
+    "conf": 0.25,
+    "iou": 0.5,
+    "tp": 3166,
+    "fp": 8360,
+    "fn": 2093,
+    "precision": 0.27468332465729656,
+    "recall": 0.6020155923179311,
+    "f1": 0.3772415847482872
+  },
+  "speed_ms": {
+    "preprocess": 8.746342857172879,
+    "inference": 126.3882445714158,
+    "postprocess": 2.870163999998892,
+    "total": 138.00475142858755,
+    "peak_vram_mb": 236.78857421875
+  },
+  "split": "val"
+}

@@ -19,3 +19,10 @@ reports/phase1_external_predictions/
 reports/*.lock
 reports/phase1_evaluation/
 reports/phase1_smoke_prediction/
+# Phase 1 additional models: keep reports/configs/metrics/charts, drop heavy regenerable artifacts
+reports/phase1_additional_models/**/predictions.json
+reports/phase1_additional_models/**/*.jpg
+reports/phase1_additional_models/logs/
+reports/phase1_additional_models/data_portable.yaml
+*.tmp
+scripts/phase1/Ultralytics/

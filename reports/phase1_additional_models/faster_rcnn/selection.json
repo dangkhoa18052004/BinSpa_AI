@@ -1,0 +1,109 @@
+{
+  "model": "faster_rcnn",
+  "chosen_config": "cfg_c",
+  "config": {
+    "imgsz": 640,
+    "batch": 4,
+    "momentum": 0.9,
+    "weight_decay": 0.0001,
+    "warmup_iters": 300,
+    "min_lr_ratio": 0.01,
+    "clip_grad": 10.0,
+    "amp": true,
+    "trainable_layers": 3,
+    "hflip": 0.5,
+    "crop_p": 0.5,
+    "crop_scale": [
+      0.6,
+      1.0
+    ],
+    "color_jitter": true,
+    "patience": 10,
+    "anchors": [
+      8,
+      16,
+      32,
+      64,
+      128
+    ],
+    "lr": 0.01
+  },
+  "final_run": "E:\\Project\\BinSpa_AI\\runs\\phase1_additional\\faster_rcnn_final_cfg_c_e50_b4",
+  "completed": {
+    "model": "faster_rcnn",
+    "config": {
+      "imgsz": 640,
+      "batch": 4,
+      "momentum": 0.9,
+      "weight_decay": 0.0001,
+      "warmup_iters": 300,
+      "min_lr_ratio": 0.01,
+      "clip_grad": 10.0,
+      "amp": true,
+      "trainable_layers": 3,
+      "hflip": 0.5,
+      "crop_p": 0.5,
+      "crop_scale": [
+        0.6,
+        1.0
+      ],
+      "color_jitter": true,
+      "patience": 10,
+      "anchors": [
+        8,
+        16,
+        32,
+        64,
+        128
+      ],
+      "lr": 0.01
+    },
+    "effective_config": {
+      "imgsz": 640,
+      "batch": 4,
+      "momentum": 0.9,
+      "weight_decay": 0.0001,
+      "warmup_iters": 300,
+      "min_lr_ratio": 0.01,
+      "clip_grad": 10.0,
+      "amp": true,
+      "trainable_layers": 3,
+      "hflip": 0.5,
+      "crop_p": 0.5,
+      "crop_scale": [
+        0.6,
+        1.0
+      ],
+      "color_jitter": true,
+      "patience": 10,
+      "anchors": [
+        8,
+        16,
+        32,
+        64,
+        128
+      ],
+      "lr": 0.01
+    },
+    "epochs": 50,
+    "actual_epochs": 29,
+    "best_epoch": {
+      "epoch": 19,
+      "val_mAP50": 0.40203469232627265,
+      "val_mAP50_95": 0.13916392758871646,
+      "val_precision": 0.5023696682464455,
+      "val_recall": 0.4232743867655448
+    },
+    "batch": 4,
+    "amp_enabled": true,
+    "peak_train_vram_gb": 3.349609375,
+    "seed": 42,
+    "manifest_sha256": "0a40262f24a967caccd4854df9649eddbb5790f73a1190c3fec51b05785e09d6",
+    "best_sha256": "012cb723475341ecf776e57909a2fe327b17ac3b68629ea0daeaeeaaab012b67",
+    "completed_utc": "2026-10-07T07:46:17.216472+00:00"
+  },
+  "deploy_weights": "E:\\Project\\BinSpa_AI\\models\\phase1\\faster_rcnn_best.pth",
+  "deploy_sha256": "7abe17f2d9313737fd505f0f56e5ddd4d27afe84bdfa90c4577ea2e5186e456b",
+  "locked_before_test": true,
+  "locked_utc": "2026-10-07T11:30:41.436716+00:00"
+}

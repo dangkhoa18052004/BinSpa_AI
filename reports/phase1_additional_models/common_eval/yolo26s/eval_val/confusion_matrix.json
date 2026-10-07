@@ -1,0 +1,15 @@
+{
+  "matrix_pred_by_true": [
+    [
+      2254.0,
+      1962.0
+    ],
+    [
+      3005.0,
+      0.0
+    ]
+  ],
+  "conf": 0.2122122122122122,
+  "match_iou": 0.5,
+  "note": "rows=predicted [acne, background], cols=true [acne, background]; background/background is undefined for detection"
+}
