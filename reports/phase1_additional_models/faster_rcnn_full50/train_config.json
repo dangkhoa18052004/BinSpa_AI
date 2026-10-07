@@ -1,0 +1,35 @@
+{
+  "config": {
+    "imgsz": 640,
+    "batch": 4,
+    "momentum": 0.9,
+    "weight_decay": 0.0001,
+    "warmup_iters": 300,
+    "min_lr_ratio": 0.01,
+    "clip_grad": 10.0,
+    "amp": true,
+    "trainable_layers": 3,
+    "hflip": 0.5,
+    "crop_p": 0.5,
+    "crop_scale": [
+      0.6,
+      1.0
+    ],
+    "color_jitter": true,
+    "patience": 50,
+    "anchors": [
+      8,
+      16,
+      32,
+      64,
+      128
+    ],
+    "lr": 0.01
+  },
+  "screen_epochs": 15,
+  "final_epochs": 50,
+  "pretrained": "torchvision FasterRCNN_ResNet50_FPN_Weights.COCO_V1",
+  "cache_long_side": 1024,
+  "optimizer": "SGD",
+  "scheduler": "linear warm-up + cosine"
+}

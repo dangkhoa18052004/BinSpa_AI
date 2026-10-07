@@ -1,0 +1,89 @@
+{
+  "conf": 0.2122122122122122,
+  "iou": 0.5,
+  "most_false_negatives": [
+    {
+      "file_name": "levle3_89.jpg",
+      "gt": 434,
+      "pred": 219,
+      "tp": 118,
+      "fp": 101,
+      "fn": 316
+    },
+    {
+      "file_name": "levle2_122.jpg",
+      "gt": 112,
+      "pred": 101,
+      "tp": 44,
+      "fp": 57,
+      "fn": 68
+    },
+    {
+      "file_name": "levle3_115.jpg",
+      "gt": 122,
+      "pred": 96,
+      "tp": 60,
+      "fp": 36,
+      "fn": 62
+    },
+    {
+      "file_name": "levle3_132.jpg",
+      "gt": 125,
+      "pred": 120,
+      "tp": 63,
+      "fp": 57,
+      "fn": 62
+    },
+    {
+      "file_name": "levle2_158.jpg",
+      "gt": 109,
+      "pred": 96,
+      "tp": 50,
+      "fp": 46,
+      "fn": 59
+    }
+  ],
+  "most_false_positives": [
+    {
+      "file_name": "levle3_89.jpg",
+      "gt": 434,
+      "pred": 219,
+      "tp": 118,
+      "fp": 101,
+      "fn": 316
+    },
+    {
+      "file_name": "levle2_34.jpg",
+      "gt": 79,
+      "pred": 99,
+      "tp": 41,
+      "fp": 58,
+      "fn": 38
+    },
+    {
+      "file_name": "levle2_122.jpg",
+      "gt": 112,
+      "pred": 101,
+      "tp": 44,
+      "fp": 57,
+      "fn": 68
+    },
+    {
+      "file_name": "levle3_132.jpg",
+      "gt": 125,
+      "pred": 120,
+      "tp": 63,
+      "fp": 57,
+      "fn": 62
+    },
+    {
+      "file_name": "levle3_106.jpg",
+      "gt": 51,
+      "pred": 83,
+      "tp": 33,
+      "fp": 50,
+      "fn": 18
+    }
+  ],
+  "legend": "green=GT, cyan=matched prediction, red=unmatched prediction"
+}

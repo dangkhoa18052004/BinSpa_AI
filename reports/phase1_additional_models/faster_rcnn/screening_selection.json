@@ -1,0 +1,44 @@
+{
+  "rule": "validation mAP50-95 (ties within 0.002) -> recall -> total latency",
+  "screen_epochs": 15,
+  "ranking": [
+    {
+      "config": "cfg_c",
+      "run": "E:\\Project\\BinSpa_AI\\runs\\phase1_additional\\faster_rcnn_screen_cfg_c_e15_b4",
+      "mAP50_95": 0.13055248071360023,
+      "mAP50": 0.3895438967758512,
+      "recall": 0.39912530899410537,
+      "precision": 0.5081094166061486,
+      "total_ms": 169.30008114286466,
+      "best_epoch": 15,
+      "actual_epochs": 15,
+      "batch": 4
+    },
+    {
+      "config": "cfg_b",
+      "run": "E:\\Project\\BinSpa_AI\\runs\\phase1_additional\\faster_rcnn_screen_cfg_b_e15_b4",
+      "mAP50_95": 0.12151697615828558,
+      "mAP50": 0.3666525874897145,
+      "recall": 0.3835329910629397,
+      "precision": 0.4936368086147822,
+      "total_ms": 177.642400571432,
+      "best_epoch": 14,
+      "actual_epochs": 15,
+      "batch": 4
+    },
+    {
+      "config": "cfg_a",
+      "run": "E:\\Project\\BinSpa_AI\\runs\\phase1_additional\\faster_rcnn_screen_cfg_a_e15_b4",
+      "mAP50_95": 0.11715371317470054,
+      "mAP50": 0.3549093513014068,
+      "recall": 0.3764974329720479,
+      "precision": 0.5024105556965237,
+      "total_ms": 99.1657405713964,
+      "best_epoch": 14,
+      "actual_epochs": 15,
+      "batch": 4
+    }
+  ],
+  "chosen": "cfg_c",
+  "scorer": "common evaluator, predictor v2"
+}

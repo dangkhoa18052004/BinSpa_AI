@@ -1,0 +1,91 @@
+{
+  "model": "rtdetr",
+  "weights": "E:\\Project\\BinSpa_AI\\models\\phase1\\rtdetr_best.pt",
+  "weights_sha256": "e36384691ae30d5e9594a3f6d7e79cee7717927d5bb2aae8920b6c4cc30d0ce6",
+  "model_mb": 63.1536226272583,
+  "params_m": 32.808131,
+  "manifest_sha256": "0a40262f24a967caccd4854df9649eddbb5790f73a1190c3fec51b05785e09d6",
+  "imgsz": 640,
+  "raw_conf": 0.001,
+  "max_det": 500,
+  "nms_iou": 0.7,
+  "latency_protocol": "batch=1, FP32, CUDA, mean over all split images after 10 warm-up images; decode excluded",
+  "val": {
+    "images": 175,
+    "gt_boxes": 5259,
+    "predictions": 52500,
+    "mAP50": 0.42998770023034244,
+    "mAP50_95": 0.15568486209142934,
+    "ultra_precision": 0.5382952265751291,
+    "ultra_recall": 0.4548393230652215,
+    "ultra_f1": 0.4930607570813768,
+    "split_max_f1_conf": 0.47347347347347346,
+    "operating_point": {
+      "conf": 0.47347347347347346,
+      "iou": 0.5,
+      "tp": 2392,
+      "fp": 2051,
+      "fn": 2867,
+      "precision": 0.5383749718658564,
+      "recall": 0.4548393230652215,
+      "f1": 0.49309420737992166
+    },
+    "fixed_conf_025": {
+      "conf": 0.25,
+      "iou": 0.5,
+      "tp": 3198,
+      "fp": 8882,
+      "fn": 2061,
+      "precision": 0.26473509933774836,
+      "recall": 0.6081003993154592,
+      "f1": 0.36887940480996595
+    },
+    "speed_ms": {
+      "preprocess": 2.1764188569587923,
+      "inference": 26.49136000005196,
+      "postprocess": 0.48318114281365915,
+      "total": 29.15095999982441,
+      "peak_vram_mb": 271.39794921875
+    },
+    "split": "val"
+  },
+  "test": {
+    "images": 176,
+    "gt_boxes": 5046,
+    "predictions": 52800,
+    "mAP50": 0.42204685742886705,
+    "mAP50_95": 0.14324653470497473,
+    "ultra_precision": 0.5421872846588077,
+    "ultra_recall": 0.441141498216409,
+    "ultra_f1": 0.486472714383313,
+    "split_max_f1_conf": 0.4674674674674675,
+    "operating_point": {
+      "conf": 0.47347347347347346,
+      "iou": 0.5,
+      "tp": 2202,
+      "fp": 1793,
+      "fn": 2844,
+      "precision": 0.551188986232791,
+      "recall": 0.43638525564803804,
+      "f1": 0.4871142572724256
+    },
+    "fixed_conf_025": {
+      "conf": 0.25,
+      "iou": 0.5,
+      "tp": 3039,
+      "fp": 8502,
+      "fn": 2007,
+      "precision": 0.2633220691447882,
+      "recall": 0.6022592152199763,
+      "f1": 0.36643154277446194
+    },
+    "speed_ms": {
+      "preprocess": 2.219481249891363,
+      "inference": 28.090723863752746,
+      "postprocess": 0.5702017047042318,
+      "total": 30.88040681834834,
+      "peak_vram_mb": 271.39794921875
+    },
+    "split": "test"
+  }
+}

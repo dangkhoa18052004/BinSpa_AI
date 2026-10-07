@@ -1,0 +1,18 @@
+{
+  "manifest_sha256": "0a40262f24a967caccd4854df9649eddbb5790f73a1190c3fec51b05785e09d6",
+  "epochs": 100,
+  "config": {
+    "batch": 8,
+    "patience": 20,
+    "cache": "ram",
+    "max_det": 500,
+    "close_mosaic": 10,
+    "weight_decay": 0.0005,
+    "lrf": 0.01,
+    "optimizer": "SGD",
+    "lr0": 0.01,
+    "momentum": 0.937
+  },
+  "batch": 8,
+  "weights": "yolov5su.pt"
+}

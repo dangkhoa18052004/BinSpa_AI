@@ -1,0 +1,50 @@
+{
+  "model": "yolo26s",
+  "weights": "E:\\Project\\BinSpa_AI\\runs\\phase1\\benchmark_yolo26s_e100_s42_b8_w0_cram\\weights\\best.pt",
+  "weights_sha256": "aa67a569e8a95bc72d92bbd17b73e6f3614a8626677efa6076cb951e34ed4be3",
+  "model_mb": 19.371769905090332,
+  "params_m": 9.948638,
+  "manifest_sha256": "0a40262f24a967caccd4854df9649eddbb5790f73a1190c3fec51b05785e09d6",
+  "imgsz": 640,
+  "raw_conf": 0.001,
+  "max_det": 500,
+  "nms_iou": 0.7,
+  "latency_protocol": "batch=1, FP32, CUDA, mean over all split images after 10 warm-up images; decode excluded",
+  "images": 175,
+  "gt_boxes": 5259,
+  "predictions": 68483,
+  "mAP50": 0.4335828488471206,
+  "mAP50_95": 0.15571561263689657,
+  "ultra_precision": 0.5346092822359596,
+  "ultra_recall": 0.4285985928883818,
+  "ultra_f1": 0.47577016764282803,
+  "split_max_f1_conf": 0.2122122122122122,
+  "operating_point": {
+    "conf": 0.2122122122122122,
+    "iou": 0.5,
+    "tp": 2254,
+    "fp": 1962,
+    "fn": 3005,
+    "precision": 0.534629981024668,
+    "recall": 0.4285985928883818,
+    "f1": 0.47577836411609503
+  },
+  "fixed_conf_025": {
+    "conf": 0.25,
+    "iou": 0.5,
+    "tp": 2092,
+    "fp": 1473,
+    "fn": 3167,
+    "precision": 0.5868162692847125,
+    "recall": 0.3977942574633961,
+    "f1": 0.4741613780598368
+  },
+  "speed_ms": {
+    "preprocess": 2.198613142796343,
+    "inference": 9.149540000102466,
+    "postprocess": 1.2656600001147515,
+    "total": 12.61381314301356,
+    "peak_vram_mb": 128.18359375
+  },
+  "split": "val"
+}

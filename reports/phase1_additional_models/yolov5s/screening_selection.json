@@ -1,0 +1,43 @@
+{
+  "rule": "validation mAP50-95 (ties within 0.002) -> recall -> total latency",
+  "screen_epochs": 30,
+  "ranking": [
+    {
+      "config": "cfg_b",
+      "run": "E:\\Project\\BinSpa_AI\\runs\\phase1_additional\\yolov5s_screen_cfg_b_e30_b8",
+      "mAP50_95": 0.14269330933089874,
+      "mAP50": 0.3922020187087445,
+      "recall": 0.39855485833808707,
+      "precision": 0.4941065535124941,
+      "total_ms": 55.62857028566733,
+      "best_epoch": 30,
+      "actual_epochs": 30,
+      "batch": 8
+    },
+    {
+      "config": "cfg_a",
+      "run": "E:\\Project\\BinSpa_AI\\runs\\phase1_additional\\yolov5s_screen_cfg_a_e30_b8",
+      "mAP50_95": 0.14216386336493728,
+      "mAP50": 0.39389757138869097,
+      "recall": 0.3977942574633961,
+      "precision": 0.49362907031618686,
+      "total_ms": 62.688793142837575,
+      "best_epoch": 29,
+      "actual_epochs": 30,
+      "batch": 8
+    },
+    {
+      "config": "cfg_c",
+      "run": "E:\\Project\\BinSpa_AI\\runs\\phase1_additional\\yolov5s_screen_cfg_c_e30_b8",
+      "mAP50_95": 0.1349456669499914,
+      "mAP50": 0.37468593250060744,
+      "recall": 0.37763833428408444,
+      "precision": 0.48581213307240706,
+      "total_ms": 39.98842571419248,
+      "best_epoch": 29,
+      "actual_epochs": 30,
+      "batch": 8
+    }
+  ],
+  "chosen": "cfg_b"
+}
