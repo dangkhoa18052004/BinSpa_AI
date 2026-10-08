@@ -224,9 +224,9 @@ class FasterRCNNPredictor:
         return sum(p.numel() for p in self.model.parameters())
 
 
-def make_predictor(weights):
+def make_predictor(weights, imgsz=IMGSZ):
     weights = Path(weights)
-    return FasterRCNNPredictor(weights) if weights.suffix == '.pth' else UltralyticsPredictor(weights)
+    return FasterRCNNPredictor(weights) if weights.suffix == '.pth' else UltralyticsPredictor(weights, imgsz)
 
 
 def collect(predictor, records, warmup=10):
@@ -272,15 +272,15 @@ def save_predictions(path, records, preds):
                            scores=np.round(p['scores'], 5).tolist()) for r, p in zip(records, preds)])
 
 
-def evaluate_model(name, weights, out_root, split_list=('val', 'test'), illustrate=True):
+def evaluate_model(name, weights, out_root, split_list=('val', 'test'), illustrate=True, imgsz=IMGSZ):
     """Validation first (chooses conf_op), then test with that conf_op. Writes immediately."""
     weights = Path(weights)
     out_root = Path(out_root)
     manifest = verify_dataset(DATASET, require_review=True)
-    predictor = make_predictor(weights)
+    predictor = make_predictor(weights, imgsz)
     summary = dict(model=name, weights=str(weights), weights_sha256=digest(weights),
                    model_mb=weights.stat().st_size / 1024 ** 2, params_m=predictor.params() / 1e6,
-                   manifest_sha256=digest(DATASET / 'manifest.json'), imgsz=IMGSZ, raw_conf=RAW_CONF,
+                   manifest_sha256=digest(DATASET / 'manifest.json'), imgsz=imgsz, raw_conf=RAW_CONF,
                    max_det=MAX_DET, nms_iou=NMS_IOU if isinstance(predictor, UltralyticsPredictor) else 'torchvision box_nms_thresh=0.5',
                    latency_protocol='batch=1, FP32, CUDA, mean over all split images after 10 warm-up images; decode excluded')
     conf_op = None
