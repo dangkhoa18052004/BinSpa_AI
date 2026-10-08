@@ -1,0 +1,187 @@
+{
+  "split": "test",
+  "reference": "yolo26s_640",
+  "n_boot": 1000,
+  "seed": 42,
+  "method": "paired percentile bootstrap over test images; thresholds chosen on validation",
+  "test": {
+    "yolo26s_640": {
+      "imgsz": 640,
+      "conf": 0.2122122122122122,
+      "mAP50": 0.4236269153457074,
+      "mAP50_95": 0.14831398771854806,
+      "precision": 0.5344400396432111,
+      "recall": 0.42746730083234247,
+      "f1": 0.47500550539528735,
+      "tp": 2157,
+      "fp": 1879,
+      "fn": 2889,
+      "total_ms": 12.28315056809234,
+      "weights_sha256": "aa67a569e8a95bc72d92bbd17b73e6f3614a8626677efa6076cb951e34ed4be3"
+    },
+    "yolo26s_1280": {
+      "imgsz": 1280,
+      "conf": 0.27227227227227224,
+      "mAP50": 0.5069682404616678,
+      "mAP50_95": 0.1940664698517355,
+      "precision": 0.5942632998283893,
+      "recall": 0.4803804994054697,
+      "f1": 0.5312876712328767,
+      "tp": 2424,
+      "fp": 1655,
+      "fn": 2622,
+      "total_ms": 24.673796590873692,
+      "weights_sha256": "5602d494da8c2919535d26444c0721ec951044b4d122441a241b5470f27e83f6"
+    }
+  },
+  "bootstrap": {
+    "yolo26s_640": {
+      "mAP50_ci_low": 0.3879079105419026,
+      "mAP50_ci_high": 0.45969288623171994,
+      "mAP50_diff_vs_ref": 0.0,
+      "mAP50_diff_ci_low": 0.0,
+      "mAP50_diff_ci_high": 0.0,
+      "mAP50_p_better_than_ref": 0.0,
+      "mAP50_95_ci_low": 0.1337674166283819,
+      "mAP50_95_ci_high": 0.16457567892959438,
+      "mAP50_95_diff_vs_ref": 0.0,
+      "mAP50_95_diff_ci_low": 0.0,
+      "mAP50_95_diff_ci_high": 0.0,
+      "mAP50_95_p_better_than_ref": 0.0,
+      "precision_ci_low": 0.5148123064588809,
+      "precision_ci_high": 0.5530295397830867,
+      "precision_diff_vs_ref": 0.0,
+      "precision_diff_ci_low": 0.0,
+      "precision_diff_ci_high": 0.0,
+      "precision_p_better_than_ref": 0.0,
+      "recall_ci_low": 0.3930188902647827,
+      "recall_ci_high": 0.4597381225033511,
+      "recall_diff_vs_ref": 0.0,
+      "recall_diff_ci_low": 0.0,
+      "recall_diff_ci_high": 0.0,
+      "recall_p_better_than_ref": 0.0,
+      "f1_ci_low": 0.4512515304741864,
+      "f1_ci_high": 0.49776564345833535,
+      "f1_diff_vs_ref": 0.0,
+      "f1_diff_ci_low": 0.0,
+      "f1_diff_ci_high": 0.0,
+      "f1_p_better_than_ref": 0.0
+    },
+    "yolo26s_1280": {
+      "mAP50_ci_low": 0.47460977422735073,
+      "mAP50_ci_high": 0.5395318882569844,
+      "mAP50_diff_vs_ref": 0.08263682694976998,
+      "mAP50_diff_ci_low": 0.06412584090507367,
+      "mAP50_diff_ci_high": 0.10012981142211366,
+      "mAP50_p_better_than_ref": 1.0,
+      "mAP50_95_ci_low": 0.17886711742584346,
+      "mAP50_95_ci_high": 0.21046847785358727,
+      "mAP50_95_diff_vs_ref": 0.04561237783354373,
+      "mAP50_95_diff_ci_low": 0.03743298662342913,
+      "mAP50_95_diff_ci_high": 0.0534635125054661,
+      "mAP50_95_p_better_than_ref": 1.0,
+      "precision_ci_low": 0.5682509037230385,
+      "precision_ci_high": 0.6176975621703236,
+      "precision_diff_vs_ref": 0.0595861690712009,
+      "precision_diff_ci_low": 0.038475154909408296,
+      "precision_diff_ci_high": 0.0817386337012878,
+      "precision_p_better_than_ref": 1.0,
+      "recall_ci_low": 0.4482773371220077,
+      "recall_ci_high": 0.5130142799414725,
+      "recall_diff_vs_ref": 0.05300160853647801,
+      "recall_diff_ci_low": 0.03763446917154876,
+      "recall_diff_ci_high": 0.06840787616731224,
+      "recall_p_better_than_ref": 1.0,
+      "f1_ci_low": 0.5095082482736888,
+      "f1_ci_high": 0.5523008621842811,
+      "f1_diff_vs_ref": 0.0562160794947683,
+      "f1_diff_ci_low": 0.04233314922004627,
+      "f1_diff_ci_high": 0.07065088183588812,
+      "f1_p_better_than_ref": 1.0
+    }
+  },
+  "recall_by_lesion_size_at_640": {
+    "yolo26s_640": {
+      "0-5px": {
+        "n": 874,
+        "recall": 0.12356979405034325
+      },
+      "5-8px": {
+        "n": 1793,
+        "recall": 0.40323480200780815
+      },
+      "8-12px": {
+        "n": 1360,
+        "recall": 0.5551470588235294
+      },
+      "12-20px": {
+        "n": 789,
+        "recall": 0.5817490494296578
+      },
+      ">=20px": {
+        "n": 230,
+        "recall": 0.48695652173913045
+      }
+    },
+    "yolo26s_1280": {
+      "0-5px": {
+        "n": 874,
+        "recall": 0.23569794050343248
+      },
+      "5-8px": {
+        "n": 1793,
+        "recall": 0.4991634132738427
+      },
+      "8-12px": {
+        "n": 1360,
+        "recall": 0.5529411764705883
+      },
+      "12-20px": {
+        "n": 789,
+        "recall": 0.5766793409378961
+      },
+      ">=20px": {
+        "n": 230,
+        "recall": 0.508695652173913
+      }
+    }
+  },
+  "recall_by_lesions_per_image": {
+    "yolo26s_640": {
+      "1-10": {
+        "lesions": 270,
+        "recall": 0.4703703703703704
+      },
+      "11-30": {
+        "lesions": 1510,
+        "recall": 0.41721854304635764
+      },
+      "31-60": {
+        "lesions": 1784,
+        "recall": 0.44506726457399104
+      },
+      ">60": {
+        "lesions": 1482,
+        "recall": 0.4089068825910931
+      }
+    },
+    "yolo26s_1280": {
+      "1-10": {
+        "lesions": 270,
+        "recall": 0.5370370370370371
+      },
+      "11-30": {
+        "lesions": 1510,
+        "recall": 0.476158940397351
+      },
+      "31-60": {
+        "lesions": 1784,
+        "recall": 0.4915919282511211
+      },
+      ">60": {
+        "lesions": 1482,
+        "recall": 0.46153846153846156
+      }
+    }
+  }
+}

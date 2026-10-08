@@ -22,7 +22,9 @@
 
 Bin Spa cần một mô-đun AI phát hiện vị trí nốt mụn trên ảnh khuôn mặt do khách hàng chụp và gửi lên, làm đầu vào cho hồ sơ da (Skin Profile) và gợi ý dịch vụ. Chúng tôi xây dựng một bộ dữ liệu sạch từ **ACNE04-v2** (1.167 ảnh, 31.498 nốt mụn sau khi loại trùng và cách ly nhãn lỗi), chia cố định train/val/test = **816/175/176** (seed 42), rồi so sánh **6 kiến trúc** — YOLO26n, YOLO26s, YOLO11s, YOLOv5s, Faster R-CNN R50-FPN và RT-DETR-L — dưới cùng một giao thức: ngân sách tuning bằng nhau, lựa chọn chỉ dựa trên validation, một evaluator chung cho mọi framework, khoảng tin cậy bootstrap ghép cặp và đo latency có kiểm soát.
 
-**Kết quả chính.** Trên tập test, **YOLO26s** đạt mAP50 **0,424** và mAP50-95 **0,148** (CI 95%: 0,134–0,165), Recall 0,428, F1 0,475 với **10,8 ms/ảnh** và **19 MB**. RT-DETR-L và YOLO11s không khác biệt có ý nghĩa thống kê về mAP50-95; YOLOv5s, Faster R-CNN và YOLO26n kém hơn có ý nghĩa. RT-DETR-L có Recall/F1 nhỉnh hơn (không có ý nghĩa thống kê) nhưng chậm hơn ~2,6×, nặng hơn ~3× và sót nhiều hơn ở ảnh mụn dày đặc do giới hạn 300 truy vấn. **YOLO26s được chọn** cho triển khai. Hạn chế lớn nhất chung cho mọi model là nốt mụn rất nhỏ (trung vị **7,8 px** ở đầu vào 640): mọi model vẫn sót hơn một nửa số nốt.
+**Kết quả chính.** Trên tập test, **YOLO26s** đạt mAP50 **0,424** và mAP50-95 **0,148** (CI 95%: 0,134–0,165), Recall 0,428, F1 0,475 với **10,8 ms/ảnh** và **19 MB**. RT-DETR-L và YOLO11s không khác biệt có ý nghĩa thống kê về mAP50-95; YOLOv5s, Faster R-CNN và YOLO26n kém hơn có ý nghĩa. RT-DETR-L có Recall/F1 nhỉnh hơn (không có ý nghĩa thống kê) nhưng chậm hơn ~2,6×, nặng hơn ~3× và sót nhiều hơn ở ảnh mụn dày đặc do giới hạn 300 truy vấn. Ở 640, **YOLO26s** được chọn. Hạn chế lớn nhất chung cho mọi model là nốt mụn rất nhỏ (trung vị **7,8 px** ở đầu vào 640).
+
+**Thử nghiệm độ phân giải ([§5.8](#58-thử-nghiệm-độ-phân-giải-1280-và-model-cuối)).** Train lại 3 model hòa điểm ở **imgsz 1280** làm tăng mọi chỉ số có ý nghĩa thống kê. Theo cùng quy tắc chọn, **RT-DETR-L @1280** là model triển khai cuối cùng: test Recall **0,511**, Precision 0,607, F1 0,555, mAP50-95 0,191, khoảng 78 ms/ảnh. Recall và F1 hơn YOLO26s @1280 có ý nghĩa thống kê. So với YOLO26s @640: Recall +8,5 điểm, Precision +7,3 điểm.
 
 ## Mục lục
 
@@ -47,7 +49,7 @@ Hệ thống phân tích da của Bin Spa gồm 3 giai đoạn độc lập, ho�
 ```mermaid
 flowchart TD
     A["Ảnh khách hàng<br/>(camera / upload)"] --> B["Tiền xử lý khuôn mặt"]
-    B --> P1["GĐ1 · Phát hiện mụn<br/>YOLO26s ✅"]
+    B --> P1["GĐ1 · Phát hiện mụn<br/>RT-DETR-L @1280 ✅"]
     B --> P2["GĐ2 · Phân loại loại mụn<br/>ConvNeXt (chưa làm)"]
     B --> P3["GĐ3 · Phân loại sẹo mụn<br/>ConvNeXt (chưa làm)"]
     P1 --> S["Skin Profile"]
@@ -268,6 +270,19 @@ Chạy đủ lịch không cải thiện có ý nghĩa (chênh ≤ 0,003). Việ
 </tr>
 </table>
 
+### 5.8 Thử nghiệm độ phân giải 1280 và model cuối
+
+Hơn một nửa số nốt mụn nhỏ hơn 8 px ở đầu vào 640, và recall ở nhóm dưới 5 px chỉ đạt 12%. Vì vậy 3 model hòa điểm được train lại ở **1280**. Mỗi model giữ cấu hình đại diện của nó, cùng split và cùng evaluator; batch được giảm để vừa 8 GB VRAM (RT-DETR-L: batch 2).
+
+| Model (test) | mAP50-95 | mAP50 | Recall | Precision | F1 | Latency | MB |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **RT-DETR-L @1280** ✅ | 0,191 | **0,528** | **0,511** | **0,607** | **0,555** | 78 ms | 63 |
+| YOLO26s @1280 | **0,194** | 0,507 | 0,480 | 0,594 | 0,531 | 24 ms | 19 |
+| YOLO11s @1280 | 0,187 | 0,509 | 0,486 | 0,597 | 0,536 | 22 ms | 18 |
+| YOLO26s @640 | 0,148 | 0,424 | 0,427 | 0,534 | 0,475 | 10 ms | 19 |
+
+Trên validation, ba model hòa nhau về mAP50-95 (cách nhau ≤ 0,002) và RT-DETR-L có Recall cao nhất, nên được chọn. Trên test, Recall (+0,032 [+0,007; +0,056]) và F1 (+0,024 [+0,006; +0,042]) của nó hơn YOLO26s @1280 có ý nghĩa thống kê; mAP50-95 thì hòa. Model triển khai là `models/phase1/best_acne_detector.pt`; bản YOLO26s @640 được giữ lại. Phương án dự phòng nhẹ là YOLO26s @1280. RT-DETR-L kém hơn trên ảnh độ phân giải thấp, nên ảnh đầu vào cần có cạnh dài ≥ 1500 px. Chi tiết: [reports/phase1_resolution_study.md](reports/phase1_resolution_study.md).
+
 ## 6. Thảo luận
 
 **Vì sao chọn YOLO26s?**
@@ -293,18 +308,25 @@ Khi chất lượng không phân biệt được, các tiêu chí triển khai v
 
 Ảnh minh hoạ lỗi nằm ở `reports/phase1_additional_models/common_eval/<model>/failure_cases_test/` (không đưa vào README vì là ảnh khuôn mặt).
 
+**FP theo vùng.** Trong 1.414 detection của YOLO26s không khớp nhãn trên test, chỉ 4,7% nằm ở vùng nhạy cảm: mắt 5, môi 17, nốt ruồi 7, tóc/lông mày/râu 38. Còn lại 91% nằm trên da mặt, nhiều trường hợp trông như nốt mụn nhỏ bị bỏ sót khi gán nhãn. Ngoài ra 2,5% nằm ngoài mặt (nền, thước đo).
+
+**Ảnh ngoài dataset.** Trên 19 ảnh điện thoại, model đạt có điều kiện: bắt được nốt mụn thật khi ảnh chụp gần, rõ nét và cạnh dài ≥ ~1500 px; không nhận nhầm nốt ruồi; không sinh box trên ảnh da sạch. Model vẫn sót nhiều nốt sẩn nhỏ ở trán và không dùng được với ảnh nhỏ hơn khoảng 700 px.
+
+Tổng hợp và checklist nghiệm thu: [reports/phase1_extended_benchmark.md](reports/phase1_extended_benchmark.md).
+
 ## 7. Hạn chế
 
 - **Một seed** cho mỗi model; kết luận dựa trên CI bootstrap theo ảnh, chưa tính dao động giữa các lần train.
 - **Ngân sách tuning không đều**: model mới có 3 cấu hình, model cũ có 1. Thực nghiệm cho thấy ảnh hưởng nhỏ với họ YOLO (YOLOv5s: 0,1422 so với 0,1427).
 - **Split không phân tầng theo mức độ mụn và không theo người**: level 3 phân bố lệch giữa các split; chưa kiểm soát cùng một người xuất hiện ở nhiều split.
-- **Chưa có ảnh camera thực tế** ngoài dataset; chưa review vùng FP (mắt, môi, nốt ruồi, râu).
+- **Ảnh camera thực tế còn ít**: 19 ảnh ngoài dataset, chưa có nhãn chuyên gia, nên chỉ đánh giá định tính ([phase1_camera_review.md](reports/phase1_camera_review.md)).
+- **Rà soát vùng FP**: các nhóm mắt, môi, nốt ruồi, tóc/râu đã được xem tay toàn bộ; nhóm "khác" (95%) mới xem theo mẫu.
 - Faster R-CNN dùng augmentation nhẹ hơn và NMS mặc định (0,5); YOLOv5s là biến thể `yolov5su`; RT-DETR dùng bản L thay vì R18.
 - Latency đo trên một laptop: thứ tự tương đối đáng tin hơn giá trị tuyệt đối.
 
 ## 8. Hướng phát triển
 
-1. **Tăng độ phân giải** (imgsz 1024) hoặc **chia ảnh thành ô** (tiling/SAHI) cho nốt ~8 px — nhiều khả năng hiệu quả hơn đổi kiến trúc.
+1. ~~Tăng độ phân giải~~: đã làm ở 1280 (§5.8). Bước tiếp theo là **chia ảnh thành ô** (tiling/SAHI) để giữ nguyên độ phân giải gốc cho nốt dưới 5 px.
 2. **Review nhãn** các FP lặp lại để phát hiện nốt bị bỏ sót khi gán nhãn.
 3. **Thêm dữ liệu mụn nặng** và chia phân tầng theo mức độ mụn.
 4. **Nhiều seed** cho các model dẫn đầu, và đánh giá trên ảnh camera thực tế của spa.
@@ -339,6 +361,29 @@ Xem [scripts/phase1/README.md](scripts/phase1/README.md) để biết các bư�
 
 Chạy nền theo hàng đợi: `.\scripts\phase1\launch_additional.ps1 -Scripts train_yolov5s.py,train_rtdetr.py`. Xem tiến độ: `.\venv\Scripts\python.exe scripts\phase1\check_additional_progress.py`.
 
+### Nghiệm thu: FP theo vùng và ảnh ngoài dataset
+
+```powershell
+# Tải model MediaPipe vào models\phase1\face_tools\
+curl -o models\phase1\face_tools\face_landmarker.task https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task
+curl -o models\phase1\face_tools\selfie_multiclass_256x256.tflite https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite
+.\venv\Scripts\python.exe scripts\phase1\evaluate_phase1.py --error-analysis       # tạo false_positive_region_review.csv
+.\venv\Scripts\python.exe scripts\phase1\label_error_regions.py                    # gán vùng + contact sheet để xem tay
+.\venv\Scripts\python.exe scripts\phase1\summarize_error_regions.py
+.\venv\Scripts\python.exe scripts\phase1\predict_acne.py --source test_img     # imgsz/conf đọc từ model_metadata.json
+```
+
+### Thử nghiệm độ phân giải 1280 và chọn model cuối
+
+```powershell
+.\venv\Scripts\python.exe -u scripts\phase1\train_1280.py --model yolo26s --batch 4   # --smoke: đo VRAM/tốc độ trước
+.\venv\Scripts\python.exe -u scripts\phase1\train_1280.py --model yolo11s --batch 4
+.\venv\Scripts\python.exe -u scripts\phase1\train_1280.py --model rtdetr --batch 2
+.\venv\Scripts\python.exe -u scripts\phase1\compare_resolution.py                    # YOLO26s 640 vs 1280
+.\venv\Scripts\python.exe -u scripts\phase1\compare_1280.py                          # chọn trên val, bootstrap, latency
+.\venv\Scripts\python.exe    scripts\phase1\promote_detector.py                      # cài model cuối, giữ bản cũ
+```
+
 ### Cấu trúc repository
 
 ```text
@@ -352,6 +397,9 @@ BinSpa_AI/
 │   ├── benchmark_additional_models.py, benchmark_latency.py
 │   └── plot_all_models_comparison.py, make_readme_figures.py
 ├── reports/
+│   ├── phase1_extended_benchmark.md                            # báo cáo cuối GĐ1 + checklist nghiệm thu
+│   ├── phase1_resolution_study.md                              # 640 vs 1280 và chọn model cuối
+│   ├── phase1_camera_review.md                                 # nghiệm thu ảnh ngoài dataset
 │   ├── phase1_summary.md                                       # báo cáo 3 model gốc
 │   ├── metrics/phase1_*.csv                                    # bảng số liệu
 │   └── phase1_additional_models/

@@ -1,0 +1,54 @@
+{
+  "model": "rtdetr_1280",
+  "chosen_config": "640 representative config, imgsz 1280",
+  "final_run": "E:\\Project\\BinSpa_AI\\runs\\phase1\\benchmark_rtdetr_e100_s42_b2_w0_cram_img1280",
+  "completed": {
+    "model": "rtdetr",
+    "imgsz": 1280,
+    "config": {
+      "epochs": 100,
+      "patience": 20,
+      "close_mosaic": 10,
+      "cache": "ram",
+      "workers": 0,
+      "seed": 42,
+      "deterministic": true,
+      "amp": true,
+      "lrf": 0.01,
+      "optimizer": "AdamW",
+      "lr0": 0.0002,
+      "weight_decay": 0.0001,
+      "warmup_bias_lr": 0.0,
+      "max_det": 300
+    },
+    "batch": 2,
+    "actual_epochs": 78,
+    "best_epoch": {
+      "epoch": 58,
+      "val_mAP50": 0.53195,
+      "val_mAP50_95": 0.2013,
+      "val_precision": 0.60698,
+      "val_recall": 0.52539
+    },
+    "amp_enabled": true,
+    "peak_train_vram_gb": 6.208984375,
+    "manifest_sha256": "0a40262f24a967caccd4854df9649eddbb5790f73a1190c3fec51b05785e09d6",
+    "best_sha256": "3bf12463d9b17601b98d20a855edcda46b728a63f90f92d1097ba5cc66176935",
+    "environment": {
+      "python": "3.12.7 (tags/v3.12.7:0b05ead, Oct  1 2024, 03:06:41) [MSC v.1941 64 bit (AMD64)]",
+      "packages": {
+        "torch": "2.11.0+cu128",
+        "torchvision": "0.26.0+cu128",
+        "ultralytics": "8.4.173"
+      },
+      "cuda_available": true,
+      "gpu": "NVIDIA GeForce RTX 5050 Laptop GPU",
+      "torch_cuda": "12.8"
+    },
+    "completed_utc": "2026-10-08T15:39:14.137733+00:00"
+  },
+  "deploy_weights": "E:\\Project\\BinSpa_AI\\runs\\phase1\\benchmark_rtdetr_e100_s42_b2_w0_cram_img1280\\weights\\best.pt",
+  "deploy_sha256": "3bf12463d9b17601b98d20a855edcda46b728a63f90f92d1097ba5cc66176935",
+  "locked_before_test": true,
+  "locked_utc": "2026-10-08T15:39:14.193518+00:00"
+}

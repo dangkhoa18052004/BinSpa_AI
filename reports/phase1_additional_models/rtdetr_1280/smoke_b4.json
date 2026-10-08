@@ -1,0 +1,8 @@
+{
+  "model": "rtdetr",
+  "batch": 4,
+  "imgsz": 1280,
+  "seconds_quarter_epoch": 721.6756094000011,
+  "peak_reserved_gb": 10.736328125,
+  "total_gb": 7.95953369140625
+}
