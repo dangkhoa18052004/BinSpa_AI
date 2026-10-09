@@ -1,0 +1,143 @@
+{
+  "selection": {
+    "rule": "val mAP50-95 (ties within 0.002) -> val hypertrophic_scar recall -> latency",
+    "representatives": {
+      "yolo26s": {
+        "arch": "yolo26s",
+        "config": "c1280",
+        "imgsz": 1280,
+        "weights": "E:\\Project\\BinSpa_AI\\runs\\phase3\\yolo26s_c1280\\weights\\best.pt",
+        "val_mAP50_95": 0.0986614312291884,
+        "val_mAP50": 0.2909706633864293,
+        "val_recall": 0.31615197454613514,
+        "val_hs_recall": 0.18461538461538463,
+        "val_hs_ap50_95": 0.0755338268932815,
+        "val_f1_conf": 0.16316316316316315,
+        "val_infer_ms": 27.127219999783847,
+        "best_epoch": 51
+      },
+      "yolo11s": {
+        "arch": "yolo11s",
+        "config": "c1280",
+        "imgsz": 1280,
+        "weights": "E:\\Project\\BinSpa_AI\\runs\\phase3\\yolo11s_c1280\\weights\\best.pt",
+        "val_mAP50_95": 0.0976844179638018,
+        "val_mAP50": 0.2944044040319379,
+        "val_recall": 0.32118971863497414,
+        "val_hs_recall": 0.2230769230769231,
+        "val_hs_ap50_95": 0.07125284455307519,
+        "val_f1_conf": 0.12212212212212212,
+        "val_infer_ms": 19.39576250015307,
+        "best_epoch": 61
+      }
+    },
+    "chosen": {
+      "arch": "yolo11s",
+      "config": "c1280",
+      "imgsz": 1280,
+      "weights": "E:\\Project\\BinSpa_AI\\runs\\phase3\\yolo11s_c1280\\weights\\best.pt",
+      "val_mAP50_95": 0.0976844179638018,
+      "val_mAP50": 0.2944044040319379,
+      "val_recall": 0.32118971863497414,
+      "val_hs_recall": 0.2230769230769231,
+      "val_hs_ap50_95": 0.07125284455307519,
+      "val_f1_conf": 0.12212212212212212,
+      "val_infer_ms": 19.39576250015307,
+      "best_epoch": 61
+    },
+    "locked_before_test": true,
+    "locked_utc": "2026-10-09T07:37:14.069387+00:00"
+  },
+  "test": {
+    "yolo26s": {
+      "mAP50": 0.35069145138606833,
+      "mAP50_95": 0.11900037923776727,
+      "precision": 0.45338458674421644,
+      "recall": 0.36303150549037044,
+      "per_class": {
+        "atrophic_scar": {
+          "precision": 0.4041733030930597,
+          "recall": 0.4217151848937844,
+          "ap50": 0.37098572492529047,
+          "ap50_95": 0.128027883597689
+        },
+        "hypertrophic_scar": {
+          "precision": 0.5025958703953732,
+          "recall": 0.30434782608695654,
+          "ap50": 0.3303971778468462,
+          "ap50_95": 0.1099728748778456
+        }
+      },
+      "f1_max_conf": 0.19519519519519518,
+      "speed_ms": {
+        "preprocess": 3.4274311112110607,
+        "inference": 22.146555555486376,
+        "loss": 0.019095555358540472,
+        "postprocess": 2.1089422221444285
+      },
+      "counts_at_val_f1_conf": {
+        "atrophic_scar": {
+          "tp": 514,
+          "fp": 692,
+          "fn": 757
+        },
+        "hypertrophic_scar": {
+          "tp": 39,
+          "fp": 30,
+          "fn": 76
+        }
+      },
+      "latency_ms_median": 23.71590000257129,
+      "config": "c1280",
+      "imgsz": 1280,
+      "conf_op": 0.16316316316316315,
+      "weights_sha256": "0ebeb9a1aca8d8dc69a4acd2a436cd9ad9f9f3b185a64ceaa2499fa3090f65f1",
+      "model_mb": 19.474736213684082
+    },
+    "yolo11s": {
+      "mAP50": 0.31449240950253143,
+      "mAP50_95": 0.10252893279750826,
+      "precision": 0.4133596846080001,
+      "recall": 0.3602933612082414,
+      "per_class": {
+        "atrophic_scar": {
+          "precision": 0.4081895783178712,
+          "recall": 0.40754324415561316,
+          "ap50": 0.3605717897424939,
+          "ap50_95": 0.12750309679296845
+        },
+        "hypertrophic_scar": {
+          "precision": 0.4185297908981289,
+          "recall": 0.3130434782608696,
+          "ap50": 0.26841302926256894,
+          "ap50_95": 0.07755476880204805
+        }
+      },
+      "f1_max_conf": 0.13413413413413414,
+      "speed_ms": {
+        "preprocess": 2.487277777739412,
+        "inference": 20.83807111121132,
+        "loss": 0.04658000010143345,
+        "postprocess": 1.931446666680535
+      },
+      "counts_at_val_f1_conf": {
+        "atrophic_scar": {
+          "tp": 554,
+          "fp": 1035,
+          "fn": 717
+        },
+        "hypertrophic_scar": {
+          "tp": 35,
+          "fp": 55,
+          "fn": 80
+        }
+      },
+      "latency_ms_median": 22.059599999920465,
+      "config": "c1280",
+      "imgsz": 1280,
+      "conf_op": 0.12212212212212212,
+      "weights_sha256": "a701a6937d48e8b8d21714c6a0cbad879c387315171d14b02dbdb2eb3a7a6179",
+      "model_mb": 18.393518447875977
+    }
+  }
+}

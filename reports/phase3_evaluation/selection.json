@@ -1,0 +1,49 @@
+{
+  "rule": "val mAP50-95 (ties within 0.002) -> val hypertrophic_scar recall -> latency",
+  "representatives": {
+    "yolo26s": {
+      "arch": "yolo26s",
+      "config": "c1280",
+      "imgsz": 1280,
+      "weights": "E:\\Project\\BinSpa_AI\\runs\\phase3\\yolo26s_c1280\\weights\\best.pt",
+      "val_mAP50_95": 0.0986614312291884,
+      "val_mAP50": 0.2909706633864293,
+      "val_recall": 0.31615197454613514,
+      "val_hs_recall": 0.18461538461538463,
+      "val_hs_ap50_95": 0.0755338268932815,
+      "val_f1_conf": 0.16316316316316315,
+      "val_infer_ms": 27.127219999783847,
+      "best_epoch": 51
+    },
+    "yolo11s": {
+      "arch": "yolo11s",
+      "config": "c1280",
+      "imgsz": 1280,
+      "weights": "E:\\Project\\BinSpa_AI\\runs\\phase3\\yolo11s_c1280\\weights\\best.pt",
+      "val_mAP50_95": 0.0976844179638018,
+      "val_mAP50": 0.2944044040319379,
+      "val_recall": 0.32118971863497414,
+      "val_hs_recall": 0.2230769230769231,
+      "val_hs_ap50_95": 0.07125284455307519,
+      "val_f1_conf": 0.12212212212212212,
+      "val_infer_ms": 19.39576250015307,
+      "best_epoch": 61
+    }
+  },
+  "chosen": {
+    "arch": "yolo11s",
+    "config": "c1280",
+    "imgsz": 1280,
+    "weights": "E:\\Project\\BinSpa_AI\\runs\\phase3\\yolo11s_c1280\\weights\\best.pt",
+    "val_mAP50_95": 0.0976844179638018,
+    "val_mAP50": 0.2944044040319379,
+    "val_recall": 0.32118971863497414,
+    "val_hs_recall": 0.2230769230769231,
+    "val_hs_ap50_95": 0.07125284455307519,
+    "val_f1_conf": 0.12212212212212212,
+    "val_infer_ms": 19.39576250015307,
+    "best_epoch": 61
+  },
+  "locked_before_test": true,
+  "locked_utc": "2026-10-09T07:37:14.069387+00:00"
+}

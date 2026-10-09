@@ -1,0 +1,27 @@
+{
+  "classes": [
+    "atrophic_scar",
+    "hypertrophic_scar"
+  ],
+  "table": {
+    "train": {
+      "atrophic_scar": 6228,
+      "hypertrophic_scar": 520,
+      "images": 190
+    },
+    "val": {
+      "atrophic_scar": 1233,
+      "hypertrophic_scar": 130,
+      "images": 40
+    },
+    "test": {
+      "atrophic_scar": 1271,
+      "hypertrophic_scar": 115,
+      "images": 45
+    }
+  },
+  "clipped_boxes": 1,
+  "master_split_sha256": "12f8084e7993710f3df67fe36defd6c2a38ca88cf998953a30faa543861fd556",
+  "label_check": 30,
+  "legend": "yellow = atrophic_scar, magenta = hypertrophic_scar"
+}

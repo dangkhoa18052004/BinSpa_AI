@@ -30,3 +30,5 @@ reports/phase1_predictions_rtdetr1280/
 reports/phase1_external_predictions_1280/
 runs/phase1_smoke_1280/
 data_raw/
+reports/phase3_label_check/
+reports/phase3_evaluation/**/*.jpg
