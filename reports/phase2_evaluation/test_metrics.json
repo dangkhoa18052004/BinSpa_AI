@@ -1,0 +1,231 @@
+{
+  "selection": {
+    "rule": "max val macro-F1 per architecture; between architectures max val macro-F1, EfficientNet-B0 if within 0.005",
+    "representatives": {
+      "convnext_tiny": {
+        "arch": "convnext_tiny",
+        "config": "cfg_a",
+        "best_epoch": 5,
+        "val_macro_f1": 0.834180025653905,
+        "val_acc": 0.8707539353769677,
+        "epochs_run": 11,
+        "train_seconds": 734.423538,
+        "best_sha256": "fb1f3230eaf7c1f4b268ef3a3a6b0892b7b8a146fbd5fcf92c2f3f3849aeaa51",
+        "peak_vram_gb": 2.368868350982666,
+        "completed_utc": "2026-10-09T03:35:28.305394+00:00"
+      },
+      "efficientnet_b0": {
+        "arch": "efficientnet_b0",
+        "config": "cfg_a",
+        "best_epoch": 12,
+        "val_macro_f1": 0.8454174153727669,
+        "val_acc": 0.8748964374482188,
+        "epochs_run": 18,
+        "train_seconds": 2026.240628999999,
+        "best_sha256": "6a6805794dafc707fb04ffe01ef7cb1af691d59175eb4597af5a5fd831a472e9",
+        "peak_vram_gb": 1.466355800628662,
+        "completed_utc": "2026-10-09T04:56:12.187758+00:00"
+      }
+    },
+    "chosen": {
+      "arch": "efficientnet_b0",
+      "config": "cfg_a",
+      "best_epoch": 12,
+      "val_macro_f1": 0.8454174153727669,
+      "val_acc": 0.8748964374482188,
+      "epochs_run": 18,
+      "train_seconds": 2026.240628999999,
+      "best_sha256": "6a6805794dafc707fb04ffe01ef7cb1af691d59175eb4597af5a5fd831a472e9",
+      "peak_vram_gb": 1.466355800628662,
+      "completed_utc": "2026-10-09T04:56:12.187758+00:00"
+    },
+    "locked_before_test": true,
+    "locked_utc": "2026-10-09T05:30:21.015671+00:00"
+  },
+  "test": {
+    "convnext_tiny": {
+      "accuracy": 0.8683484430429641,
+      "balanced_accuracy": 0.8310567809962055,
+      "macro_precision": 0.8421596699771496,
+      "macro_recall": 0.8310567809962055,
+      "macro_f1": 0.8321921915476336,
+      "roc_auc_ovr_macro": 0.9779929094648399,
+      "per_class": {
+        "closed_comedo": {
+          "precision": 0.959902794653706,
+          "recall": 0.8135942327497425,
+          "f1": 0.8807134894091416,
+          "support": 971
+        },
+        "open_comedo": {
+          "precision": 0.9077868852459017,
+          "recall": 0.9365750528541226,
+          "f1": 0.9219562955254943,
+          "support": 473
+        },
+        "papule": {
+          "precision": 0.8285123966942148,
+          "recall": 0.9250288350634371,
+          "f1": 0.8741144414168938,
+          "support": 867
+        },
+        "pustule": {
+          "precision": 0.6217391304347826,
+          "recall": 0.7447916666666666,
+          "f1": 0.6777251184834123,
+          "support": 192
+        },
+        "nodule": {
+          "precision": 0.8928571428571429,
+          "recall": 0.7352941176470589,
+          "f1": 0.8064516129032258,
+          "support": 34
+        }
+      },
+      "confusion_matrix": [
+        [
+          790,
+          31,
+          91,
+          59,
+          0
+        ],
+        [
+          1,
+          443,
+          28,
+          1,
+          0
+        ],
+        [
+          22,
+          13,
+          802,
+          27,
+          3
+        ],
+        [
+          10,
+          1,
+          38,
+          143,
+          0
+        ],
+        [
+          0,
+          0,
+          9,
+          0,
+          25
+        ]
+      ],
+      "config": "cfg_a",
+      "val_macro_f1": 0.834180025653905,
+      "weights_sha256": "fb1f3230eaf7c1f4b268ef3a3a6b0892b7b8a146fbd5fcf92c2f3f3849aeaa51",
+      "params_m": 27.823973,
+      "model_mb": 106.19570827484131,
+      "ms_per_crop_batch64": 8.707447694127067
+    },
+    "efficientnet_b0": {
+      "accuracy": 0.8659834450137959,
+      "balanced_accuracy": 0.8064202776973509,
+      "macro_precision": 0.8049737996701412,
+      "macro_recall": 0.8064202776973509,
+      "macro_f1": 0.8052639760454845,
+      "roc_auc_ovr_macro": 0.9631410921010216,
+      "per_class": {
+        "closed_comedo": {
+          "precision": 0.9057815845824411,
+          "recall": 0.8712667353244078,
+          "f1": 0.8881889763779528,
+          "support": 971
+        },
+        "open_comedo": {
+          "precision": 0.9362637362637363,
+          "recall": 0.9006342494714588,
+          "f1": 0.9181034482758621,
+          "support": 473
+        },
+        "papule": {
+          "precision": 0.8311688311688312,
+          "recall": 0.8858131487889274,
+          "f1": 0.8576214405360134,
+          "support": 867
+        },
+        "pustule": {
+          "precision": 0.7127659574468085,
+          "recall": 0.6979166666666666,
+          "f1": 0.7052631578947368,
+          "support": 192
+        },
+        "nodule": {
+          "precision": 0.6388888888888888,
+          "recall": 0.6764705882352942,
+          "f1": 0.6571428571428571,
+          "support": 34
+        }
+      },
+      "confusion_matrix": [
+        [
+          846,
+          19,
+          75,
+          31,
+          0
+        ],
+        [
+          12,
+          426,
+          35,
+          0,
+          0
+        ],
+        [
+          56,
+          9,
+          768,
+          23,
+          11
+        ],
+        [
+          19,
+          1,
+          36,
+          134,
+          2
+        ],
+        [
+          1,
+          0,
+          10,
+          0,
+          23
+        ]
+      ],
+      "config": "cfg_a",
+      "val_macro_f1": 0.8454174153727669,
+      "weights_sha256": "6a6805794dafc707fb04ffe01ef7cb1af691d59175eb4597af5a5fd831a472e9",
+      "params_m": 4.013953,
+      "model_mb": 15.574986457824707,
+      "ms_per_crop_batch64": 1.2967683484432657
+    }
+  },
+  "bootstrap": {
+    "unit": "source image",
+    "n_boot": 1000,
+    "seed": 42,
+    "convnext_macro_f1_ci": [
+      0.804291448638434,
+      0.8621936149936256
+    ],
+    "efficientnet_macro_f1_ci": [
+      0.7571485491765522,
+      0.8434078780251035
+    ],
+    "diff_convnext_minus_efficientnet": 0.02692810542193928,
+    "diff_ci": [
+      -0.01234715057993977,
+      0.07406807989691579
+    ]
+  }
+}

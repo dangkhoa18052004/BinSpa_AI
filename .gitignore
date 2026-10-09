@@ -29,3 +29,4 @@ scripts/phase1/Ultralytics/
 reports/phase1_predictions_rtdetr1280/
 reports/phase1_external_predictions_1280/
 runs/phase1_smoke_1280/
+data_raw/

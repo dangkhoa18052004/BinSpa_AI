@@ -1,0 +1,98 @@
+{
+  "rtdetr_1280": {
+    "images": 45,
+    "detections": 1501,
+    "detections_on_any_lesion_iou30": 0.6069287141905396,
+    "recall": {
+      "iou30": {
+        "all": 0.3102089081592432,
+        "closed_comedo": 0.11534500514933059,
+        "open_comedo": 0.046511627906976744,
+        "papule": 0.5940023068050749,
+        "pustule": 0.578125,
+        "nodule": 0.7941176470588235
+      },
+      "iou50": {
+        "all": 0.19195900670082774,
+        "closed_comedo": 0.06385169927909372,
+        "open_comedo": 0.02959830866807611,
+        "papule": 0.34717416378316035,
+        "pustule": 0.4635416666666667,
+        "nodule": 0.6176470588235294
+      }
+    },
+    "gt_lesions": {
+      "pustule": 192,
+      "open_comedo": 473,
+      "papule": 867,
+      "nodule": 34,
+      "closed_comedo": 971
+    },
+    "classifier_on_matched": {
+      "n": 787,
+      "detector_crop": {
+        "accuracy": 0.8246505717916137,
+        "macro_f1": 0.69475174799589
+      },
+      "annotated_crop": {
+        "accuracy": 0.8614993646759848,
+        "macro_f1": 0.7540441235522393
+      },
+      "matched_per_class": {
+        "closed_comedo": 112,
+        "open_comedo": 22,
+        "papule": 515,
+        "pustule": 111,
+        "nodule": 27
+      }
+    }
+  },
+  "yolo26s_1280": {
+    "images": 45,
+    "detections": 1535,
+    "detections_on_any_lesion_iou30": 0.5993485342019544,
+    "recall": {
+      "iou30": {
+        "all": 0.2905005912495073,
+        "closed_comedo": 0.08856848609680741,
+        "open_comedo": 0.048625792811839326,
+        "papule": 0.5790080738177624,
+        "pustule": 0.5260416666666666,
+        "nodule": 0.7352941176470589
+      },
+      "iou50": {
+        "all": 0.17934568387859676,
+        "closed_comedo": 0.055612770339855816,
+        "open_comedo": 0.03382663847780127,
+        "papule": 0.3356401384083045,
+        "pustule": 0.3958333333333333,
+        "nodule": 0.5294117647058824
+      }
+    },
+    "gt_lesions": {
+      "pustule": 192,
+      "open_comedo": 473,
+      "papule": 867,
+      "nodule": 34,
+      "closed_comedo": 971
+    },
+    "classifier_on_matched": {
+      "n": 737,
+      "detector_crop": {
+        "accuracy": 0.8385345997286295,
+        "macro_f1": 0.6416540389252487
+      },
+      "annotated_crop": {
+        "accuracy": 0.858887381275441,
+        "macro_f1": 0.7385357754978967
+      },
+      "matched_per_class": {
+        "closed_comedo": 86,
+        "open_comedo": 23,
+        "papule": 502,
+        "pustule": 101,
+        "nodule": 25
+      }
+    }
+  }
+}

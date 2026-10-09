@@ -1,0 +1,43 @@
+{
+  "rule": "max val macro-F1 per architecture; between architectures max val macro-F1, EfficientNet-B0 if within 0.005",
+  "representatives": {
+    "convnext_tiny": {
+      "arch": "convnext_tiny",
+      "config": "cfg_a",
+      "best_epoch": 5,
+      "val_macro_f1": 0.834180025653905,
+      "val_acc": 0.8707539353769677,
+      "epochs_run": 11,
+      "train_seconds": 734.423538,
+      "best_sha256": "fb1f3230eaf7c1f4b268ef3a3a6b0892b7b8a146fbd5fcf92c2f3f3849aeaa51",
+      "peak_vram_gb": 2.368868350982666,
+      "completed_utc": "2026-10-09T03:35:28.305394+00:00"
+    },
+    "efficientnet_b0": {
+      "arch": "efficientnet_b0",
+      "config": "cfg_a",
+      "best_epoch": 12,
+      "val_macro_f1": 0.8454174153727669,
+      "val_acc": 0.8748964374482188,
+      "epochs_run": 18,
+      "train_seconds": 2026.240628999999,
+      "best_sha256": "6a6805794dafc707fb04ffe01ef7cb1af691d59175eb4597af5a5fd831a472e9",
+      "peak_vram_gb": 1.466355800628662,
+      "completed_utc": "2026-10-09T04:56:12.187758+00:00"
+    }
+  },
+  "chosen": {
+    "arch": "efficientnet_b0",
+    "config": "cfg_a",
+    "best_epoch": 12,
+    "val_macro_f1": 0.8454174153727669,
+    "val_acc": 0.8748964374482188,
+    "epochs_run": 18,
+    "train_seconds": 2026.240628999999,
+    "best_sha256": "6a6805794dafc707fb04ffe01ef7cb1af691d59175eb4597af5a5fd831a472e9",
+    "peak_vram_gb": 1.466355800628662,
+    "completed_utc": "2026-10-09T04:56:12.187758+00:00"
+  },
+  "locked_before_test": true,
+  "locked_utc": "2026-10-09T05:30:21.015671+00:00"
+}

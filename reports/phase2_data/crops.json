@@ -1,0 +1,32 @@
+{
+  "context": 2.0,
+  "min_side": 32,
+  "min_lesion": 4,
+  "crops": 16182,
+  "skipped": [],
+  "table": {
+    "train": {
+      "closed_comedo": 4127,
+      "open_comedo": 2309,
+      "papule": 3773,
+      "pustule": 879,
+      "nodule": 143
+    },
+    "val": {
+      "closed_comedo": 776,
+      "open_comedo": 511,
+      "papule": 899,
+      "pustule": 196,
+      "nodule": 32
+    },
+    "test": {
+      "closed_comedo": 971,
+      "open_comedo": 473,
+      "papule": 867,
+      "pustule": 192,
+      "nodule": 34
+    }
+  },
+  "master_split_sha256": "12f8084e7993710f3df67fe36defd6c2a38ca88cf998953a30faa543861fd556",
+  "manifest_sha256": "4b789fe6ba5ba35331cb438c2c05b01a75837dba8650cea9d16d46af9096ea22"
+}
