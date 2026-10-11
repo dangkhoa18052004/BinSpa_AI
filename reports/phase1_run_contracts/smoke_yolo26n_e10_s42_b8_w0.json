@@ -1,9 +1,0 @@
-{
-  "manifest_sha256": "0a40262f24a967caccd4854df9649eddbb5790f73a1190c3fec51b05785e09d6",
-  "epochs": 10,
-  "imgsz": 640,
-  "batch": 8,
-  "patience": 10,
-  "seed": 42,
-  "stage": "smoke"
-}

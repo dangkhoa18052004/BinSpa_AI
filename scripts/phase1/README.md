@@ -1,6 +1,6 @@
 # Giai đoạn 1: phát hiện vị trí mụn
 
-Chạy PowerShell tại `D:\BinSpa_AI`. Các lệnh bên dưới dùng trực tiếp venv.
+Chạy PowerShell tại thư mục gốc của repository. Các lệnh bên dưới dùng trực tiếp venv; dữ liệu và checkpoint phải được chuẩn bị riêng theo README chính.
 
 ## Dữ liệu
 
@@ -71,7 +71,7 @@ AMP được kiểm tra ở smoke. Benchmark có thể dùng lại certificate k
 Tiến độ: `reports/phase1_training_status.json`; logs: `reports/logs`; PID: `reports/phase1_process.json`. Giữ máy hoạt động. Run hoàn thành khớp config/hash được dùng lại; run dở cần resume:
 
 ```powershell
-.\venv\Scripts\python.exe -u scripts\phase1\train_phase1.py --resume 'D:\BinSpa_AI\runs\phase1\TEN_RUN\weights\last.pt'
+.\venv\Scripts\python.exe -u scripts\phase1\train_phase1.py --resume 'runs\phase1\TEN_RUN\weights\last.pt'
 .\venv\Scripts\python.exe -u scripts\phase1\run_phase1.py
 ```
 
@@ -90,7 +90,7 @@ Chọn YOLO26n/YOLO26s/YOLO11s trên validation bằng mAP50–95, Recall, rồi
 
 ```powershell
 .\venv\Scripts\python.exe scripts\phase1\evaluate_phase1.py --split test --error-analysis
-.\venv\Scripts\python.exe scripts\phase1\predict_acne.py --source 'D:\anh_camera_moi.jpg'
+.\venv\Scripts\python.exe scripts\phase1\predict_acne.py --source 'test_img\selfie.jpg'
 ```
 
 Inference trả bbox/confidence/lesion_count/version/disclaimer, không trả loại mụn/severity. Camera ngoài dataset và kiểm tra lỗi theo vùng là điều kiện nghiệm thu thực tế; không tự chuyển GĐ2.

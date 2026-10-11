@@ -29,3 +29,74 @@ scripts/phase1/Ultralytics/
 reports/phase1_predictions_rtdetr1280/
 reports/phase1_external_predictions_1280/
 runs/phase1_smoke_1280/
+data_raw/
+reports/phase3_label_check/
+reports/phase3_evaluation/**/*.jpg
+reports/phase1_external_predictions_combined/
+reports/phase1_combined/**/*.jpg
+reports/phase1_combined/**/predictions.json
+reports/detectdataskin2_audit/*.jpg
+reports/detectdataskin2_audit/frozen_evaluation/*.npz
+
+# Public releases contain only code and deliberately exported aggregate reports.
+/test_img/
+/weights/
+/.venv/
+/.publication/
+/.agents/
+/.codex/
+/.aws/
+**/Ultralytics/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# Credentials and local configuration.
+.env
+.env.*
+!.env.example
+*credentials*.json
+*service-account*.json
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+
+# Personal documents, archives and derived binaries stay local.
+*.zip
+*.7z
+*.rar
+*.tar
+*.gz
+*.docx
+*.doc
+*.xlsx
+*.parquet
+*.pth
+*.h5
+*.ckpt
+*.safetensors
+*.npz
+*.npy
+*.log
+/doc_content.txt
+
+# Per-image reports may identify faces, source records or machine paths.
+# Ignoring files does not remove them from existing commits.
+/reports/*
+!/reports/publication/
+/reports/publication/*
+!/reports/publication/*.json
+!/reports/publication/*.md
+
+# Never include face photographs or contact sheets.
+*.jpg
+*.jpeg
+*.webp
+*.heic
+*.bmp
+*.tif
+*.tiff

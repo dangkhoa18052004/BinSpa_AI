@@ -1,5 +1,0 @@
-{
-  "policy": "reuse_verified_smoke_amp",
-  "certificate": "D:\\BinSpa_AI\\reports\\phase1_amp_certificate.json",
-  "reason": "Repeated FP16 convolution in Ultralytics AMP self-test stalled; smoke AMP check passed and 10 epochs completed with finite losses. Monitor finite validation metrics during benchmark."
-}

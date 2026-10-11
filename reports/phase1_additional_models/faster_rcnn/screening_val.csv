@@ -1,4 +1,0 @@
-﻿config,run,mAP50_95,mAP50,recall,precision,total_ms,best_epoch,actual_epochs,batch
-cfg_a,E:\Project\BinSpa_AI\runs\phase1_additional\faster_rcnn_screen_cfg_a_e15_b4,0.11715371317470054,0.3549093513014068,0.3764974329720479,0.5024105556965237,99.1657405713964,14,15,4
-cfg_b,E:\Project\BinSpa_AI\runs\phase1_additional\faster_rcnn_screen_cfg_b_e15_b4,0.12151697615828558,0.3666525874897145,0.3835329910629397,0.4936368086147822,177.642400571432,14,15,4
-cfg_c,E:\Project\BinSpa_AI\runs\phase1_additional\faster_rcnn_screen_cfg_c_e15_b4,0.13055248071360023,0.3895438967758512,0.39912530899410537,0.5081094166061486,169.30008114286466,15,15,4

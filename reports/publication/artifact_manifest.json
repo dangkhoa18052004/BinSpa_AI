@@ -1,0 +1,170 @@
+{
+  "privacy": "Aggregate figures and metrics only; no per-image records",
+  "artifacts": [
+    {
+      "path": "docs/figures/research/confusion_matrices/all_models_confusion_matrices.pdf",
+      "bytes": 100451,
+      "sha256": "a8c8c7c603ae6fc9c72f1d390960cad78f18b439d083b9fc8e698057ccb201d5"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/deployed_original_test.png",
+      "bytes": 253870,
+      "sha256": "b626da07342d46fdd1e15f6b3cb81c63a70920d1f123df96a4e3d3103c2f3ba4"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/detectdataskin2_exploratory.png",
+      "bytes": 218846,
+      "sha256": "cd0e503b999a704cc3304d58dd5402cd6b6facae28819bd8264af0e4b6d97433"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase1/external_phase1_rtdetr.png",
+      "bytes": 122753,
+      "sha256": "bbb4d8754a725e6d315449ee5a8fc12019673db7311841ed8b9c60e3a43a67b0"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase1/phase1_faster_rcnn.png",
+      "bytes": 118620,
+      "sha256": "1aa482ba3f30239c0fc2be92078e656a94c8cc70ed787d9a859bacad7ebcf51f"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase1/phase1_faster_rcnn_full50.png",
+      "bytes": 121875,
+      "sha256": "7f33c07856a18bca2d06f4531dce77b698f8c24858034c899bc6f4c4d7e77095"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase1/phase1_rtdetr.png",
+      "bytes": 114124,
+      "sha256": "3580f0e2e8c30be9b8747c1ba5acbc6490fb5f533b1632429d102ef891edcda0"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase1/phase1_rtdetr_1280.png",
+      "bytes": 115045,
+      "sha256": "9044ae1daf6e3a893914a11ef323468277e25141a75feb456e51bb8fc33762e7"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase1/phase1_rtdetr_ft.png",
+      "bytes": 116951,
+      "sha256": "ed97a0675f6ed6a3fee62870a1799f533a77ca55fc25cab9950ab147e9325a22"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase1/phase1_rtdetr_full100.png",
+      "bytes": 117098,
+      "sha256": "1df2f5aa2a2814feec8d42112070647bd99eddb5f263884231fef837f3fd4e52"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase1/phase1_yolo11s.png",
+      "bytes": 117790,
+      "sha256": "28d2b776349ab0e2a51ce5a7099ec961b52f1194dd61be715954c64c82f2b439"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase1/phase1_yolo11s_1280.png",
+      "bytes": 115853,
+      "sha256": "5134a4e78a64574037acd7bd0ff9a6385e7727bcda7a1db772aec5dac78668c0"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase1/phase1_yolo11s_full100.png",
+      "bytes": 119950,
+      "sha256": "48742b0ba7487936d580b1da3b3d70b62e620632a6c9df71646b28ce4eb65add"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase1/phase1_yolo26n.png",
+      "bytes": 115653,
+      "sha256": "fde44d157c4bdac1ca570da1abdaa5152673a1a66092817e5c8421371a8adef4"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase1/phase1_yolo26s.png",
+      "bytes": 115163,
+      "sha256": "ce03f2bc0d373ad88ed2c91dfdfe76833f70863f2f8410f4c905fe8afdfab9b8"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase1/phase1_yolo26s_1280.png",
+      "bytes": 114493,
+      "sha256": "774f90d56236644b0e31827ffbdeaca9fa84886f4dc1d6f3a0ba83db6a449948"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase1/phase1_yolo26s_ft.png",
+      "bytes": 121726,
+      "sha256": "7208b846b91a3c60bded7230945446bb0b90501f731b625c66fe8c1318b84b21"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase1/phase1_yolov5s.png",
+      "bytes": 116031,
+      "sha256": "866bed7ff8f3d41b2dac091e7a773384fbbd31047021daa483a69419748dfabe"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase1_1280_comparison.png",
+      "bytes": 155655,
+      "sha256": "c76a0a48f33df68254e083de394e4b2396dc32da72cda3cdc97af265e1af4c0d"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase1_640_comparison.png",
+      "bytes": 257376,
+      "sha256": "92ff9c937de46269454cf855548a08fc6d6141375c328cf6028e57a2fa9375b4"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase2/external_phase2_efficientnet.png",
+      "bytes": 260868,
+      "sha256": "8f6026b21f8a620d95086aab414b9761137d9f595d9eb7ee4894bc399c1fbb03"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase2/phase2_convnext_tiny.png",
+      "bytes": 242943,
+      "sha256": "5ca149ddd374cc253e6b6d221c586e07775e0a130762e50ac7d021e2a498de65"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase2/phase2_efficientnet_b0.png",
+      "bytes": 241372,
+      "sha256": "e629cb2dc3b41f55d28335482f3a27c8b9bdcfec4addf63060ce23b410771980"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase2_comparison.png",
+      "bytes": 278302,
+      "sha256": "3fca0fbbd0cb19b013ce17205c79005c1e3af02b7ad035b6c7f9491d3a761b3f"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase3/phase3_yolo11s.png",
+      "bytes": 170254,
+      "sha256": "f698ddadeebccb1f0f854d37052e7f41880fb305e0eabb466cd43791e72a0419"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase3/phase3_yolo26s.png",
+      "bytes": 171062,
+      "sha256": "9890d18df42010ff12b00287bb0e2d0d81834ef530784aa818622427510c9547"
+    },
+    {
+      "path": "docs/figures/research/confusion_matrices/phase3_comparison.png",
+      "bytes": 202365,
+      "sha256": "f2c0192ed254f1fb9ed930a3483cffb6f0379d2754128d187c62c4be6f070565"
+    },
+    {
+      "path": "docs/figures/research/external_confidence_diagnostics.png",
+      "bytes": 60849,
+      "sha256": "61bf9dca7ae3aafe3ea9800595e3d316232232692b5718e5a0c8df5174e74ae3"
+    },
+    {
+      "path": "docs/figures/research/phase1_benchmark.png",
+      "bytes": 222454,
+      "sha256": "a96db2fae108fc57178af605c67b0ae943c6e2fef404d50b1f3b5241583f7d3d"
+    },
+    {
+      "path": "docs/figures/research/phase2_class_f1.png",
+      "bytes": 70031,
+      "sha256": "8bb34ee91eb4214e5654e4de84671a9544743195f1566b3accece9243ddac3c6"
+    },
+    {
+      "path": "reports/publication/confusion_matrices.json",
+      "bytes": 20333,
+      "sha256": "f1ed1736debebbc215412a89a8857e43f527d929472b8ef51e4b8e45212af754"
+    },
+    {
+      "path": "reports/publication/metrics.json",
+      "bytes": 23566,
+      "sha256": "fda4d2874188df857ab1682af5c6303dd982928a7e2f11dcad1fd65f5e4159d7"
+    },
+    {
+      "path": "reports/publication/README.md",
+      "bytes": 4276,
+      "sha256": "d46f9c6b12c5d10b5d6a6f149db2f85a03d2db5ecc073000340db92a4699da30"
+    }
+  ]
+}

@@ -1,8 +1,0 @@
-{
-  "requested": "auto",
-  "chosen": "ram",
-  "estimated_resized_bytes": 1074541632,
-  "available_bytes": 9852055552,
-  "reserve_bytes": 4294967296,
-  "workers": 0
-}

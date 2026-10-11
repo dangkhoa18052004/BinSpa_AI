@@ -1,0 +1,4 @@
+# Keep text artifacts byte-stable so published SHA256 values survive Git checkout.
+* text=auto eol=lf
+*.png binary
+*.pdf binary

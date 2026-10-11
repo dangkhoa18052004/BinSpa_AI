@@ -1,0 +1,857 @@
+{
+  "orientation": "rows=true, columns=predicted",
+  "normalization": "true-label row percentages; detector background row undefined",
+  "matrices": [
+    {
+      "key": "phase1_faster_rcnn",
+      "phase": "GĐ1",
+      "model": "Faster R-CNN @640",
+      "dataset": "ACNE04 — test",
+      "matrix_true_by_predicted": [
+        [
+          2066,
+          2980
+        ],
+        [
+          2100,
+          0
+        ]
+      ],
+      "labels": [
+        "acne",
+        "background"
+      ],
+      "display_labels": [
+        "Mụn",
+        "Nền"
+      ],
+      "detection": true,
+      "images": 176,
+      "ground_truth_labels": 5046,
+      "support": [
+        5046
+      ],
+      "predictions": 4166,
+      "checkpoint_sha256": "7abe17f2d9313737fd505f0f56e5ddd4d27afe84bdfa90c4577ea2e5186e456b",
+      "matching": "Existing project binary IoU matching; original unrounded aggregate counts",
+      "confidence": 0.6586586586586587,
+      "iou": 0.5,
+      "figure": "docs/figures/research/confusion_matrices/phase1/phase1_faster_rcnn.png"
+    },
+    {
+      "key": "phase1_faster_rcnn_full50",
+      "phase": "GĐ1",
+      "model": "Faster R-CNN @640, full50",
+      "dataset": "ACNE04 — test",
+      "matrix_true_by_predicted": [
+        [
+          2069,
+          2977
+        ],
+        [
+          2082,
+          0
+        ]
+      ],
+      "labels": [
+        "acne",
+        "background"
+      ],
+      "display_labels": [
+        "Mụn",
+        "Nền"
+      ],
+      "detection": true,
+      "images": 176,
+      "ground_truth_labels": 5046,
+      "support": [
+        5046
+      ],
+      "predictions": 4151,
+      "checkpoint_sha256": "12d20c7419fe5b65c21dc214a14a1379962c7c8de11f723f92df0a820d4502fd",
+      "matching": "Existing project binary IoU matching; original unrounded aggregate counts",
+      "confidence": 0.6366366366366366,
+      "iou": 0.5,
+      "figure": "docs/figures/research/confusion_matrices/phase1/phase1_faster_rcnn_full50.png"
+    },
+    {
+      "key": "phase1_rtdetr",
+      "phase": "GĐ1",
+      "model": "RT-DETR-L @640",
+      "dataset": "ACNE04 — test",
+      "matrix_true_by_predicted": [
+        [
+          2202,
+          2844
+        ],
+        [
+          1793,
+          0
+        ]
+      ],
+      "labels": [
+        "acne",
+        "background"
+      ],
+      "display_labels": [
+        "Mụn",
+        "Nền"
+      ],
+      "detection": true,
+      "images": 176,
+      "ground_truth_labels": 5046,
+      "support": [
+        5046
+      ],
+      "predictions": 3995,
+      "checkpoint_sha256": "e36384691ae30d5e9594a3f6d7e79cee7717927d5bb2aae8920b6c4cc30d0ce6",
+      "matching": "Existing project binary IoU matching; original unrounded aggregate counts",
+      "confidence": 0.47347347347347346,
+      "iou": 0.5,
+      "figure": "docs/figures/research/confusion_matrices/phase1/phase1_rtdetr.png"
+    },
+    {
+      "key": "phase1_rtdetr_full100",
+      "phase": "GĐ1",
+      "model": "RT-DETR-L @640, full100",
+      "dataset": "ACNE04 — test",
+      "matrix_true_by_predicted": [
+        [
+          2214,
+          2832
+        ],
+        [
+          1888,
+          0
+        ]
+      ],
+      "labels": [
+        "acne",
+        "background"
+      ],
+      "display_labels": [
+        "Mụn",
+        "Nền"
+      ],
+      "detection": true,
+      "images": 176,
+      "ground_truth_labels": 5046,
+      "support": [
+        5046
+      ],
+      "predictions": 4102,
+      "checkpoint_sha256": "22920ceb2d5e45bc5364616e0c903b4b83a23c3bc01b95393b9440dac0c64acb",
+      "matching": "Existing project binary IoU matching; original unrounded aggregate counts",
+      "confidence": 0.4894894894894895,
+      "iou": 0.5,
+      "figure": "docs/figures/research/confusion_matrices/phase1/phase1_rtdetr_full100.png"
+    },
+    {
+      "key": "phase1_yolo11s",
+      "phase": "GĐ1",
+      "model": "YOLO11s @640",
+      "dataset": "ACNE04 — test",
+      "matrix_true_by_predicted": [
+        [
+          2005,
+          3041
+        ],
+        [
+          1792,
+          0
+        ]
+      ],
+      "labels": [
+        "acne",
+        "background"
+      ],
+      "display_labels": [
+        "Mụn",
+        "Nền"
+      ],
+      "detection": true,
+      "images": 176,
+      "ground_truth_labels": 5046,
+      "support": [
+        5046
+      ],
+      "predictions": 3797,
+      "checkpoint_sha256": "d88da6f2bbc936bac5564fa430eb5b4fda8e6b6a4ff1eafe89e941877c10bc02",
+      "matching": "Existing project binary IoU matching; original unrounded aggregate counts",
+      "confidence": 0.2882882882882883,
+      "iou": 0.5,
+      "figure": "docs/figures/research/confusion_matrices/phase1/phase1_yolo11s.png"
+    },
+    {
+      "key": "phase1_yolo11s_full100",
+      "phase": "GĐ1",
+      "model": "YOLO11s @640, full100",
+      "dataset": "ACNE04 — test",
+      "matrix_true_by_predicted": [
+        [
+          2010,
+          3036
+        ],
+        [
+          1664,
+          0
+        ]
+      ],
+      "labels": [
+        "acne",
+        "background"
+      ],
+      "display_labels": [
+        "Mụn",
+        "Nền"
+      ],
+      "detection": true,
+      "images": 176,
+      "ground_truth_labels": 5046,
+      "support": [
+        5046
+      ],
+      "predictions": 3674,
+      "checkpoint_sha256": "2834926bf413c310fdda339a841679d22bc382e47c82fd6c414f099c726831d0",
+      "matching": "Existing project binary IoU matching; original unrounded aggregate counts",
+      "confidence": 0.24924924924924924,
+      "iou": 0.5,
+      "figure": "docs/figures/research/confusion_matrices/phase1/phase1_yolo11s_full100.png"
+    },
+    {
+      "key": "phase1_yolo26n",
+      "phase": "GĐ1",
+      "model": "YOLO26n @640",
+      "dataset": "ACNE04 — test",
+      "matrix_true_by_predicted": [
+        [
+          1818,
+          3228
+        ],
+        [
+          1820,
+          0
+        ]
+      ],
+      "labels": [
+        "acne",
+        "background"
+      ],
+      "display_labels": [
+        "Mụn",
+        "Nền"
+      ],
+      "detection": true,
+      "images": 176,
+      "ground_truth_labels": 5046,
+      "support": [
+        5046
+      ],
+      "predictions": 3638,
+      "checkpoint_sha256": "45397764335fd0e1972f7ca30c553f1777012ed97c624eeb9536d810e766d562",
+      "matching": "Existing project binary IoU matching; original unrounded aggregate counts",
+      "confidence": 0.22422422422422422,
+      "iou": 0.5,
+      "figure": "docs/figures/research/confusion_matrices/phase1/phase1_yolo26n.png"
+    },
+    {
+      "key": "phase1_yolo26s",
+      "phase": "GĐ1",
+      "model": "YOLO26s @640",
+      "dataset": "ACNE04 — test",
+      "matrix_true_by_predicted": [
+        [
+          2157,
+          2889
+        ],
+        [
+          1879,
+          0
+        ]
+      ],
+      "labels": [
+        "acne",
+        "background"
+      ],
+      "display_labels": [
+        "Mụn",
+        "Nền"
+      ],
+      "detection": true,
+      "images": 176,
+      "ground_truth_labels": 5046,
+      "support": [
+        5046
+      ],
+      "predictions": 4036,
+      "checkpoint_sha256": "aa67a569e8a95bc72d92bbd17b73e6f3614a8626677efa6076cb951e34ed4be3",
+      "matching": "Existing project binary IoU matching; original unrounded aggregate counts",
+      "confidence": 0.2122122122122122,
+      "iou": 0.5,
+      "figure": "docs/figures/research/confusion_matrices/phase1/phase1_yolo26s.png"
+    },
+    {
+      "key": "phase1_yolov5s",
+      "phase": "GĐ1",
+      "model": "YOLOv5su @640",
+      "dataset": "ACNE04 — test",
+      "matrix_true_by_predicted": [
+        [
+          2017,
+          3029
+        ],
+        [
+          1824,
+          0
+        ]
+      ],
+      "labels": [
+        "acne",
+        "background"
+      ],
+      "display_labels": [
+        "Mụn",
+        "Nền"
+      ],
+      "detection": true,
+      "images": 176,
+      "ground_truth_labels": 5046,
+      "support": [
+        5046
+      ],
+      "predictions": 3841,
+      "checkpoint_sha256": "47e328db627855ae6d3d7e6457998bf27854cab920f2b5c016301d96eb34b8ae",
+      "matching": "Existing project binary IoU matching; original unrounded aggregate counts",
+      "confidence": 0.21521521521521522,
+      "iou": 0.5,
+      "figure": "docs/figures/research/confusion_matrices/phase1/phase1_yolov5s.png"
+    },
+    {
+      "key": "phase1_rtdetr_1280",
+      "phase": "GĐ1",
+      "model": "RT-DETR-L @1280",
+      "dataset": "ACNE04 — test",
+      "matrix_true_by_predicted": [
+        [
+          2581,
+          2465
+        ],
+        [
+          1671,
+          0
+        ]
+      ],
+      "labels": [
+        "acne",
+        "background"
+      ],
+      "display_labels": [
+        "Mụn",
+        "Nền"
+      ],
+      "detection": true,
+      "images": 176,
+      "ground_truth_labels": 5046,
+      "support": [
+        5046
+      ],
+      "predictions": 4252,
+      "checkpoint_sha256": "3bf12463d9b17601b98d20a855edcda46b728a63f90f92d1097ba5cc66176935",
+      "matching": "Existing project binary IoU matching; original unrounded aggregate counts",
+      "confidence": 0.45945945945945943,
+      "iou": 0.5,
+      "figure": "docs/figures/research/confusion_matrices/phase1/phase1_rtdetr_1280.png"
+    },
+    {
+      "key": "phase1_yolo11s_1280",
+      "phase": "GĐ1",
+      "model": "YOLO11s @1280",
+      "dataset": "ACNE04 — test",
+      "matrix_true_by_predicted": [
+        [
+          2453,
+          2593
+        ],
+        [
+          1653,
+          0
+        ]
+      ],
+      "labels": [
+        "acne",
+        "background"
+      ],
+      "display_labels": [
+        "Mụn",
+        "Nền"
+      ],
+      "detection": true,
+      "images": 176,
+      "ground_truth_labels": 5046,
+      "support": [
+        5046
+      ],
+      "predictions": 4106,
+      "checkpoint_sha256": "216167c6af82ed1dba9fd0bf39ab2e6b99980853f5547bd1fec6753a82e04df3",
+      "matching": "Existing project binary IoU matching; original unrounded aggregate counts",
+      "confidence": 0.2502502502502503,
+      "iou": 0.5,
+      "figure": "docs/figures/research/confusion_matrices/phase1/phase1_yolo11s_1280.png"
+    },
+    {
+      "key": "phase1_yolo26s_1280",
+      "phase": "GĐ1",
+      "model": "YOLO26s @1280",
+      "dataset": "ACNE04 — test",
+      "matrix_true_by_predicted": [
+        [
+          2424,
+          2622
+        ],
+        [
+          1655,
+          0
+        ]
+      ],
+      "labels": [
+        "acne",
+        "background"
+      ],
+      "display_labels": [
+        "Mụn",
+        "Nền"
+      ],
+      "detection": true,
+      "images": 176,
+      "ground_truth_labels": 5046,
+      "support": [
+        5046
+      ],
+      "predictions": 4079,
+      "checkpoint_sha256": "5602d494da8c2919535d26444c0721ec951044b4d122441a241b5470f27e83f6",
+      "matching": "Existing project binary IoU matching; original unrounded aggregate counts",
+      "confidence": 0.27227227227227224,
+      "iou": 0.5,
+      "figure": "docs/figures/research/confusion_matrices/phase1/phase1_yolo26s_1280.png"
+    },
+    {
+      "key": "phase1_rtdetr_ft",
+      "phase": "GĐ1",
+      "model": "RT-DETR-L @1280, fine-tune",
+      "dataset": "ACNE04 — test",
+      "matrix_true_by_predicted": [
+        [
+          2636,
+          2410
+        ],
+        [
+          1744,
+          0
+        ]
+      ],
+      "labels": [
+        "acne",
+        "background"
+      ],
+      "display_labels": [
+        "Mụn",
+        "Nền"
+      ],
+      "detection": true,
+      "images": 176,
+      "ground_truth_labels": 5046,
+      "support": [
+        5046
+      ],
+      "predictions": 4380,
+      "checkpoint_sha256": "a0ce94240a59b6b3901186790f2cc63c5c6b7c0392f0dfd234250fded1e880a5",
+      "matching": "Existing project binary IoU matching; original unrounded aggregate counts",
+      "confidence": 0.4804804804804805,
+      "iou": 0.5,
+      "figure": "docs/figures/research/confusion_matrices/phase1/phase1_rtdetr_ft.png"
+    },
+    {
+      "key": "phase1_yolo26s_ft",
+      "phase": "GĐ1",
+      "model": "YOLO26s @1280, fine-tune",
+      "dataset": "ACNE04 — test",
+      "matrix_true_by_predicted": [
+        [
+          2381,
+          2665
+        ],
+        [
+          1612,
+          0
+        ]
+      ],
+      "labels": [
+        "acne",
+        "background"
+      ],
+      "display_labels": [
+        "Mụn",
+        "Nền"
+      ],
+      "detection": true,
+      "images": 176,
+      "ground_truth_labels": 5046,
+      "support": [
+        5046
+      ],
+      "predictions": 3993,
+      "checkpoint_sha256": "284d1b879a58462c60dbabc43a2ca0d821a2a344d42857c14413d6f67edf3627",
+      "matching": "Existing project binary IoU matching; original unrounded aggregate counts",
+      "confidence": 0.23723723723723725,
+      "iou": 0.5,
+      "figure": "docs/figures/research/confusion_matrices/phase1/phase1_yolo26s_ft.png"
+    },
+    {
+      "key": "phase2_efficientnet_b0",
+      "phase": "GĐ2",
+      "model": "EfficientNet-B0",
+      "dataset": "ACNEDET — crop test",
+      "matrix_true_by_predicted": [
+        [
+          846,
+          19,
+          75,
+          31,
+          0
+        ],
+        [
+          12,
+          426,
+          35,
+          0,
+          0
+        ],
+        [
+          56,
+          9,
+          768,
+          23,
+          11
+        ],
+        [
+          19,
+          1,
+          36,
+          134,
+          2
+        ],
+        [
+          1,
+          0,
+          10,
+          0,
+          23
+        ]
+      ],
+      "labels": [
+        "closed_comedo",
+        "open_comedo",
+        "papule",
+        "pustule",
+        "nodule"
+      ],
+      "display_labels": [
+        "Đầu trắng",
+        "Đầu đen",
+        "Sẩn",
+        "Mủ",
+        "Nốt"
+      ],
+      "detection": false,
+      "images": 45,
+      "ground_truth_labels": 2537,
+      "support": [
+        971,
+        473,
+        867,
+        192,
+        34
+      ],
+      "predictions": 2537,
+      "checkpoint_sha256": "6a6805794dafc707fb04ffe01ef7cb1af691d59175eb4597af5a5fd831a472e9",
+      "matching": "Ground-truth crops; top-1 argmax, not full-face pipeline accuracy",
+      "accuracy": 0.8659834450137959,
+      "macro_f1": 0.8052639760454845,
+      "figure": "docs/figures/research/confusion_matrices/phase2/phase2_efficientnet_b0.png"
+    },
+    {
+      "key": "phase2_convnext_tiny",
+      "phase": "GĐ2",
+      "model": "ConvNeXt-Tiny",
+      "dataset": "ACNEDET — crop test",
+      "matrix_true_by_predicted": [
+        [
+          790,
+          31,
+          91,
+          59,
+          0
+        ],
+        [
+          1,
+          443,
+          28,
+          1,
+          0
+        ],
+        [
+          22,
+          13,
+          802,
+          27,
+          3
+        ],
+        [
+          10,
+          1,
+          38,
+          143,
+          0
+        ],
+        [
+          0,
+          0,
+          9,
+          0,
+          25
+        ]
+      ],
+      "labels": [
+        "closed_comedo",
+        "open_comedo",
+        "papule",
+        "pustule",
+        "nodule"
+      ],
+      "display_labels": [
+        "Đầu trắng",
+        "Đầu đen",
+        "Sẩn",
+        "Mủ",
+        "Nốt"
+      ],
+      "detection": false,
+      "images": 45,
+      "ground_truth_labels": 2537,
+      "support": [
+        971,
+        473,
+        867,
+        192,
+        34
+      ],
+      "predictions": 2537,
+      "checkpoint_sha256": "fb1f3230eaf7c1f4b268ef3a3a6b0892b7b8a146fbd5fcf92c2f3f3849aeaa51",
+      "matching": "Ground-truth crops; top-1 argmax, not full-face pipeline accuracy",
+      "accuracy": 0.8683484430429641,
+      "macro_f1": 0.8321921915476336,
+      "figure": "docs/figures/research/confusion_matrices/phase2/phase2_convnext_tiny.png"
+    },
+    {
+      "key": "phase3_yolo11s",
+      "phase": "GĐ3",
+      "model": "YOLO11s @1280",
+      "dataset": "ACNEDET — scar test",
+      "matrix_true_by_predicted": [
+        [
+          553,
+          2,
+          716
+        ],
+        [
+          3,
+          35,
+          77
+        ],
+        [
+          1033,
+          53,
+          0
+        ]
+      ],
+      "labels": [
+        "atrophic_scar",
+        "hypertrophic_scar",
+        "background"
+      ],
+      "display_labels": [
+        "Sẹo lõm",
+        "Sẹo phì đại/lồi",
+        "Nền"
+      ],
+      "detection": true,
+      "images": 45,
+      "ground_truth_labels": 1386,
+      "support": [
+        1271,
+        115
+      ],
+      "predictions": 1679,
+      "checkpoint_sha256": "a701a6937d48e8b8d21714c6a0cbad879c387315171d14b02dbdb2eb3a7a6179",
+      "matching": "Ultralytics ConfusionMatrix.process_batch, class-agnostic highest-IoU matching",
+      "confidence": 0.12212212212212212,
+      "iou": 0.5,
+      "figure": "docs/figures/research/confusion_matrices/phase3/phase3_yolo11s.png"
+    },
+    {
+      "key": "phase3_yolo26s",
+      "phase": "GĐ3",
+      "model": "YOLO26s @1280",
+      "dataset": "ACNEDET — scar test",
+      "matrix_true_by_predicted": [
+        [
+          514,
+          0,
+          757
+        ],
+        [
+          0,
+          39,
+          76
+        ],
+        [
+          692,
+          30,
+          0
+        ]
+      ],
+      "labels": [
+        "atrophic_scar",
+        "hypertrophic_scar",
+        "background"
+      ],
+      "display_labels": [
+        "Sẹo lõm",
+        "Sẹo phì đại/lồi",
+        "Nền"
+      ],
+      "detection": true,
+      "images": 45,
+      "ground_truth_labels": 1386,
+      "support": [
+        1271,
+        115
+      ],
+      "predictions": 1275,
+      "checkpoint_sha256": "0ebeb9a1aca8d8dc69a4acd2a436cd9ad9f9f3b185a64ceaa2499fa3090f65f1",
+      "matching": "Ultralytics ConfusionMatrix.process_batch, class-agnostic highest-IoU matching",
+      "confidence": 0.16316316316316315,
+      "iou": 0.5,
+      "figure": "docs/figures/research/confusion_matrices/phase3/phase3_yolo26s.png"
+    },
+    {
+      "key": "external_phase1_rtdetr",
+      "phase": "GĐ1",
+      "model": "RT-DETR-L @1280, fine-tune",
+      "dataset": "DetectDataSkin-2 — thăm dò",
+      "matrix_true_by_predicted": [
+        [
+          3144,
+          15830
+        ],
+        [
+          10871,
+          0
+        ]
+      ],
+      "labels": [
+        "acne",
+        "background"
+      ],
+      "display_labels": [
+        "Mụn",
+        "Nền"
+      ],
+      "detection": true,
+      "images": 1275,
+      "ground_truth_labels": 18974,
+      "support": [
+        18974
+      ],
+      "predictions": 14015,
+      "checkpoint_sha256": "a0ce94240a59b6b3901186790f2cc63c5c6b7c0392f0dfd234250fded1e880a5",
+      "matching": "Existing frozen binary detector evaluation; unreviewed source labels",
+      "confidence": 0.4804804804804805,
+      "iou": 0.5,
+      "figure": "docs/figures/research/confusion_matrices/phase1/external_phase1_rtdetr.png"
+    },
+    {
+      "key": "external_phase2_efficientnet",
+      "phase": "GĐ2",
+      "model": "EfficientNet-B0",
+      "dataset": "DetectDataSkin-2 — crop thăm dò",
+      "matrix_true_by_predicted": [
+        [
+          981,
+          80,
+          295,
+          43,
+          10
+        ],
+        [
+          378,
+          1088,
+          448,
+          14,
+          17
+        ],
+        [
+          1772,
+          848,
+          1725,
+          38,
+          12
+        ],
+        [
+          3729,
+          4980,
+          1606,
+          403,
+          11
+        ],
+        [
+          19,
+          14,
+          313,
+          7,
+          15
+        ]
+      ],
+      "labels": [
+        "closed_comedo",
+        "open_comedo",
+        "papule",
+        "pustule",
+        "nodule"
+      ],
+      "display_labels": [
+        "Đầu trắng",
+        "Đầu đen",
+        "Sẩn",
+        "Mủ",
+        "Nốt"
+      ],
+      "detection": false,
+      "images": 1275,
+      "ground_truth_labels": 18846,
+      "support": [
+        1409,
+        1945,
+        4395,
+        10729,
+        368
+      ],
+      "predictions": 18846,
+      "checkpoint_sha256": "6a6805794dafc707fb04ffe01ef7cb1af691d59175eb4597af5a5fd831a472e9",
+      "matching": "GT crops; provisional label mapping; labels unreviewed",
+      "accuracy": 0.22349570200573066,
+      "macro_f1": 0.20272001972072146,
+      "figure": "docs/figures/research/confusion_matrices/phase2/external_phase2_efficientnet.png"
+    }
+  ]
+}
