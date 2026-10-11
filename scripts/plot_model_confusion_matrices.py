@@ -2,8 +2,7 @@
 
 Rows are true labels, columns predicted labels. Detection background/background
 is undefined and masked; the background row is not normalized as a false-positive
-rate. Scar predictions are collected at the original validation thresholds and
-matched with the installed Ultralytics ConfusionMatrix implementation at IoU 0.5.
+rate. Only acne detection and acne-type classification are active tasks.
 No training, threshold selection, or checkpoint promotion occurs.
 """
 import csv
@@ -112,70 +111,6 @@ def classifier_matrices():
     return result
 
 
-def scar_matrices():
-    import cv2
-    import torch
-    from ultralytics import YOLO
-    from ultralytics.utils.metrics import ConfusionMatrix
-    torch.set_num_threads(4)
-    cv2.setNumThreads(2)
-    if not torch.cuda.is_available():
-        raise RuntimeError('CUDA is required to replay the original scar checkpoints')
-    original = read(ROOT/'reports/phase3_evaluation/test_metrics.json')
-    dataset = ROOT/'datasets/phase3_scar_detection'
-    images = sorted((dataset/'images/test').glob('*.jpg'))
-    assert len(images) == 45
-    result = []
-    for key in ['yolo11s', 'yolo26s']:
-        summary = original['test'][key]
-        weights = Path(original['selection']['representatives'][key]['weights'])
-        assert sha(weights) == summary['weights_sha256']
-        protocol = dict(model=key, weights_sha256=sha(weights), confidence=summary['conf_op'],
-                        iou_matching=0.5, nms_iou=0.7, max_det=500, imgsz=summary['imgsz'], images=45,
-                        matching='Ultralytics ConfusionMatrix.process_batch, class-agnostic highest-IoU matching',
-                        purpose='Render scar test confusion matrix at previously fixed validation threshold')
-        write(OUT/f'phase3_{key}_protocol.json', protocol)
-        model = YOLO(str(weights))
-        cm = ConfusionMatrix(names={0:'atrophic_scar',1:'hypertrophic_scar'})
-        saved = []
-        for idx, image_path in enumerate(images):
-            image = cv2.imread(str(image_path))
-            if image is None:
-                raise RuntimeError(f'Cannot read {image_path}')
-            height, width = image.shape[:2]
-            label_path = dataset/'labels/test'/f'{image_path.stem}.txt'
-            labels = np.array([list(map(float,l.split())) for l in label_path.read_text().splitlines()], dtype=float).reshape(-1,5)
-            assert np.isin(labels[:,0], [0,1]).all()
-            gt = np.column_stack([(labels[:,1]-labels[:,3]/2)*width, (labels[:,2]-labels[:,4]/2)*height,
-                                  (labels[:,1]+labels[:,3]/2)*width, (labels[:,2]+labels[:,4]/2)*height])
-            prediction = model.predict(image, imgsz=summary['imgsz'], conf=summary['conf_op'], iou=.7,
-                                       max_det=500, device=0, verbose=False)[0]
-            boxes = prediction.boxes.xyxy.cpu()
-            scores = prediction.boxes.conf.cpu()
-            classes = prediction.boxes.cls.cpu()
-            cm.process_batch(dict(bboxes=boxes, conf=scores, cls=classes),
-                             dict(bboxes=torch.tensor(gt,dtype=torch.float32), cls=torch.tensor(labels[:,0])),
-                             conf=summary['conf_op'], iou_thres=.5)
-            saved.append(dict(file_name=image_path.name, image_sha256=sha(image_path), label_sha256=sha(label_path),
-                              gt_boxes=gt.tolist(), gt_classes=labels[:,0].astype(int).tolist(),
-                              boxes=boxes.tolist(), scores=scores.tolist(), classes=classes.int().tolist()))
-            if (idx+1)%15 == 0:
-                print(f'Scar {key}: {idx+1}/45', flush=True)
-        source = OUT/f'phase3_{key}_predictions.json'
-        write(source, saved)
-        matrix = cm.matrix.T.astype(int)
-        gt_support = np.bincount(np.concatenate([r['gt_classes'] for r in saved]), minlength=2)
-        assert np.array_equal(matrix[:2].sum(1),gt_support)
-        assert matrix[:,:2].sum() == sum(len(r['scores']) for r in saved)
-        assert int(gt_support.sum()) == 1386
-        assert sha(weights) == summary['weights_sha256']
-        result.append(entry('phase3_'+key, 'GĐ3', 'YOLO11s @1280' if key=='yolo11s' else 'YOLO26s @1280',
-                    'ACNEDET — scar test', matrix, ['atrophic_scar','hypertrophic_scar','background'],
-                    ['Sẹo lõm','Sẹo phì đại/lồi','Nền'], True, 45, source, confidence=summary['conf_op'],
-                    iou=.5, checkpoint_sha256=summary['weights_sha256'], matching=protocol['matching']))
-        del model
-        torch.cuda.empty_cache()
-    return result
 
 
 def external_matrices():
@@ -280,10 +215,9 @@ def render(items):
             pdf.savefig(fig)
             item['figure']=relative.as_posix()
             plt.close(fig)
-    original=[r for r in items if r['key'] in ['phase1_rtdetr_ft','phase2_efficientnet_b0','phase3_yolo11s']]
-    overview(original,'deployed_original_test.png','Ba model đang triển khai — các tập test gốc')
+    original=[r for r in items if r['key'] in ['phase1_rtdetr_ft','phase2_efficientnet_b0']]
+    overview(original,'deployed_original_test.png','Hai model đang triển khai — các tập test gốc')
     overview([r for r in items if r['key'].startswith('phase2_')], 'phase2_comparison.png','GĐ2 — hai classifier, cùng 2.537 crop test ACNEDET')
-    overview([r for r in items if r['key'].startswith('phase3_')], 'phase3_comparison.png','GĐ3 — hai detector sẹo, cùng 45 ảnh test ACNEDET')
     overview([r for r in items if r['key'].startswith('external_')], 'detectdataskin2_exploratory.png','DetectDataSkin-2 — nhãn chưa xác minh, đánh giá thăm dò')
     for size in ['640','1280']:
         subset=[r for r in items if r['phase']=='GĐ1' and r['key'].startswith('phase1_') and '@'+size in r['model']]
@@ -302,25 +236,23 @@ def render(items):
 
 def documentation(items):
     lines=['# Ma trận nhầm lẫn các model BinSpa_AI','',
-        'Đã vẽ 20 ma trận: 18 checkpoint trên tập test gốc, cùng hai ma trận của checkpoint đang triển khai trên DetectDataSkin-2. Mỗi ảnh có hai phần: số lượng và tỷ lệ theo hàng nhãn thật. Không train, đổi ngưỡng mặc định hoặc lựa chọn lại model.','',
+        'Đã vẽ 18 ma trận: 16 checkpoint trên tập test gốc, cùng hai ma trận của checkpoint đang triển khai trên DetectDataSkin-2. Mỗi ảnh có hai phần: số lượng và tỷ lệ theo hàng nhãn thật. Không train, đổi ngưỡng mặc định hoặc lựa chọn lại model.','',
         '## Mở nhanh','',
-        '- [PDF toàn bộ 20 ma trận](all_models_confusion_matrices.pdf)',
-        '- [Ba model đang triển khai trên test gốc](deployed_original_test.png)',
+        '- [PDF toàn bộ 18 ma trận](all_models_confusion_matrices.pdf)',
+        '- [Hai model đang triển khai trên test gốc](deployed_original_test.png)',
         '- [GĐ1 @640](phase1_640_comparison.png)',
         '- [GĐ1 @1280 và fine-tune](phase1_1280_comparison.png)',
         '- [Hai classifier GĐ2](phase2_comparison.png)',
-        '- [Hai detector sẹo GĐ3](phase3_comparison.png)',
         '- [Kết quả thăm dò DetectDataSkin-2](detectdataskin2_exploratory.png)','',
         '## Cách đọc','',
         '- Hàng = nhãn thật; cột = dự đoán. Đường chéo = đúng lớp, ngoài đường chéo = nhầm lớp.',
         '- GĐ2: phần trăm là tỷ lệ trong từng lớp nhãn thật, tương ứng recall trên đường chéo. Đầu trắng/đầu đen/sẩn/mủ/nốt lần lượt là closed_comedo/open_comedo/papule/pustule/nodule.',
         '- Detector: cột Nền là tổn thương bị bỏ sót; hàng Nền là dự đoán không ghép được với tổn thương có nhãn. Ô Nền–Nền không xác định vì không đếm được mọi vùng nền âm tính đúng; ghi N/A.',
         '- Phần tỷ lệ của detector chỉ chuẩn hóa các hàng có nhãn tổn thương. Toàn bộ hàng Nền ghi N/A vì không có mẫu số nền đã xác minh; không suy ra specificity hoặc false-positive rate từ hàng này.',
-        '- Mỗi detector dùng ngưỡng đã chọn từ validation riêng, IoU ghép 0,5; đây không phải so sánh ở cùng một confidence. Confidence của model mụn đang triển khai vẫn là 0,48048, của model sẹo là 0,12212.',
+        '- Mỗi detector dùng ngưỡng đã chọn từ validation riêng, IoU ghép 0,5; đây không phải so sánh ở cùng một confidence. Confidence của model mụn đang triển khai vẫn là 0,48048.',
         '- GĐ1: chuyển vị ma trận số nguyên đã lưu, đối chiếu TP/FP/FN với artifact tương ứng; không dùng metadata test cũ của checkpoint fine-tune hoặc đếm số từ ảnh PNG.',
         '- GĐ2: tính lại từ CSV dự đoán top-1 và kiểm tra khớp ma trận, accuracy đã công bố.',
-        '- GĐ3: chạy lại hai checkpoint trên 45 ảnh test ở ngưỡng validation cố định; dùng Ultralytics ConfusionMatrix.process_batch ghép theo IoU cao nhất, không xét lớp khi ghép. Nhờ vậy ma trận thể hiện nhầm giữa hai lớp sẹo. Cách ghép này khác counts_at trong báo cáo cũ (ghép theo score riêng từng lớp), nên số chéo có thể khác TP cũ. Không suy ngược ma trận đa lớp từ chỉ TP/FP/FN tổng.',
-        '- Hai ma trận DetectDataSkin-2 là thăm dò trên nhãn nguồn chưa được chuyên gia xác minh và chưa xác nhận tách người. GĐ2 chỉ gồm 18.846 crop có mapping hỗ trợ, không gồm Cysts. Không có ma trận GĐ3 trên bộ này vì thiếu nhãn phân biệt hai loại sẹo.',
+        '- Hai ma trận DetectDataSkin-2 là thăm dò trên nhãn nguồn chưa được chuyên gia xác minh và chưa xác nhận tách người. GĐ2 chỉ gồm 18.846 crop có mapping hỗ trợ, không gồm Cysts.',
         '- Không dùng test gốc hoặc bộ thăm dò đã xem để khẳng định chất lượng trên người mới. Các tập dữ liệu và support khác nhau không so trực tiếp như cùng một benchmark.','',
         '## Ma trận từng model','',
         '| Model | Bộ dữ liệu | Số nhãn thật | Hình |',
@@ -328,25 +260,25 @@ def documentation(items):
     for item in items:
         lines.append(f'| {item["phase"]} {item["model"]} | {item["dataset"]} | {item["ground_truth_labels"]:,} | [Mở]({item["figure"]}) |')
     lines+=['','## Dữ liệu và tái lập','',
-            '`matrices.json` chứa số nguyên, nhãn, trục, nguồn/hash, confidence và phương pháp ghép. Các prediction sẹo và protocol mới được lưu cùng thư mục để chấm lại mà không cần chạy GPU. `verification.json` ghi kiểm tra tổng nhãn và tổng dự đoán.','',
+            '`matrices.json` chứa số nguyên, nhãn, trục, nguồn/hash, confidence và phương pháp ghép. `verification.json` ghi kiểm tra tổng nhãn và tổng dự đoán.','',
             '```powershell','.\\venv\\Scripts\\python.exe -X utf8 scripts\\plot_model_confusion_matrices.py','```']
     (OUT/'README.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
     write(OUT/'matrices.json', dict(orientation='rows=true, columns=predicted',
           normalization='row percentage; detection background row masked', matrices=items))
     write(OUT/'verification.json',dict(passed=True,matrices=len(items), phase1_matrices=14,phase2_matrices=2,
-          phase3_matrices=2,external_matrices=2,checks=['source aggregate counts match operating point',
-          'classifier CSV argmax, confusion matrix and accuracy match', 'scar checkpoint hashes before/after',
-          'scar GT and prediction marginal totals preserved', 'undefined background masked'],
+          external_matrices=2,checks=['source aggregate counts match operating point',
+          'classifier CSV argmax, confusion matrix and accuracy match',
+          'undefined background masked'],
           matrices_sha256=sha(OUT/'matrices.json')))
 
 
 def main():
     OUT.mkdir(parents=True,exist_ok=True)
-    items=acne_matrices()+classifier_matrices()+scar_matrices()+external_matrices()
-    assert len(items)==20 and len({r['key'] for r in items})==20
+    items=acne_matrices()+classifier_matrices()+external_matrices()
+    assert len(items)==18 and len({r['key'] for r in items})==18
     render(items)
     documentation(items)
-    print('Saved 20 paired confusion matrices, overview figures, PDF and verified data to',OUT,flush=True)
+    print(f'Saved {len(items)} paired confusion matrices, overview figures, PDF and verified data to',OUT,flush=True)
 
 
 if __name__=='__main__':

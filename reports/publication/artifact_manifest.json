@@ -3,13 +3,13 @@
   "artifacts": [
     {
       "path": "docs/figures/research/confusion_matrices/all_models_confusion_matrices.pdf",
-      "bytes": 100451,
-      "sha256": "a8c8c7c603ae6fc9c72f1d390960cad78f18b439d083b9fc8e698057ccb201d5"
+      "bytes": 91467,
+      "sha256": "db0fb5d7fed67d0ee5854c2758c379420ee162bdcd00b5299df83a4db6bdf3c7"
     },
     {
       "path": "docs/figures/research/confusion_matrices/deployed_original_test.png",
-      "bytes": 253870,
-      "sha256": "b626da07342d46fdd1e15f6b3cb81c63a70920d1f123df96a4e3d3103c2f3ba4"
+      "bytes": 203214,
+      "sha256": "610da6e63a0a05f8f7bb9550365e7d47ac59d005558cc5b3f72064f8c289e29d"
     },
     {
       "path": "docs/figures/research/confusion_matrices/detectdataskin2_exploratory.png",
@@ -122,21 +122,6 @@
       "sha256": "3fca0fbbd0cb19b013ce17205c79005c1e3af02b7ad035b6c7f9491d3a761b3f"
     },
     {
-      "path": "docs/figures/research/confusion_matrices/phase3/phase3_yolo11s.png",
-      "bytes": 170254,
-      "sha256": "f698ddadeebccb1f0f854d37052e7f41880fb305e0eabb466cd43791e72a0419"
-    },
-    {
-      "path": "docs/figures/research/confusion_matrices/phase3/phase3_yolo26s.png",
-      "bytes": 171062,
-      "sha256": "9890d18df42010ff12b00287bb0e2d0d81834ef530784aa818622427510c9547"
-    },
-    {
-      "path": "docs/figures/research/confusion_matrices/phase3_comparison.png",
-      "bytes": 202365,
-      "sha256": "f2c0192ed254f1fb9ed930a3483cffb6f0379d2754128d187c62c4be6f070565"
-    },
-    {
       "path": "docs/figures/research/external_confidence_diagnostics.png",
       "bytes": 60849,
       "sha256": "61bf9dca7ae3aafe3ea9800595e3d316232232692b5718e5a0c8df5174e74ae3"
@@ -153,18 +138,18 @@
     },
     {
       "path": "reports/publication/confusion_matrices.json",
-      "bytes": 20333,
-      "sha256": "f1ed1736debebbc215412a89a8857e43f527d929472b8ef51e4b8e45212af754"
+      "bytes": 18170,
+      "sha256": "8be22406c448dde2a43735f436348d5554d3a027a065aeb79942db9a1ede6e66"
     },
     {
       "path": "reports/publication/metrics.json",
-      "bytes": 23566,
-      "sha256": "fda4d2874188df857ab1682af5c6303dd982928a7e2f11dcad1fd65f5e4159d7"
+      "bytes": 20062,
+      "sha256": "6edfaab231e4f949ed22a10c48ac8a24732e83b2d0be46063d532a725f6a83e0"
     },
     {
       "path": "reports/publication/README.md",
-      "bytes": 4276,
-      "sha256": "d46f9c6b12c5d10b5d6a6f149db2f85a03d2db5ecc073000340db92a4699da30"
+      "bytes": 3757,
+      "sha256": "fb8f14fb82ba5c209209740cb121713931f06874ba9667d492d1220b4cd408ec"
     }
   ]
 }

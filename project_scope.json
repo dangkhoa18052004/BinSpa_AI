@@ -1,0 +1,7 @@
+{
+  "active_stages": ["phase1", "phase2"],
+  "task": "Detect acne lesions and classify their types",
+  "acne_types": ["closed_comedo", "open_comedo", "papule", "pustule", "nodule"],
+  "scar_detection_enabled": false,
+  "historical_artifacts": "Retained locally for provenance; excluded from current publication and default evaluation"
+}

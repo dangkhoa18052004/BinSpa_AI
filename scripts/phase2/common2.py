@@ -12,12 +12,14 @@ SOURCE = ROOT / 'data_raw/acnedet_roboflow/acnedet.v1i.coco/train'
 ANNOTATIONS = SOURCE / '_annotations.coco.json'
 REPORTS = ROOT / 'reports'
 DATA_REPORT = REPORTS / 'phase2_data'
-MASTER_SPLIT = ROOT / 'datasets/acnedet_master_split.csv'  # shared by phase 2 and phase 3
+MASTER_SPLIT = ROOT / 'datasets/acnedet_master_split.csv'  # frozen source-image split for acne models
 CROPS = ROOT / 'datasets/phase2_acne_type'
 MODELS = ROOT / 'models/phase2'
 RUNS = ROOT / 'runs/phase2'
 ACNE_CLASSES = ['closed_comedo', 'open_comedo', 'papule', 'pustule', 'nodule']  # names exactly as in ACNE-DET
-SCAR_CLASSES = ['atrophic_scar', 'hypertrophic_scar']
+# Auxiliary counts used ONLY to reproduce the historical split. No scar task is
+# active; keep these columns so retiring a task does not silently change test data.
+SPLIT_AUX_CLASSES = ['atrophic_scar', 'hypertrophic_scar']
 
 
 def source_id(image):

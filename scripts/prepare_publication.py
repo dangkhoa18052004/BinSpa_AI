@@ -30,7 +30,10 @@ def write(path, data):
 
 
 def export_metrics():
+    scope = read('project_scope.json')
+    assert scope['active_stages'] == ['phase1', 'phase2'] and not scope['scar_detection_enabled']
     matrices = read('reports/confusion_matrices/matrices.json')['matrices']
+    assert len(matrices) == 18 and all(not item['key'].startswith('phase3_') for item in matrices)
     phase1 = []
     for item in matrices:
         if not item['key'].startswith('phase1_'):
@@ -44,32 +47,19 @@ def export_metrics():
             precision=op['precision'], recall=op['recall'], f1=op['f1'],
             tp=op['tp'], fp=op['fp'], fn=op['fn'], checkpoint_sha256=item['checkpoint_sha256']))
     p2 = read('reports/phase2_evaluation/test_metrics.json')
-    p3 = read('reports/phase3_evaluation/test_metrics.json')
     phase2 = {key: {field: data[field] for field in ['accuracy', 'balanced_accuracy', 'macro_precision',
         'macro_recall', 'macro_f1', 'roc_auc_ovr_macro', 'per_class', 'confusion_matrix', 'config',
         'val_macro_f1', 'weights_sha256', 'params_m', 'model_mb', 'ms_per_crop_batch64']}
         for key, data in p2['test'].items()}
-    phase3 = {}
-    for key, data in p3['test'].items():
-        counts = data['counts_at_val_f1_conf']
-        totals = {name: sum(row[name] for row in counts.values()) for name in ['tp', 'fp', 'fn']}
-        tp, fp, fn = (totals[name] for name in ['tp', 'fp', 'fn'])
-        phase3[key] = dict(mAP50=data['mAP50'], mAP50_95=data['mAP50_95'],
-            confidence=data['conf_op'], imgsz=data['imgsz'], per_class_counts=counts,
-            operating_point_micro=dict(**totals, precision=tp/(tp+fp), recall=tp/(tp+fn),
-                                       f1=2*tp/(2*tp+fp+fn)),
-            checkpoint_sha256=data['weights_sha256'], latency_ms_median=data['latency_ms_median'],
-            count_matching='Class-aware, score-ordered, IoU 0.5; differs from multiclass confusion-matrix matching')
     external = read('reports/detectdataskin2_audit/frozen_evaluation/metrics.json')
     result = dict(status='Exploratory engineering study; not a clinically validated system',
         datasets=dict(acne04=dict(images=1167, split_images=dict(train=816,val=175,test=176),
             test_lesions=5046, patient_ids_verified=False),
             acnedet=dict(images=275, split_images=dict(train=190,val=40,test=45),
-                inferred_groups=50, patient_ids_verified=False, test_crops=2537, test_scars=1386),
+                inferred_groups=50, patient_ids_verified=False, test_crops=2537),
             detectdataskin2=dict(source_images=3462, screened_images=1275, acne_labels=18974,
                 supported_type_crops=18846, labels_expert_verified=False, patient_ids_verified=False)),
-        phase1=phase1, phase2=phase2, phase2_bootstrap=p2['bootstrap'], phase3=phase3,
-        phase3_bootstrap=read('reports/phase3_evaluation/bootstrap_test.json'),
+        phase1=phase1, phase2=phase2, phase2_bootstrap=p2['bootstrap'],
         external=dict(phase1=external['phase1_binary_detection'],
             phase2=external['phase2_gt_crop_classifier'], pipeline=external['phase1_plus_phase2_pipeline'],
             confidence_diagnostics=read('reports/detectdataskin2_audit/frozen_evaluation/classifier_confidence_diagnostics.json')))
@@ -89,7 +79,7 @@ def export_metrics():
     write(PUBLIC / 'confusion_matrices.json', dict(orientation='rows=true, columns=predicted',
         normalization='true-label row percentages; detector background row undefined', matrices=safe_matrices))
     for name in ['all_models_confusion_matrices.pdf','deployed_original_test.png','phase1_640_comparison.png',
-                 'phase1_1280_comparison.png','phase2_comparison.png','phase3_comparison.png',
+                 'phase1_1280_comparison.png','phase2_comparison.png',
                  'detectdataskin2_exploratory.png']:
         shutil.copyfile(ROOT / 'reports/confusion_matrices' / name, MATRICES / name)
     shutil.copyfile(ROOT / 'reports/detectdataskin2_audit/frozen_evaluation/classifier_confidence_diagnostics.png',
@@ -151,14 +141,7 @@ def readme_tables(data):
         row=data['phase2'][key]
         lo,hi=data['phase2_bootstrap'][ci_key]
         p2.append(f'| {name} | {row["accuracy"]:.2%} | {row["macro_f1"]:.4f} [{lo:.4f}; {hi:.4f}] | {row["balanced_accuracy"]:.4f} |')
-    p3 = ['| Model | mAP50 | mAP50–95 [CI 95%] | Micro P | Micro R | Micro F1 | Conf |',
-          '| --- | ---: | --- | ---: | ---: | ---: | ---: |']
-    for key,name in [('yolo11s','YOLO11s @1280 **(đang dùng)**'),('yolo26s','YOLO26s @1280')]:
-        row=data['phase3'][key]
-        op=row['operating_point_micro']
-        lo,hi=data['phase3_bootstrap']['ci'][key]['mAP50_95']
-        p3.append(f'| {name} | {row["mAP50"]:.4f} | {row["mAP50_95"]:.4f} [{lo:.4f}; {hi:.4f}] | {op["precision"]:.4f} | {op["recall"]:.4f} | {op["f1"]:.4f} | {row["confidence"]:.5f} |')
-    for number,rows in enumerate([p1,p2,p3],1):
+    for number,rows in enumerate([p1,p2],1):
         start=f'<!-- PHASE{number}_TABLE -->'
         end=f'<!-- /PHASE{number}_TABLE -->'
         replacement=start+'\n\n'+'\n'.join(rows)+'\n\n'+end
@@ -181,17 +164,16 @@ def main():
         '- [Báo cáo chính và các hình hiển thị trực tiếp](../../README.md)',
         '- [Số liệu các thực nghiệm](metrics.json)',
         '- [Ma trận dưới dạng số nguyên](confusion_matrices.json)',
-        '- [PDF 20 trang](../../docs/figures/research/confusion_matrices/all_models_confusion_matrices.pdf)','',
+        '- [PDF 18 trang](../../docs/figures/research/confusion_matrices/all_models_confusion_matrices.pdf)','',
         '## Ma trận từng checkpoint','',
         '| Giai đoạn | Model | Tập dữ liệu | Hình |','| --- | --- | --- | --- |']
     for item in read('reports/publication/confusion_matrices.json')['matrices']:
         rows.append(f'| {item["phase"]} | {item["model"]} | {item["dataset"]} | [Mở](../../{item["figure"]}) |')
     rows += ['', '## Tái lập và phạm vi', '',
         '`python scripts/prepare_publication.py` xuất lại các artifact này từ báo cáo đánh giá lưu riêng. Script không chạy model hay chọn lại ngưỡng. Muốn chấm lại từ đầu cần dữ liệu được cấp quyền, manifest chia tập và checkpoint tương ứng; các đầu vào đó không nằm trong bản công khai.', '',
-        'Các số P/R/F1 của GĐ3 trong metrics dùng ghép theo score riêng từng lớp; ma trận đa lớp dùng ghép IoU không xét lớp. Vì thế không dùng đường chéo ma trận để đối chiếu trực tiếp TP của phương pháp kia.', '',
         'Dữ liệu DetectDataSkin-2 là thăm dò với mapping nhãn tạm thời. Không diễn giải kết quả này như kiểm định lâm sàng hoặc kiểm định độc lập theo bệnh nhân.', '']
     (PUBLIC/'README.md').write_text('\n'.join(rows),encoding='utf-8',newline='\n')
-    artifacts=sorted([p for p in FIGURES.rglob('*') if p.is_file()] +
+    artifacts=sorted([p for p in FIGURES.rglob('*') if p.is_file() and 'phase3' not in p.parts and 'phase3' not in p.name] +
                      [PUBLIC/'metrics.json',PUBLIC/'confusion_matrices.json',PUBLIC/'README.md'])
     write(PUBLIC/'artifact_manifest.json',dict(privacy='Aggregate figures and metrics only; no per-image records',
         artifacts=[dict(path=p.relative_to(ROOT).as_posix(),bytes=p.stat().st_size,

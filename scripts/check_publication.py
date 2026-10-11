@@ -13,7 +13,7 @@ from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[1]
 ROOT_FILES = {'.gitignore','.gitattributes','README.md','requirements-phase1.txt','requirements-phase1-lock.txt',
-              'extract_acne04_images.py','zip_for_kaggle.py'}
+              'extract_acne04_images.py','zip_for_kaggle.py','project_scope.json'}
 REPORT_FILES = {'reports/publication/README.md','reports/publication/metrics.json',
                 'reports/publication/confusion_matrices.json','reports/publication/artifact_manifest.json'}
 LEGACY_FIGURES = {'1_precision_recall_map.png','2_map50_95.png','3_inference_time.png','4_model_size.png',
@@ -33,13 +33,15 @@ SECRET_PATTERNS = {
 
 def allowed(path):
     p=PurePosixPath(path)
-    if path in ROOT_FILES or path in REPORT_FILES or path=='docs/PRIVACY.md':
+    if path in ROOT_FILES or path in REPORT_FILES or path in {'docs/PRIVACY.md','docs/RELIABILITY_PLAN.md'}:
         return True
     if p.parts[0]=='scripts' and p.suffix in {'.py','.ps1','.md'}:
-        return not any(part in {'__pycache__','Ultralytics'} or part.startswith('.') for part in p.parts)
+        return not any(part in {'__pycache__','Ultralytics','phase3'} or part.startswith('.') for part in p.parts)
     if p.parent==PurePosixPath('docs/figures'):
         return p.name in LEGACY_FIGURES
     if path.startswith('docs/figures/research/'):
+        if 'phase3' in p.parts or 'phase3' in p.name:
+            return False
         if p.suffix=='.png':
             return True
         return path=='docs/figures/research/confusion_matrices/all_models_confusion_matrices.pdf'
@@ -47,7 +49,7 @@ def allowed(path):
 
 
 def publication_paths():
-    candidates=[ROOT / p for p in ROOT_FILES | REPORT_FILES | {'docs/PRIVACY.md'}]
+    candidates=[ROOT / p for p in ROOT_FILES | REPORT_FILES | {'docs/PRIVACY.md','docs/RELIABILITY_PLAN.md'}]
     candidates+=list((ROOT/'scripts').rglob('*'))+list((ROOT/'docs/figures').rglob('*'))
     return sorted({p.relative_to(ROOT).as_posix() for p in candidates if p.is_file() and allowed(p.relative_to(ROOT).as_posix())})
 

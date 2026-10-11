@@ -100,3 +100,8 @@ id_ed25519*
 *.bmp
 *.tif
 *.tiff
+
+# Retired task; kept only as a local historical implementation.
+/scripts/phase3/
+/docs/figures/research/confusion_matrices/phase3/
+/docs/figures/research/confusion_matrices/phase3_comparison.png

@@ -1,4 +1,4 @@
-"""Audit the ACNE-DET Roboflow mirror and build the master source-image split shared by GĐ2 and GĐ3.
+"""Audit the ACNE-DET Roboflow mirror and reproduce the frozen source-image split.
 
 Audit: classes, instances and images per class, image sizes, exact duplicates (SHA256), invalid
 boxes, lesion size per class, and similarity between images with consecutive ACNE-DET numbers.
@@ -9,7 +9,10 @@ blocks of 5 consecutive numbers, and blocks are merged when the two images at th
 ImageNet-embedding cosine similarity >= 0.95. Every lesion crop or box inherits its image's split.
 
 Split: groups -> train/val/test ~70/15/15. Among 5000 seeded shuffles, keep the one whose
-per-class instance shares (5 acne + 2 scar classes) and image share are closest to the targets.
+per-class instance shares and image share are closest to the targets. Two auxiliary
+scar-count columns are retained solely to reproduce the original split; scar
+detection is not an active task. Do not change this balancing policy and describe
+the new split as the same original benchmark.
 Usage: venv/Scripts/python.exe scripts/phase2/audit_and_split.py
 """
 import hashlib
@@ -18,7 +21,7 @@ from collections import Counter, defaultdict
 import cv2
 import numpy as np
 
-from common2 import (ACNE_CLASSES, DATA_REPORT, MASTER_SPLIT, SCAR_CLASSES, SOURCE, digest, load_coco,
+from common2 import (ACNE_CLASSES, DATA_REPORT, MASTER_SPLIT, SPLIT_AUX_CLASSES, SOURCE, digest, load_coco,
                      source_id, write_csv, write_json)
 
 BLOCK, SIM_MERGE, SEED, TRIALS = 5, 0.95, 42, 5000
@@ -63,7 +66,7 @@ def groups_for(images, emb):
 
 
 def choose_split(group_of, per_image):
-    classes = ACNE_CLASSES + SCAR_CLASSES
+    classes = ACNE_CLASSES + SPLIT_AUX_CLASSES
     n_groups = max(group_of) + 1
     g_counts = np.zeros((n_groups, len(classes) + 1))
     for k, g in enumerate(group_of):
@@ -110,7 +113,7 @@ def main():
     class_rows = []
     for name in sorted(set(cats.values()) - {'ACNE-Nprb'}):
         s = np.array(sizes[name]) if sizes[name] else np.zeros(1)
-        class_rows.append(dict(cls=name, task='phase2' if name in ACNE_CLASSES else 'phase3' if name in SCAR_CLASSES else 'unused',
+        class_rows.append(dict(cls=name, task='phase2' if name in ACNE_CLASSES else 'unused',
                                instances=len(sizes[name]), images=sum(1 for c in per_image if c[name]),
                                size_p5=float(np.percentile(s, 5)), size_median=float(np.median(s)), size_p95=float(np.percentile(s, 95))))
     duplicates = [v for v in hashes.values() if len(v) > 1]
@@ -126,11 +129,11 @@ def main():
         rows.append(dict(source_id=source_id(img), original_name=img['extra']['name'], file_name=img['file_name'],
                          image_id=img['id'], width=img['width'], height=img['height'], group=group_of[k],
                          split=names[split_of_group[group_of[k]]],
-                         **{c: per_image[k][c] for c in ACNE_CLASSES + SCAR_CLASSES}))
+                         **{c: per_image[k][c] for c in ACNE_CLASSES + SPLIT_AUX_CLASSES}))
     write_csv(MASTER_SPLIT, rows, list(rows[0]))
     split_table = {s: dict(images=sum(r['split'] == s for r in rows), groups=len({r['group'] for r in rows if r['split'] == s}),
-                           **{c: sum(r[c] for r in rows if r['split'] == s) for c in ACNE_CLASSES + SCAR_CLASSES},
-                           **{f'{c}_images': sum(r['split'] == s and r[c] > 0 for r in rows) for c in ACNE_CLASSES + SCAR_CLASSES})
+                           **{c: sum(r[c] for r in rows if r['split'] == s) for c in ACNE_CLASSES + SPLIT_AUX_CLASSES},
+                           **{f'{c}_images': sum(r['split'] == s and r[c] > 0 for r in rows) for c in ACNE_CLASSES + SPLIT_AUX_CLASSES})
                    for s in names}
     write_csv(DATA_REPORT / 'class_audit.csv', class_rows, list(class_rows[0]))
     write_csv(DATA_REPORT / 'invalid_annotations.csv', invalid or [dict(image='', annotation_id='', cls='', bbox='')],

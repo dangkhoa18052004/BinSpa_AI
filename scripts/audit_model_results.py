@@ -73,7 +73,6 @@ def datasets():
     source_duplicates = [v for v in hashes.values() if len(v) > 1]
     crops = rows(ROOT / 'datasets/phase2_acne_type/crop_manifest.csv')
     crop_errors = [r['crop_path'] for r in crops if r['split'] != by_id[r['source_id']]['split']]
-    scar_counts = {s: Counter() for s in ['train', 'val', 'test']}
     derived_errors = []
     coco = read(ROOT / 'data_raw/acnedet_roboflow/acnedet.v1i.coco/train/_annotations.coco.json')
     cats = {c['id']: c['name'] for c in coco['categories']}
@@ -83,7 +82,7 @@ def datasets():
     for r in master:
         s, stem = r['split'], f'acnedet_{int(r["source_id"]):03d}'
         expected_acne = sum(anns[int(r['image_id'])][c] for c in CLASSES)
-        for ds, expected in [('phase3_scar_detection', None), ('phase1_combined_acnedet', expected_acne)]:
+        for ds, expected in [('phase1_combined_acnedet', expected_acne)]:
             lab = ROOT / 'datasets' / ds / 'labels' / s / (stem + '.txt')
             image = ROOT / 'datasets' / ds / 'images' / s / (stem + '.jpg')
             if not lab.is_file() or not image.is_file():
@@ -100,11 +99,6 @@ def datasets():
                 if not (np.isfinite([cls, cx, cy, w, h]).all() and 0 <= cx <= 1 and 0 <= cy <= 1 and 0 < w <= 1 and 0 < h <= 1):
                     derived_errors.append(f'invalid bbox {ds}/{s}/{stem}')
                 counts[int(cls)] += 1
-            if expected is None:
-                scar_counts[s].update(counts)
-                for k, c in enumerate(['atrophic_scar', 'hypertrophic_scar']):
-                    if counts[k] != anns[int(r['image_id'])][c]:
-                        derived_errors.append(f'scar count mismatch {s}/{stem}/{c}')
     return dict(phase1_integrity=True, phase1_split=manifest['counts'],
                 phase1_verified_negative_images=sum(r['lesions'] == 0 for r in manifest['images']),
                 acnedet_images=len(master), master_groups=len(groups),
@@ -113,7 +107,7 @@ def datasets():
                 cross_split_groups=[g for g, v in groups.items() if len(v) > 1],
                 exact_duplicate_source_images=source_duplicates, crop_split_errors=crop_errors,
                 crop_counts=dict(Counter(r['split'] for r in crops)),
-                scar_label_counts={s: dict(v) for s, v in scar_counts.items()}, derived_errors=derived_errors)
+                derived_errors=derived_errors)
 
 
 def phase1():
@@ -200,44 +194,20 @@ def phase2():
     return dict(models=result, bootstrap=boots, recorded_bootstrap=original['bootstrap'])
 
 
-def phase3():
-    original = read(ROOT / 'reports/phase3_evaluation/test_metrics.json')
-    result = {}
-    for arch, m in original['test'].items():
-        per = {c: dict(**v, **prf(v['tp'], v['fp'], v['fn'])) for c, v in m['counts_at_val_f1_conf'].items()}
-        totals = {k: sum(v[k] for v in per.values()) for k in ['tp', 'fp', 'fn']}
-        result[arch] = dict(conf_op=m['conf_op'], test_max_f1_conf=m['f1_max_conf'],
-                            reported_precision=m['precision'], reported_recall=m['recall'],
-                            at_val_conf_per_class=per, at_val_conf_micro=dict(**totals, **prf(**totals)),
-                            at_val_conf_macro={k: float(np.mean([v[k] for v in per.values()])) for k in ['precision', 'recall', 'f1']})
-    return result
 
 
 def selection_checks():
-    vr = rows(ROOT / 'reports/phase3_evaluation/validation_runs.csv')
-    reps = {}
-    for arch in ['yolo26s', 'yolo11s']:
-        subset = [r for r in vr if r['arch'] == arch]
-        reps[arch] = max(subset, key=lambda r: float(r['val_mAP50_95']))
-    best = max(float(r['val_mAP50_95']) for r in reps.values())
-    tied = [r for r in reps.values() if best - float(r['val_mAP50_95']) <= .002]
-    chosen = max(tied, key=lambda r: (float(r['val_hs_recall']), -float(r['val_infer_ms'])))
     meta = read(ROOT / 'models/phase1/model_metadata.json')
     combined = read(ROOT / 'reports/phase1_combined/comparison.json')
     new = combined['candidates'][combined['selection']['chosen']]
     comparison = {k: dict(metadata=meta['test'][f'test_{k}'], current_artifact=new[f'acne04_test_{k}']) for k in ['mAP50', 'mAP50_95', 'precision', 'recall', 'f1']}
-    return dict(phase3_documented_rule_chosen=chosen['arch'],
-                phase3_actual_chosen=read(ROOT / 'reports/phase3_evaluation/selection.json')['chosen']['arch'],
-                bucket_rounding_counterexample=dict(a=.09899, b=.09901, difference=.00002, tolerance=.002,
-                                                     buckets=[round(.09899/.002), round(.09901/.002)]),
-                phase1_metadata_vs_current_checkpoint_metrics=comparison)
+    return dict(phase1_metadata_vs_current_checkpoint_metrics=comparison)
 
 
 def provenance():
     deployed = {}
     for phase, filename, key in [('phase1', 'best_acne_detector.pt', 'selected_weights_sha256'),
-                                 ('phase2', 'best_acne_type.pth', 'weights_sha256'),
-                                 ('phase3', 'best_scar_detector.pt', 'weights_sha256')]:
+                                 ('phase2', 'best_acne_type.pth', 'weights_sha256')]:
         meta = read(ROOT / 'models' / phase / 'model_metadata.json')
         actual = sha(ROOT / 'models' / phase / filename)
         deployed[phase] = dict(sha256=actual, matches_metadata=actual == meta[key])
@@ -250,7 +220,6 @@ def provenance():
 def inference_checks():
     import cv2
     import torch
-    from ultralytics import YOLO
     from evaluate_detector_common import load_split, make_predictor, box_iou
     from train_classifier import CropSet, predict, transforms
     from evaluate_classifier import load_model
@@ -281,35 +250,6 @@ def inference_checks():
         progress(f'inference phase2 {arch}: {result["phase2"][arch]}')
         del model
         torch.cuda.empty_cache()
-    # Full scar test replay at the deployed validation confidence, greedy by score.
-    original = read(ROOT / 'reports/phase3_evaluation/test_metrics.json')
-    result['phase3'] = {}
-    for arch, prior in original['test'].items():
-        sel = original['selection']['representatives'][arch]
-        model = YOLO(str(source_path(sel['weights'])))
-        totals = {c: dict(tp=0, fp=0, fn=0) for c in ['atrophic_scar','hypertrophic_scar']}
-        for path in sorted((ROOT/'datasets/phase3_scar_detection/images/test').glob('*.jpg')):
-            r = model.predict(str(path), imgsz=sel['imgsz'], conf=sel['val_f1_conf'], iou=.7, max_det=500, device=0, verbose=False)[0]
-            H, W = r.orig_shape
-            labels = np.array([list(map(float,l.split())) for l in (ROOT/'datasets/phase3_scar_detection/labels/test'/f'{path.stem}.txt').read_text().splitlines()]).reshape(-1,5)
-            for k, c in enumerate(totals):
-                lab = labels[labels[:,0]==k,1:]
-                gt = np.column_stack(((lab[:,0]-lab[:,2]/2)*W,(lab[:,1]-lab[:,3]/2)*H,(lab[:,0]+lab[:,2]/2)*W,(lab[:,1]+lab[:,3]/2)*H))
-                keep = r.boxes.cls.cpu().numpy()==k
-                d = r.boxes.xyxy.cpu().numpy()[keep][np.argsort(-r.boxes.conf.cpu().numpy()[keep])]
-                iou = box_iou(gt,d)
-                used = np.zeros(len(gt),bool)
-                tp=0
-                for j in range(len(d)):
-                    v=iou[:,j].copy();v[used]=-1
-                    if len(v) and v.max()>=.5:
-                        used[v.argmax()]=True;tp+=1
-                totals[c]['tp']+=tp;totals[c]['fp']+=len(d)-tp;totals[c]['fn']+=len(gt)-tp
-        result['phase3'][arch] = dict(images=45, counts=totals,
-                                     matches_recorded=totals==prior['counts_at_val_f1_conf'])
-        progress(f'inference phase3 {arch}: {result["phase3"][arch]}')
-        del model
-        torch.cuda.empty_cache()
     # Original full-resolution test images, current selected phase1 checkpoint.
     meta = read(ROOT/'models/phase1/model_metadata.json')
     saved = read(ROOT/'reports/phase1_combined/rtdetr_ft/eval_test/predictions.json')
@@ -334,7 +274,7 @@ def main():
     p.add_argument('--inference',action='store_true')
     a=p.parse_args()
     data=dict(created_utc=datetime.now(timezone.utc).isoformat(), scope='frozen artifacts; no training or model selection')
-    for name, fn in [('datasets',datasets),('provenance',provenance),('phase1_replay',phase1),('phase2_replay',phase2),('phase3_operating_point',phase3),('selection_checks',selection_checks)]:
+    for name, fn in [('datasets',datasets),('provenance',provenance),('phase1_replay',phase1),('phase2_replay',phase2),('selection_checks',selection_checks)]:
         progress(f'Audit {name}')
         data[name]=fn();save(data)
     if a.inference:

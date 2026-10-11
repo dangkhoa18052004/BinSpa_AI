@@ -9,6 +9,8 @@ Bản công khai được xây dựng từ danh sách file cho phép, không dù
 - Số liệu tổng hợp, phân bố lớp, ma trận số nguyên và checkpoint hash.
 - Biểu đồ PNG và PDF ma trận, không có ảnh khuôn mặt hay contact sheet.
 
+Phạm vi hiện tại chỉ gồm phát hiện mụn và phân loại năm loại mụn. Mã và kết quả phát hiện sẹo cũ được giữ riêng tại máy, không nằm trong danh sách công bố hiện tại.
+
 ## Nội dung giữ riêng
 
 - Ảnh nguồn, selfie, crop và mọi bản xuất ảnh khuôn mặt.

@@ -2,16 +2,16 @@
 
 # BinSpa AI
 
-### Phát hiện mụn, phân loại tổn thương và phát hiện nhóm sẹo trên ảnh khuôn mặt
+### Phát hiện vị trí mụn và phân loại mụn trên ảnh khuôn mặt
 
-**Báo cáo thực nghiệm · 3 giai đoạn · Đánh giá test và kiểm tra khả năng tổng quát**
+**Báo cáo thực nghiệm · 2 giai đoạn · Đánh giá test và kiểm tra khả năng tổng quát**
 
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](requirements-phase1-lock.txt)
 [![PyTorch](https://img.shields.io/badge/Framework-PyTorch-EE4C2C?logo=pytorch&logoColor=white)](requirements-phase1-lock.txt)
 ![Status](https://img.shields.io/badge/Status-Research%20prototype-167d8d)
 ![Privacy](https://img.shields.io/badge/Public%20artifacts-Aggregate%20only-3274a1)
 
-[Kết quả tổng hợp](reports/publication/README.md) · [Số liệu JSON](reports/publication/metrics.json) · [PDF 20 ma trận](docs/figures/research/confusion_matrices/all_models_confusion_matrices.pdf) · [Chính sách công bố](docs/PRIVACY.md)
+[Kết quả tổng hợp](reports/publication/README.md) · [Số liệu JSON](reports/publication/metrics.json) · [PDF 18 ma trận](docs/figures/research/confusion_matrices/all_models_confusion_matrices.pdf) · [Chính sách công bố](docs/PRIVACY.md) · [Kế hoạch tăng độ tin cậy](docs/RELIABILITY_PLAN.md)
 
 </div>
 
@@ -19,9 +19,9 @@
 
 ## Tóm tắt
 
-BinSpa AI nghiên cứu một pipeline gồm ba thành phần: **GĐ1** xác định vị trí mụn bằng detector; **GĐ2** phân loại crop thành năm nhóm tổn thương; **GĐ3** phát hiện hai nhóm sẹo. Thực nghiệm gồm 14 checkpoint detector mụn, hai classifier đại diện và hai detector sẹo đại diện được đánh giá trên test. Các run dùng kiến trúc có sẵn; đóng góp của dự án nằm ở chuẩn bị dữ liệu, so sánh thực nghiệm, kiểm tra artifact và phân tích giới hạn khi chuyển miền dữ liệu.
+BinSpa AI nghiên cứu một pipeline gồm hai thành phần: **GĐ1** xác định vị trí mụn bằng detector; **GĐ2** phân loại crop thành năm nhóm tổn thương. Thực nghiệm gồm 14 checkpoint detector mụn và hai classifier đại diện được đánh giá trên test. Các run dùng kiến trúc có sẵn; đóng góp của dự án nằm ở chuẩn bị dữ liệu, so sánh thực nghiệm, kiểm tra artifact và phân tích giới hạn khi chuyển miền dữ liệu.
 
-Detector hiện dùng là **RT-DETR-L @1280**, fine-tune trên ACNE04-v2 và phần train ACNEDET. Trên test ACNE04, model đạt mAP50–95 **0,1883**, precision **0,6018**, recall **0,5224**. Classifier **EfficientNet-B0** đạt accuracy **86,60%**, macro-F1 **0,8053** trên 2.537 crop test ACNEDET. Detector sẹo **YOLO11s @1280** đạt mAP50–95 **0,1025** trên 45 ảnh test ACNEDET.
+Detector hiện dùng là **RT-DETR-L @1280**, fine-tune trên ACNE04-v2 và phần train ACNEDET. Trên test ACNE04, model đạt mAP50–95 **0,1883**, precision **0,6018**, recall **0,5224**. Classifier **EfficientNet-B0** đạt accuracy **86,60%**, macro-F1 **0,8053** trên 2.537 crop test ACNEDET.
 
 Đánh giá thăm dò trên 1.275 ảnh DetectDataSkin-2 sau sàng lọc cho kết quả thấp hơn: detector mụn đạt F1 **0,1906**, classifier đạt accuracy **22,35%**. Hai nguồn khác nhau về ảnh, quy ước nhãn và phân bố lớp; kết quả này cho thấy cần kiểm tra khả năng tổng quát, không đủ để quy mọi sai khác cho riêng chất lượng model.
 
@@ -39,19 +39,16 @@ Detector hiện dùng là **RT-DETR-L @1280**, fine-tune trên ACNE04-v2 và ph�
 
 ## 1. Bài toán và kiến trúc
 
-GĐ1 và GĐ3 nhận ảnh khuôn mặt. GĐ2 nhận crop tổn thương, từ box có nhãn khi benchmark classifier hoặc từ box GĐ1 khi chạy pipeline thực tế. GĐ3 giữ đúng hai lớp nguồn; không suy ra phân loại chi tiết rolling, icepick, boxcar hay keloid.
+GĐ1 nhận ảnh khuôn mặt. GĐ2 nhận crop tổn thương, từ box có nhãn khi benchmark classifier hoặc từ box GĐ1 khi chạy pipeline thực tế.
 
 ```mermaid
 flowchart LR
     A["Ảnh khuôn mặt"] --> B["GĐ1: detector mụn<br/>RT-DETR-L @1280"]
     B --> C["Crop vuông có ngữ cảnh"]
     C --> D["GĐ2: classifier<br/>EfficientNet-B0"]
-    A --> E["GĐ3: detector sẹo<br/>YOLO11s @1280"]
     D --> F["Box, loại tổn thương<br/>và confidence"]
-    E --> F
     style B fill:#3274a1,color:#fff
     style D fill:#167d8d,color:#fff
-    style E fill:#3274a1,color:#fff
 ```
 
 *Hình 1. Luồng suy luận. Đánh giá từng model và đánh giá pipeline là hai bài toán khác nhau.*
@@ -60,7 +57,6 @@ flowchart LR
 | --- | --- | --- | ---: |
 | GĐ1 | `acne` | RT-DETR-L @1280, fine-tune | 0,48048 |
 | GĐ2 | `closed_comedo`, `open_comedo`, `papule`, `pustule`, `nodule` | EfficientNet-B0 @224 | Top-1 argmax |
-| GĐ3 | `atrophic_scar`, `hypertrophic_scar` | YOLO11s @1280 | 0,12212 |
 
 ## 2. Dữ liệu và cách chia tập
 
@@ -69,12 +65,12 @@ flowchart LR
 | Nguồn | Vai trò | Train / validation / test | Quy mô test |
 | --- | --- | --- | --- |
 | ACNE04, nhãn ACNE04-v2 | Detector mụn GĐ1 | 816 / 175 / 176 ảnh | 5.046 box mụn |
-| Mirror ACNEDET trên Roboflow | Classifier GĐ2 và detector sẹo GĐ3; phần train dùng thêm cho fine-tune GĐ1 | 190 / 40 / 45 ảnh | 2.537 crop mụn; 1.386 box sẹo |
+| Mirror ACNEDET trên Roboflow | Classifier GĐ2; phần train dùng thêm cho fine-tune GĐ1 | 190 / 40 / 45 ảnh | 2.537 crop mụn |
 | DetectDataSkin-2 | Thăm dò với checkpoint và ngưỡng cố định | Không dùng train hoặc chọn ngưỡng | 1.275 ảnh; 18.974 box mụn; 18.846 crop có mapping nhãn hỗ trợ |
 
 ACNE04 và ACNE04-v2 dùng chung nguồn ảnh, không phải hai cohort độc lập. Sau ghép nhãn, cách ly ảnh có lỗi và loại trùng chính xác trước chia tập, bản ACNE04 dùng trong dự án còn **1.167 ảnh, 31.498 tổn thương**. Nguồn ảnh được giới thiệu trong [Wu et al., ICCV 2019](https://openaccess.thecvf.com/content_ICCV_2019/papers/Wu_Joint_Acne_Image_Grading_and_Counting_via_Label_Distribution_Learning_ICCV_2019_paper.pdf); nguồn nhãn v2 được liên kết từ [AcneAI, MICCAI 2024](https://papers.miccai.org/miccai-2024/042-Paper2216.html).
 
-Mirror ACNEDET có **275 ảnh và 31.502 annotation** thuộc nhiều lớp. Dự án chỉ dùng năm lớp mụn cho GĐ2 và hai lớp sẹo cho GĐ3. Các nguồn được chuẩn bị riêng; ảnh không được phân phối lại trong bản công khai.
+Mirror ACNEDET có **275 ảnh và 31.502 annotation** thuộc nhiều lớp. Dự án chỉ dùng năm lớp mụn cho GĐ2. Các nguồn được chuẩn bị riêng; ảnh không được phân phối lại trong bản công khai.
 
 ![Thống kê ACNE04 sau làm sạch](docs/figures/dataset_stats.png)
 
@@ -83,7 +79,7 @@ Mirror ACNEDET có **275 ảnh và 31.502 annotation** thuộc nhiều lớp. D�
 ### 2.2 Đơn vị chia tập và nguy cơ rò rỉ
 
 - ACNE04 được chia theo ảnh sau loại trùng SHA256, seed 42. Không có ID bệnh nhân đã xác minh.
-- ACNEDET dùng master split chung cho GĐ2 và GĐ3. Có 50 nhóm suy đoán từ thứ tự ảnh và độ giống ảnh; train/val/test có 34/8/8 nhóm. Đây **không phải xác nhận độc lập theo bệnh nhân**.
+- ACNEDET dùng master split đã khóa cho GĐ2. Có 50 nhóm suy đoán từ thứ tự ảnh và độ giống ảnh; train/val/test có 34/8/8 nhóm. Đây **không phải xác nhận độc lập theo bệnh nhân**.
 - Mọi crop kế thừa split của ảnh gốc. Crop từ cùng ảnh không đi sang split khác.
 - Fine-tune GĐ1 dùng 816 ảnh train ACNE04 và 190 ảnh train ACNEDET. Phần test không nằm trong tập train; các tập test đã được xem qua nhiều bước nghiên cứu nên không còn là cohort mới hoàn toàn cho thử nghiệm tương lai.
 
@@ -106,7 +102,6 @@ GĐ1 so sánh YOLO26n, YOLO26s, YOLO11s, YOLOv5su, Faster R-CNN và RT-DETR-L, g
 
 GĐ2 so sánh EfficientNet-B0 và ConvNeXt-Tiny pretrained ImageNet. Crop vuông có cạnh `2 × max(w, h)`, tối thiểu 32 pixel, được cắt từ ảnh gốc, đưa về kích thước đầu vào 224 và chuẩn hóa theo checkpoint. Mỗi kiến trúc thử ba cấu hình; cấu hình đại diện chọn bằng validation macro-F1. EfficientNet-B0 được chọn trước bước test đại diện vì validation macro-F1 cao hơn.
 
-GĐ3 thử hai họ YOLO với ba cấu hình mỗi họ: 640, 1280 và 1280 với learning rate thấp hơn. Hai đại diện @1280 gần nhau về validation mAP50–95; quy tắc phá hòa bằng recall lớp sẹo phì đại trên validation chọn YOLO11s.
 
 ### 3.2 Chỉ số và ma trận
 
@@ -115,17 +110,14 @@ GĐ3 thử hai họ YOLO với ba cấu hình mỗi họ: 640, 1280 và 1280 v�
 | Detector mụn | mAP50, mAP50–95 | AP từ dự đoán confidence thấp; IoU 0,50:0,05:0,95 |
 | Detector mụn | P, R, F1; TP, FP, FN | IoU 0,5; ngưỡng max-F1 chọn trên validation riêng từng model |
 | Classifier | Accuracy, macro-F1, balanced accuracy | Top-1 trên crop từ box nhãn; không bao gồm lỗi bỏ sót của detector |
-| Detector sẹo | mAP50, mAP50–95 | AP của hai lớp theo evaluator Ultralytics |
-| Detector sẹo | Micro P/R/F1 ở ngưỡng cố định | Ghép theo confidence riêng từng lớp, IoU 0,5 |
-| Ma trận sẹo đa lớp | Đúng lớp, nhầm lớp, bỏ sót, báo dư | Ghép IoU không xét lớp; cho phép thấy nhầm giữa hai loại sẹo |
 
 Các ma trận thống nhất **hàng = nhãn thật, cột = dự đoán**. Với detector, cột **Nền** là tổn thương bị bỏ sót; hàng **Nền** là dự đoán không ghép được nhãn. Ô nền–nền và tỷ lệ của hàng nền ghi **N/A** vì không xác định được mọi vùng âm tính đúng. Không suy ra specificity từ các ma trận này.
 
-Ma trận GĐ1 được chuyển vị từ số nguyên đã lưu và đối chiếu TP/FP/FN. Ma trận GĐ2 được tính lại từ CSV top-1. Ma trận GĐ3 được chạy lại trên 45 ảnh test ở ngưỡng validation cố định, giữ nguyên checkpoint. Cách ghép ma trận GĐ3 khác cách ghép khi tính micro P/R/F1; không dùng đường chéo ma trận để đối chiếu trực tiếp TP của bảng kia.
+Ma trận GĐ1 được chuyển vị từ số nguyên đã lưu và đối chiếu TP/FP/FN. Ma trận GĐ2 được tính lại từ CSV top-1.
 
 ### 3.3 Độ bất định và môi trường
 
-Bootstrap ghép cặp 1.000 lần theo **ảnh gốc** được dùng cho so sánh hai classifier và hai detector sẹo. Không lấy từng crop làm mẫu độc lập. Vì nhóm bệnh nhân chưa được xác minh, khoảng tin cậy này vẫn không phải khoảng tin cậy theo bệnh nhân. Mỗi cấu hình chủ yếu dùng một seed; chưa đo đủ biến thiên huấn luyện.
+Bootstrap ghép cặp 1.000 lần theo **ảnh gốc** được dùng cho so sánh hai classifier. Không lấy từng crop làm mẫu độc lập. Vì nhóm bệnh nhân chưa được xác minh, khoảng tin cậy này vẫn không phải khoảng tin cậy theo bệnh nhân. Mỗi cấu hình chủ yếu dùng một seed; chưa đo đủ biến thiên huấn luyện.
 
 Môi trường thực nghiệm: Windows, Python 3.12, PyTorch, torchvision, timm, Ultralytics; GPU RTX 5050 Laptop 8 GB. Phiên bản đã cài được lưu trong [file lock](requirements-phase1-lock.txt). Các lệnh tải pretrained cần kết nối mạng. Thời gian suy luận phụ thuộc thiết bị, batch và bước tiền xử lý.
 
@@ -187,24 +179,6 @@ Chênh lệch macro-F1 ConvNeXt-Tiny trừ EfficientNet-B0 là **+0,0269**, CI 9
 
 *Hình 6. F1 và support test của từng lớp. Lớp nốt chỉ có 34 mẫu; chỉ số của lớp này dễ dao động. Accuracy 86,60% không bao gồm các nốt GĐ1 bỏ sót.*
 
-### 4.3 GĐ3 — phát hiện nhóm sẹo
-
-*Bảng 3. AP trên 45 ảnh test, 1.271 sẹo lõm và 115 sẹo phì đại. Micro P/R/F1 được tính lại từ TP/FP/FN ở ngưỡng validation cố định; không dùng P/R tại điểm F1 tối ưu trên test của báo cáo Ultralytics cũ.*
-
-<!-- PHASE3_TABLE -->
-
-| Model | mAP50 | mAP50–95 [CI 95%] | Micro P | Micro R | Micro F1 | Conf |
-| --- | ---: | --- | ---: | ---: | ---: | ---: |
-| YOLO11s @1280 **(đang dùng)** | 0.3145 | 0.1025 [0.0757; 0.1298] | 0.3508 | 0.4250 | 0.3843 | 0.12212 |
-| YOLO26s @1280 | 0.3507 | 0.1190 [0.0889; 0.1500] | 0.4337 | 0.3990 | 0.4156 | 0.16316 |
-
-<!-- /PHASE3_TABLE -->
-
-Chênh lệch mAP50–95 YOLO26s trừ YOLO11s có CI 95% **[−0,0075; +0,0400]**. Với tập test này, chưa xác nhận được khác biệt. YOLO11s giữ vai trò model đã chọn từ validation.
-
-![Ma trận hai detector sẹo](docs/figures/research/confusion_matrices/phase3_comparison.png)
-
-*Hình 7. Ma trận sẹo ở ngưỡng cố định, ghép IoU không xét lớp. Ngoài nhầm giữa hai loại sẹo, lỗi lớn là bỏ sót và báo dư. Số đường chéo có thể khác TP trong Bảng 3 do phương pháp ghép khác nhau.*
 
 ## 5. Đánh giá thăm dò DetectDataSkin-2
 
@@ -212,7 +186,7 @@ Chênh lệch mAP50–95 YOLO26s trừ YOLO11s có CI 95% **[−0,0075; +0,0400]
 
 Archive có **3.462 ảnh, 93.717 annotation**; tên split có sẵn không được dùng để tuyên bố một test mới độc lập. Qua kiểm tra trùng chính xác, nguồn tên ảnh, ảnh gần trùng và dấu hiệu chồng với dữ liệu đã dùng, còn **1.275 ảnh** trong tập thăm dò. Các trường hợp nghi chồng lặp được cách ly. Phương pháp này chưa loại trừ mọi biến thể ảnh hoặc cùng một người ở hai nguồn.
 
-Mapping GĐ2 tạm thời: `Whitehead → closed_comedo`, `Blackhead → open_comedo`, `Papule → papule`, `Pustule → pustule`, `Nodule/Nodules → nodule`. `Cysts` không đưa vào classifier năm lớp. `Bekas Jerawat` không đủ phân biệt hai loại sẹo nên **không đánh giá GĐ3** trên nguồn này.
+Mapping GĐ2 tạm thời: `Whitehead → closed_comedo`, `Blackhead → open_comedo`, `Papule → papule`, `Pustule → pustule`, `Nodule/Nodules → nodule`. `Cysts` không đưa vào classifier năm lớp. Các nhãn ngoài phạm vi năm loại mụn không được dùng cho classifier.
 
 Checkpoint, confidence và cách tiền xử lý được giữ cố định trước suy luận. Không train hay chọn lại ngưỡng trên tập thăm dò. Nhãn nguồn chưa được chuyên gia kiểm tra; 108 ảnh không có nhãn mụn không được coi là ảnh da sạch đã xác minh.
 
@@ -226,15 +200,15 @@ Checkpoint, confidence và cách tiền xử lý được giữ cố định tr�
 
 ![Ma trận thăm dò trên DetectDataSkin-2](docs/figures/research/confusion_matrices/detectdataskin2_exploratory.png)
 
-*Hình 8. Detector bỏ sót nhiều nhãn nguồn; classifier nhận đúng khoảng 3,8% crop lớp mủ và 4,1% crop lớp nốt. Các tỷ lệ này phụ thuộc mapping nhãn tạm thời và khác biệt nguồn ảnh; không phải kết quả xác nhận lâm sàng.*
+*Hình 7. Detector bỏ sót nhiều nhãn nguồn; classifier nhận đúng khoảng 3,8% crop lớp mủ và 4,1% crop lớp nốt. Các tỷ lệ này phụ thuộc mapping nhãn tạm thời và khác biệt nguồn ảnh; không phải kết quả xác nhận lâm sàng.*
 
 ![Đối chiếu confidence và accuracy](docs/figures/research/external_confidence_diagnostics.png)
 
-*Hình 9. Confidence top-1 trung bình 72,59% trong khi accuracy 22,35%; ECE 10 bin = 0,5024. Confidence cao không đủ để tin dự đoán. Đây là chẩn đoán trên nhãn được cung cấp, chưa hiệu chỉnh và chưa kiểm định theo bệnh nhân.*
+*Hình 8. Confidence top-1 trung bình 72,59% trong khi accuracy 22,35%; ECE 10 bin = 0,5024. Confidence cao không đủ để tin dự đoán. Đây là chẩn đoán trên nhãn được cung cấp, chưa hiệu chỉnh và chưa kiểm định theo bệnh nhân.*
 
 ## 6. Thảo luận và hạn chế
 
-Kết quả test gốc cho thấy hệ thống có thể học đặc trưng tổn thương trong miền ảnh đã dùng. Tuy nhiên detector mụn vẫn bỏ sót gần một nửa nhãn ACNE04, detector sẹo có AP thấp, và classifier suy giảm đáng kể trên bộ thăm dò. Bằng chứng hiện tại **chưa đủ để khẳng định hệ thống đáng tin cậy trên selfie thực tế**.
+Kết quả test gốc cho thấy hệ thống có thể học đặc trưng tổn thương trong miền ảnh đã dùng. Tuy nhiên detector mụn vẫn bỏ sót gần một nửa nhãn ACNE04, và classifier suy giảm đáng kể trên bộ thăm dò. Bằng chứng hiện tại **chưa đủ để khẳng định hệ thống đáng tin cậy trên selfie thực tế**.
 
 | Hạn chế | Ảnh hưởng tới diễn giải | Thực nghiệm cần bổ sung |
 | --- | --- | --- |
@@ -246,7 +220,7 @@ Kết quả test gốc cho thấy hệ thống có thể học đặc trưng t�
 | Benchmark classifier dùng crop nhãn | Chưa bao gồm lỗi bỏ sót và sai box GĐ1 | Đánh giá pipeline đúng lớp, đúng vị trí |
 | Confidence chưa được hiệu chỉnh trên miền đích | Có thể dự đoán sai với confidence cao | Hiệu chỉnh trên validation riêng, chấm trên test mới |
 
-Ưu tiên tiếp theo là pilot selfie có quyền sử dụng, nhãn được kiểm tra, ID người rõ ràng và một test mới được khóa. Việc hạ confidence chỉ thay đổi đánh đổi bỏ sót/báo dư; không thay thế đánh giá chất lượng.
+Kế hoạch tiếp theo ưu tiên dữ liệu đã có nhãn từ nguồn gốc, kiểm tra chống trùng, đo pipeline và hiệu chỉnh confidence. Xem [bảng kế hoạch khi không tự thu thập ảnh](docs/RELIABILITY_PLAN.md). Việc hạ confidence chỉ thay đổi đánh đổi bỏ sót/báo dư; không thay thế đánh giá chất lượng.
 
 ## 7. Cài đặt và tái lập
 
@@ -269,7 +243,6 @@ Ví dụ trên dùng build CUDA tương ứng môi trường thực nghiệm; th
 BinSpa_AI/
 ├── scripts/phase1/       # chuẩn bị, train, chấm detector mụn
 ├── scripts/phase2/       # master split, crop, train/chấm classifier
-├── scripts/phase3/       # chuẩn bị, train/chấm detector sẹo
 ├── docs/figures/         # chỉ biểu đồ và ma trận tổng hợp
 ├── reports/publication/  # số liệu JSON, manifest artifact công khai
 ├── datasets/             # dữ liệu có quyền truy cập, lưu riêng
@@ -284,14 +257,11 @@ Ví dụ các bước sau khi đã chuẩn bị dữ liệu riêng:
 .\venv\Scripts\python.exe scripts\phase1\split_phase1.py
 .\venv\Scripts\python.exe scripts\phase1\test_phase1.py
 
-# GĐ2: master split chung cho GĐ2 và GĐ3, tạo crop rồi train.
+# GĐ2: master split đã khóa cho GĐ2, tạo crop rồi train.
 .\venv\Scripts\python.exe scripts\phase2\audit_and_split.py
 .\venv\Scripts\python.exe scripts\phase2\make_crops.py
 .\venv\Scripts\python.exe scripts\phase2\train_classifier.py --model efficientnet_b0 --config cfg_a
 
-# GĐ3: chuẩn bị nhãn sẹo theo cùng master split.
-.\venv\Scripts\python.exe scripts\phase3\build_scar_dataset.py
-.\venv\Scripts\python.exe scripts\phase3\train_scar.py --model yolo11s --config c1280
 ```
 
 Các script train và chọn model là workflow nghiên cứu, có thể tạo hoặc thay metadata/checkpoint trong thư mục riêng. Để chấm lại đúng các kết quả đã công bố, cần cùng manifest và checkpoint hash; train mới sẽ tạo một thực nghiệm mới.
@@ -300,7 +270,6 @@ Các script train và chọn model là workflow nghiên cứu, có thể tạo h
 # Suy luận: cần models/ và metadata tương ứng, dùng ảnh của bạn.
 .\venv\Scripts\python.exe scripts\phase1\predict_acne.py --source test_img\selfie.jpg
 .\venv\Scripts\python.exe scripts\phase2\predict_acne_type.py --face test_img\selfie.jpg --out reports\local\acne_types.json
-.\venv\Scripts\python.exe scripts\phase3\predict_scar.py --source test_img\selfie.jpg
 
 # Chỉ khi có các báo cáo đánh giá riêng: vẽ và xuất bản tổng hợp.
 .\venv\Scripts\python.exe scripts\plot_model_confusion_matrices.py
@@ -314,7 +283,7 @@ Các script train và chọn model là workflow nghiên cứu, có thể tạo h
 
 ## 8. Công bố dữ liệu và quyền sử dụng
 
-Bản công khai gồm mã nguồn, yêu cầu môi trường, báo cáo tổng hợp, biểu đồ và 20 ma trận: 18 checkpoint trên test gốc và hai kết quả của checkpoint hiện dùng trên DetectDataSkin-2. Ảnh khuôn mặt, crop, nhãn từng ảnh, dự đoán từng ảnh, tài liệu cá nhân, file ZIP dữ liệu, venv và checkpoint không nằm trong bản công bố hiện tại.
+Bản công khai gồm mã nguồn, yêu cầu môi trường, báo cáo tổng hợp, biểu đồ và 18 ma trận: 16 checkpoint trên test gốc và hai kết quả của checkpoint hiện dùng trên DetectDataSkin-2. Ảnh khuôn mặt, crop, nhãn từng ảnh, dự đoán từng ảnh, tài liệu cá nhân, file ZIP dữ liệu, venv và checkpoint không nằm trong bản công bố hiện tại.
 
 `.gitignore` bảo vệ việc thêm file mới, **không xóa dữ liệu trong lịch sử Git**. Các commit hoặc nhánh cũ có thể vẫn chứa artifact trước khi dọn. Xem [phạm vi bảo vệ và xử lý lịch sử](docs/PRIVACY.md).
 
