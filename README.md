@@ -49,7 +49,7 @@ Hệ thống phân tích da của Bin Spa gồm 3 giai đoạn độc lập, ho�
 ```mermaid
 flowchart TD
     A["Ảnh khách hàng<br/>(camera / upload)"] --> B["Tiền xử lý khuôn mặt"]
-    B --> P1["GĐ1 · Phát hiện mụn<br/>RT-DETR-L @1280 ✅"]
+    B --> P1["GĐ1 · Phát hiện mụn<br/>RT-DETR-L @1280 "]
     B --> P2["GĐ2 · Phân loại loại mụn<br/>ConvNeXt (chưa làm)"]
     B --> P3["GĐ3 · Phân loại sẹo mụn<br/>ConvNeXt (chưa làm)"]
     P1 --> S["Skin Profile"]
@@ -276,7 +276,7 @@ Hơn một nửa số nốt mụn nhỏ hơn 8 px ở đầu vào 640, và recal
 
 | Model (test) | mAP50-95 | mAP50 | Recall | Precision | F1 | Latency | MB |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| **RT-DETR-L @1280** ✅ | 0,191 | **0,528** | **0,511** | **0,607** | **0,555** | 78 ms | 63 |
+| **RT-DETR-L @1280**  | 0,191 | **0,528** | **0,511** | **0,607** | **0,555** | 78 ms | 63 |
 | YOLO26s @1280 | **0,194** | 0,507 | 0,480 | 0,594 | 0,531 | 24 ms | 19 |
 | YOLO11s @1280 | 0,187 | 0,509 | 0,486 | 0,597 | 0,536 | 22 ms | 18 |
 | YOLO26s @640 | 0,148 | 0,424 | 0,427 | 0,534 | 0,475 | 10 ms | 19 |
