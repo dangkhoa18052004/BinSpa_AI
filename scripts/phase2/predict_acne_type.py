@@ -5,7 +5,9 @@ Two modes:
           (models/phase2/pipeline_metadata.json; fallback models/phase2/best_acne_type.pth)
   --face  a face photo. Default engine 'pipeline' (the project's two-stage design: find acne, then tell the
           type): phase-1 detector (models/phase1/best_acne_detector.pt) -> square context crop (2x lesion side,
-          min 32 px) -> classifier top-3. Engine 'det5': the one-stage RT-DETR-L 5-class detector
+          min 32 px) -> classifier top-3. With type_calibration in pipeline_metadata.json the type probabilities
+          are temperature-calibrated and each lesion gets type_status 'confident' or 'uncertain' (type withheld,
+          location shown; scripts/phase2/calibrate_classifier.py). Engine 'det5': the one-stage RT-DETR-L 5-class detector
           (models/phase2/best_acne_det5.pt) with a calibrated confidence = P(box and type correct); about 7-10x
           faster, but less accurate than the two-stage pipeline in 5-fold CV (reports/phase2_cv_summary.md).
           --conf overrides the detector confidence of either engine.
@@ -31,8 +33,13 @@ from make_crops import crop_box
 DISCLAIMER = 'Kết quả phân tích hình ảnh chỉ mang tính tham khảo chăm sóc da.'
 
 
+def softmax(z):
+    e = np.exp(z - z.max(1, keepdims=True))
+    return e / e.sum(1, keepdims=True)
+
+
 class TypeClassifier:
-    def __init__(self, path=MODELS / 'best_acne_type.pth', device='cuda'):
+    def __init__(self, path=MODELS / 'best_acne_type.pth', device='cuda', temperature=1.0):
         import timm
         ckpt = torch.load(path, map_location='cpu', weights_only=False)
         self.model = timm.create_model(ckpt['timm_name'], pretrained=False, num_classes=len(ckpt['classes']))
@@ -42,16 +49,27 @@ class TypeClassifier:
         self.mean = torch.tensor(ckpt['mean']).view(1, 3, 1, 1)
         self.std = torch.tensor(ckpt['std']).view(1, 3, 1, 1)
         self.version = digest(path)[:16]
+        self.temperature = temperature  # probabilities = softmax(logits / T); 1.0 = uncalibrated
+
+    def logits(self, crops_bgr, batch=64):
+        """Every forward pass gets exactly `batch` inputs (zero-padded): each new batch size costs cuDNN
+        seconds of kernel selection on this GPU, and every face has a different lesion count."""
+        out = []
+        for i in range(0, len(crops_bgr), batch):
+            x = np.stack([cv2.resize(c, (256, 256), interpolation=cv2.INTER_AREA)[:, :, ::-1] for c in crops_bgr[i:i + batch]])
+            n = len(x)
+            x = torch.from_numpy(x).permute(0, 3, 1, 2).float() / 255
+            x = torch.nn.functional.interpolate(x, size=self.size, mode='bilinear', antialias=True, align_corners=False)
+            x = ((x - self.mean) / self.std)
+            x = torch.cat([x, x.new_zeros((batch - n, *x.shape[1:]))]).to(self.device)
+            with torch.inference_mode():
+                out.append(self.model(x)[:n].float().cpu().numpy())
+        return np.concatenate(out) if out else np.zeros((0, len(self.classes)), np.float32)
 
     def __call__(self, crops_bgr, k=3):
         if not crops_bgr:
             return []
-        x = np.stack([cv2.resize(c, (256, 256), interpolation=cv2.INTER_AREA)[:, :, ::-1] for c in crops_bgr])
-        x = torch.from_numpy(x).permute(0, 3, 1, 2).float() / 255
-        x = torch.nn.functional.interpolate(x, size=self.size, mode='bilinear', antialias=True, align_corners=False)
-        x = ((x - self.mean) / self.std).to(self.device)
-        with torch.inference_mode():
-            prob = torch.softmax(self.model(x).float(), 1).cpu().numpy()
+        prob = softmax(self.logits(crops_bgr) / self.temperature)
         out = []
         for p in prob:
             top = np.argsort(-p)[:k]
@@ -81,6 +99,21 @@ def pipeline_classifier():
     return ROOT / read_json(meta)['classifier'] if meta.exists() else MODELS / 'best_acne_type.pth'
 
 
+def pipeline_type_model():
+    """-> (classifier with the calibrated temperature, accept threshold or None, calibration info for the output).
+    models/phase2/pipeline_metadata.json 'type_calibration' (calibrate_classifier.py --promote); absent = T 1, no status."""
+    meta = MODELS / 'pipeline_metadata.json'
+    cal = (read_json(meta).get('type_calibration') if meta.exists() else None) or {}
+    T, tau = cal.get('temperature', 1.0), cal.get('accept_threshold')
+    info = dict(temperature=round(T, 4), accept_threshold=tau) if cal else None
+    return TypeClassifier(pipeline_classifier(), temperature=T), tau, info
+
+
+def with_status(top3, tau):
+    """'confident': show the type; 'uncertain': calibrated top-1 probability below the threshold, show only the location."""
+    return dict(top3=top3) if tau is None else dict(top3=top3, type_status='confident' if top3[0]['probability'] >= tau else 'uncertain')
+
+
 def calibrate(score, platt):
     z = np.log(np.clip(score, 1e-4, 1 - 1e-4) / (1 - np.clip(score, 1e-4, 1 - 1e-4)))
     return 1 / (1 + np.exp(-(platt['a'] * z + platt['b'])))
@@ -98,17 +131,20 @@ def face_det5(path, conf):
 
 
 def face_pipeline(path, conf):
-    clf = TypeClassifier(pipeline_classifier())
+    clf, tau, cal = pipeline_type_model()
     image = cv2.imread(str(path))
     boxes, score, _, det_version, threshold = detect(path, conf)
     crops = []
     for (x1, y1, x2, y2) in boxes:
         x0, y0, side = crop_box([x1, y1, x2 - x1, y2 - y1], image.shape[1], image.shape[0])
         crops.append(image[y0:y0 + side, x0:x0 + side])
-    return dict(image=str(path), engine='pipeline', lesion_count=len(boxes), detector_version=det_version,
-                detector_confidence_threshold=threshold, type_model_version=clf.version,
-                predictions=[dict(bbox=[round(float(v), 1) for v in b], detection_confidence=round(float(c), 4), top3=t)
-                             for b, c, t in zip(boxes, score, clf(crops))])
+    preds = [dict(bbox=[round(float(v), 1) for v in b], detection_confidence=round(float(c), 4), **with_status(t, tau))
+             for b, c, t in zip(boxes, score, clf(crops))]
+    out = dict(image=str(path), engine='pipeline', lesion_count=len(boxes), detector_version=det_version,
+               detector_confidence_threshold=threshold, type_model_version=clf.version)
+    if cal:
+        out.update(type_calibration=cal, uncertain_type_count=sum(p['type_status'] == 'uncertain' for p in preds) if tau else None)
+    return dict(out, predictions=preds)
 
 
 def main():
@@ -126,9 +162,12 @@ def main():
         if not 0 <= a.conf <= 1:
             p.error('--conf must be a finite number between 0 and 1')
     if a.crop:
-        clf = TypeClassifier(pipeline_classifier())
+        clf, tau, cal = pipeline_type_model()
         crops = [cv2.imread(str(c)) for c in a.crop]
-        result = dict(predictions=[dict(crop=str(c), top3=t) for c, t in zip(a.crop, clf(crops))], type_model_version=clf.version)
+        result = dict(predictions=[dict(crop=str(c), **with_status(t, tau)) for c, t in zip(a.crop, clf(crops))],
+                      type_model_version=clf.version)
+        if cal:
+            result['type_calibration'] = cal
     else:
         result = (face_det5 if a.engine == 'det5' else face_pipeline)(a.face, a.conf)
     result.update(disclaimer=DISCLAIMER)

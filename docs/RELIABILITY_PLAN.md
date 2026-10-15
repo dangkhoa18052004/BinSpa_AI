@@ -16,6 +16,17 @@ Bạn không phải tự chụp hoặc thu thập ảnh. Hướng chính là kha
 | Confidence GĐ2 trên tập thăm dò | Trung bình 72,59%; ECE 0,5024 | Dự đoán sai vẫn có thể rất tự tin |
 | Độc lập theo người | Có nhóm suy đoán; không có ID người được xác minh | Không được gọi là kiểm định trên bệnh nhân độc lập |
 
+## Tiến độ (cập nhật 15/10/2026)
+
+| Hạng mục | Trạng thái | Kết quả chính |
+| --- | --- | --- |
+| Benchmark lại cả pipeline | Xong | 5-fold CV theo nhóm trên 275 ảnh ACNEDET: pipeline 2 giai đoạn hơn detector 5 lớp (macro-F1 0,401 so với 0,363, CI không chứa 0) |
+| Chống trùng | Xong | pHash cộng 7 biến thể xoay/lật: không có cặp trùng giữa test ACNEDET và ACNE04 |
+| Cải thiện GĐ2 với ảnh kém chất lượng | Xong | Classifier robust: ngang cfg_a trên ảnh sạch; mAP50 trên ảnh mờ/nhiễu/JPEG tăng từ 0,099 lên 0,160 |
+| Hiệu chỉnh confidence và từ chối | Xong, đã triển khai | Temperature T = 0,80, ngưỡng τ = 0,87 (`type_status` confident/uncertain). CV: ECE 0,062 → 0,013; hiển thị loại cho 64% nốt, đúng 94,7% [93,7–95,8]. **Không có tác dụng ngoài miền:** DetectDataSkin-2 ECE 0,51 → 0,57, phần hiển thị chỉ đúng 23,7% |
+| Xác minh ACNEDET gốc, xin AcneSCU | Chưa làm | Cần người dùng tự tải hoặc gửi yêu cầu |
+| Nhiều seed, model card | Chưa làm | |
+
 ## Bảng kế hoạch thực hiện
 
 Ước tính 3–5 tuần làm việc bán thời gian, chưa tính thời gian xin dữ liệu. Đây là lịch dự kiến, không phải cam kết sẽ đạt một mức accuracy cụ thể.
