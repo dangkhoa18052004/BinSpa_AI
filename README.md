@@ -270,6 +270,8 @@ Các script train và chọn model là workflow nghiên cứu, có thể tạo h
 # Suy luận: cần models/ và metadata tương ứng, dùng ảnh của bạn.
 .\venv\Scripts\python.exe scripts\phase1\predict_acne.py --source test_img\selfie.jpg
 .\venv\Scripts\python.exe scripts\phase2\predict_acne_type.py --face test_img\selfie.jpg --out reports\local\acne_types.json
+# Mặc định --face chạy 2 giai đoạn: detector GĐ1 → classifier EfficientNet-B0 robust (models/phase2/pipeline_metadata.json).
+# Bản một bước RT-DETR-L 5 lớp (nhanh hơn, kém chính xác hơn trong 5-fold CV): thêm --engine det5. Xem reports/phase2_cv_summary.md.
 
 # Chỉ khi có các báo cáo đánh giá riêng: vẽ và xuất bản tổng hợp.
 .\venv\Scripts\python.exe scripts\plot_model_confusion_matrices.py
