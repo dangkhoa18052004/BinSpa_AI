@@ -7,7 +7,10 @@ Two modes:
           type): phase-1 detector (models/phase1/best_acne_detector.pt) -> square context crop (2x lesion side,
           min 32 px) -> classifier top-3. With type_calibration in pipeline_metadata.json the type probabilities
           are temperature-calibrated and each lesion gets type_status 'confident' or 'uncertain' (type withheld,
-          location shown; scripts/phase2/calibrate_classifier.py). Engine 'det5': the one-stage RT-DETR-L 5-class detector
+          location shown; scripts/phase2/calibrate_classifier.py). With models/phase2/input_gate.json the photo
+          is checked first (face, size, sharpness, noise, light; scripts/phase2/input_gate.py): a failed check returns
+          analysis_status 'retake_photo' with reasons, a photo unlike the training photos 'location_only'.
+          --no-check skips it. Engine 'det5': the one-stage RT-DETR-L 5-class detector
           (models/phase2/best_acne_det5.pt) with a calibrated confidence = P(box and type correct); about 7-10x
           faster, but less accurate than the two-stage pipeline in 5-fold CV (reports/phase2_cv_summary.md).
           --conf overrides the detector confidence of either engine.
@@ -51,10 +54,11 @@ class TypeClassifier:
         self.version = digest(path)[:16]
         self.temperature = temperature  # probabilities = softmax(logits / T); 1.0 = uncalibrated
 
-    def logits(self, crops_bgr, batch=64):
-        """Every forward pass gets exactly `batch` inputs (zero-padded): each new batch size costs cuDNN
-        seconds of kernel selection on this GPU, and every face has a different lesion count."""
-        out = []
+    def embed(self, crops_bgr, batch=64):
+        """-> (pooled penultimate features, logits). Every forward pass gets exactly `batch` inputs (zero-padded):
+        each new batch size costs cuDNN seconds of kernel selection on this GPU, and every face has a different
+        lesion count."""
+        feats, logits = [], []
         for i in range(0, len(crops_bgr), batch):
             x = np.stack([cv2.resize(c, (256, 256), interpolation=cv2.INTER_AREA)[:, :, ::-1] for c in crops_bgr[i:i + batch]])
             n = len(x)
@@ -63,8 +67,15 @@ class TypeClassifier:
             x = ((x - self.mean) / self.std)
             x = torch.cat([x, x.new_zeros((batch - n, *x.shape[1:]))]).to(self.device)
             with torch.inference_mode():
-                out.append(self.model(x)[:n].float().cpu().numpy())
-        return np.concatenate(out) if out else np.zeros((0, len(self.classes)), np.float32)
+                f = self.model.forward_head(self.model.forward_features(x), pre_logits=True)
+                feats.append(f[:n].float().cpu().numpy())
+                logits.append(self.model.get_classifier()(f)[:n].float().cpu().numpy())
+        if not feats:
+            return np.zeros((0, self.model.num_features), np.float32), np.zeros((0, len(self.classes)), np.float32)
+        return np.concatenate(feats), np.concatenate(logits)
+
+    def logits(self, crops_bgr, batch=64):
+        return self.embed(crops_bgr, batch)[1]
 
     def __call__(self, crops_bgr, k=3):
         if not crops_bgr:
@@ -130,20 +141,47 @@ def face_det5(path, conf):
                              for b, s, c, p in zip(boxes, score, cls, calibrated)])
 
 
-def face_pipeline(path, conf):
-    clf, tau, cal = pipeline_type_model()
+def topk(prob, classes, k=3):
+    return [[dict(type=classes[i], probability=round(float(p[i]), 4)) for i in np.argsort(-p)[:k]] for p in prob]
+
+
+def face_pipeline(path, conf, check=True):
+    """check: apply the input check of models/phase2/input_gate.json (evaluate_input_gate.py --promote).
+    analysis_status: 'ok'; 'retake_photo' (quality check failed: no lesions are reported, reasons say why);
+    'location_only' (photo unlike the training photos: every type is 'uncertain')."""
+    from input_gate import MESSAGES, DomainScore, FaceTool, judge, load_gate, measure
+    gate = load_gate() if check else None
     image = cv2.imread(str(path))
+    out = dict(image=str(path), engine='pipeline', analysis_status='ok')
+    if gate and gate['quality_check']:
+        metrics = measure(image, FaceTool())
+        fails = judge(metrics, gate['thresholds'])
+        out['input_check'] = dict(passed=not fails, reasons=[dict(code=f, message=MESSAGES[f]) for f in fails],
+                                  metrics={k: round(v, 4) if isinstance(v, float) else v for k, v in metrics.items()})
+        if fails:
+            return dict(out, analysis_status='retake_photo', lesion_count=None, predictions=[])
+    clf, tau, cal = pipeline_type_model()
     boxes, score, _, det_version, threshold = detect(path, conf)
     crops = []
     for (x1, y1, x2, y2) in boxes:
         x0, y0, side = crop_box([x1, y1, x2 - x1, y2 - y1], image.shape[1], image.shape[0])
         crops.append(image[y0:y0 + side, x0:x0 + side])
+    feats, logits = clf.embed(crops)
+    tops = topk(softmax(logits / clf.temperature), clf.classes)
     preds = [dict(bbox=[round(float(v), 1) for v in b], detection_confidence=round(float(c), 4), **with_status(t, tau))
-             for b, c, t in zip(boxes, score, clf(crops))]
-    out = dict(image=str(path), engine='pipeline', lesion_count=len(boxes), detector_version=det_version,
-               detector_confidence_threshold=threshold, type_model_version=clf.version)
+             for b, c, t in zip(boxes, score, tops)]
+    if gate and gate['domain_check']:
+        d = DomainScore.load(ROOT / gate['domain_stats']).photo(feats)
+        out['domain_check'] = dict(score=None if d is None else round(d, 3), threshold=round(gate['thresholds']['domain_max'], 3),
+                                   in_domain=None if d is None else d <= gate['thresholds']['domain_max'])
+        if d is not None and d > gate['thresholds']['domain_max']:
+            out.update(analysis_status='location_only', message=MESSAGES['out_of_domain'])
+            for p in preds:
+                p['type_status'] = 'uncertain'
+    out.update(lesion_count=len(boxes), detector_version=det_version, detector_confidence_threshold=threshold,
+               type_model_version=clf.version)
     if cal:
-        out.update(type_calibration=cal, uncertain_type_count=sum(p['type_status'] == 'uncertain' for p in preds) if tau else None)
+        out.update(type_calibration=cal, uncertain_type_count=sum(p.get('type_status') == 'uncertain' for p in preds) if tau else None)
     return dict(out, predictions=preds)
 
 
@@ -154,6 +192,7 @@ def main():
     g.add_argument('--face', type=Path)
     p.add_argument('--engine', choices=['pipeline', 'det5'], default='pipeline', help='--face only (default pipeline)')
     p.add_argument('--conf', type=float, help='Detector confidence for --face only; default: deployed metadata')
+    p.add_argument('--no-check', action='store_true', help='--face pipeline: skip the input check (analyse anyway)')
     p.add_argument('--out', type=Path)
     a = p.parse_args()
     if a.conf is not None:
@@ -169,7 +208,7 @@ def main():
         if cal:
             result['type_calibration'] = cal
     else:
-        result = (face_det5 if a.engine == 'det5' else face_pipeline)(a.face, a.conf)
+        result = face_det5(a.face, a.conf) if a.engine == 'det5' else face_pipeline(a.face, a.conf, check=not a.no_check)
     result.update(disclaimer=DISCLAIMER)
     text = json.dumps(result, ensure_ascii=False, indent=2)
     if a.out:

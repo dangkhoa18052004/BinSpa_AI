@@ -24,6 +24,7 @@ Bạn không phải tự chụp hoặc thu thập ảnh. Hướng chính là kha
 | Chống trùng | Xong | pHash cộng 7 biến thể xoay/lật: không có cặp trùng giữa test ACNEDET và ACNE04 |
 | Cải thiện GĐ2 với ảnh kém chất lượng | Xong | Classifier robust: ngang cfg_a trên ảnh sạch; mAP50 trên ảnh mờ/nhiễu/JPEG tăng từ 0,099 lên 0,160 |
 | Hiệu chỉnh confidence và từ chối | Xong, đã triển khai | Temperature T = 0,80, ngưỡng τ = 0,87 (`type_status` confident/uncertain). CV: ECE 0,062 → 0,013; hiển thị loại cho 64% nốt, đúng 94,7% [93,7–95,8]. **Không có tác dụng ngoài miền:** DetectDataSkin-2 ECE 0,51 → 0,57, phần hiển thị chỉ đúng 23,7% |
+| Kiểm tra ảnh đầu vào | Xong, đã triển khai (cập nhật 20/10) | `analysis_status` ok / retake_photo / location_only. Bản khóa trước không đạt: kiểm tra nhiễu chặn nhầm 20% ảnh test sạch. Bản triển khai nới ngưỡng nhiễu (post-hoc, ngưỡng lấy từ val): chặn nhầm 0,5% trên 190 ảnh độc lập; trên test, F1 ảnh được cho qua 0,33 so với ảnh bị chặn 0,16. Mọi selfie có ≥ 3 nốt bị đánh giá là khác miền |
 | Xác minh ACNEDET gốc, xin AcneSCU | Chưa làm | Cần người dùng tự tải hoặc gửi yêu cầu |
 | Nhiều seed, model card | Chưa làm | |
 
