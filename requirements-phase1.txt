@@ -11,3 +11,5 @@ PyYAML>=6
 timm>=1.0
 # Only for error-region review (scripts/phase1/label_error_regions.py).
 mediapipe>=1.1
+# Only for the local HTTP service (api/server.py).
+Flask>=3.1

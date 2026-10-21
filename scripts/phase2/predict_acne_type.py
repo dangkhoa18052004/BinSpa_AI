@@ -92,12 +92,8 @@ class TypeClassifier:
 def detect(image_path, conf=None, weights=ROOT / 'models/phase1/best_acne_detector.pt',
            meta_path=ROOT / 'models/phase1/model_metadata.json'):
     """-> boxes xyxy, scores, class ids, weights version, threshold used."""
-    from ultralytics import RTDETR, YOLO
     meta = read_json(meta_path)
-    ckpt = torch.load(str(weights), map_location='cpu', weights_only=False)
-    detr = 'RTDETR' in type(ckpt.get('model') or ckpt.get('ema')).__name__
-    del ckpt
-    model = (RTDETR if detr else YOLO)(str(weights))
+    model = load_yolo_or_detr(weights)
     threshold = meta['operating_conf'] if conf is None else conf
     r = model.predict(str(image_path), imgsz=meta['imgsz'], conf=threshold, max_det=500, verbose=False)[0]
     return (r.boxes.xyxy.cpu().numpy(), r.boxes.conf.cpu().numpy(), r.boxes.cls.cpu().numpy().astype(int),
@@ -146,49 +142,79 @@ def topk(prob, classes, k=3):
     return [[dict(type=classes[i], probability=round(float(p[i]), 4)) for i in np.argsort(-p)[:k]] for p in prob]
 
 
-def face_pipeline(path, conf, check=True):
-    """check: apply the input check of models/phase2/input_gate.json (evaluate_input_gate.py --promote).
+def load_yolo_or_detr(weights):
+    from ultralytics import RTDETR, YOLO
+    ckpt = torch.load(str(weights), map_location='cpu', weights_only=False)
+    detr = 'RTDETR' in type(ckpt.get('model') or ckpt.get('ema')).__name__
+    del ckpt
+    return (RTDETR if detr else YOLO)(str(weights))
+
+
+class AcnePipeline:
+    """The deployed two-stage pipeline with every model loaded once (CLI --face and api/server.py).
+    check: apply the input check of models/phase2/input_gate.json (evaluate_input_gate.py).
     analysis_status: 'ok'; 'retake_photo' (quality check failed: no lesions are reported, reasons say why);
-    'location_only' (photo unlike the training photos: every type is 'uncertain')."""
-    from input_gate import MESSAGES, DomainScore, FaceTool, judge, load_gate, measure
-    gate = load_gate() if check else None
-    image = cv2.imread(str(path))
-    out = dict(image=str(path), engine='pipeline', analysis_status='ok')
-    if gate and gate['quality_check']:
-        metrics = measure(image, FaceTool())
-        fails = judge(metrics, gate['thresholds'])
-        out['input_check'] = dict(passed=not fails, reasons=[dict(code=f, message=MESSAGES[f]) for f in fails],
-                                  metrics={k: round(v, 4) if isinstance(v, float) else v for k, v in metrics.items()})
-        if fails:
-            return dict(out, analysis_status='retake_photo', lesion_count=None, predictions=[])
-    clf, tau, cal = pipeline_type_model()
-    boxes, score, _, det_version, threshold = detect(path, conf)
-    crops = []
-    for (x1, y1, x2, y2) in boxes:
-        x0, y0, side = crop_box([x1, y1, x2 - x1, y2 - y1], image.shape[1], image.shape[0])
-        crops.append(image[y0:y0 + side, x0:x0 + side])
-    feats, logits = clf.embed(crops)
-    tops = topk(softmax(logits / clf.temperature), clf.classes)
-    preds = [dict(bbox=[round(float(v), 1) for v in b], detection_confidence=round(float(c), 4), **with_status(t, tau))
-             for b, c, t in zip(boxes, score, tops)]
-    if gate and gate['domain_check'] and len(feats):
-        ds, limit = DomainScore.load(ROOT / gate['domain_stats']), gate['thresholds']['domain_max']
-        d = ds.photo(feats)
-        out['domain_check'] = dict(score=None if d is None else round(d, 3), threshold=round(limit, 3),
-                                   in_domain=None if d is None else d <= limit)
-        if d is None:  # 1-2 lesions: too few to verify the photo -> treated as unverified, types withheld
-            out['domain_check'].update(status='unverified', crop_scores=[round(float(v), 3) for v in ds.crops(feats)])
-            out.update(analysis_status='location_only', message=MESSAGES['domain_unverified'])
-        elif d > limit:
-            out.update(analysis_status='location_only', message=MESSAGES['out_of_domain'])
-        if out['analysis_status'] == 'location_only':
-            for p in preds:
-                p['type_status'] = 'uncertain'
-    out.update(lesion_count=len(boxes), detector_version=det_version, detector_confidence_threshold=threshold,
-               type_model_version=clf.version)
-    if cal:
-        out.update(type_calibration=cal, uncertain_type_count=sum(p.get('type_status') == 'uncertain' for p in preds) if tau else None)
-    return dict(out, predictions=preds)
+    'location_only' (photo unlike the training photos, or only 1-2 lesions to verify it: every type 'uncertain')."""
+
+    def __init__(self, conf=None, check=True, weights=ROOT / 'models/phase1/best_acne_detector.pt',
+                 meta_path=ROOT / 'models/phase1/model_metadata.json'):
+        from input_gate import DomainScore, FaceTool, load_gate
+        meta = read_json(meta_path)
+        self.detector, self.det_version = load_yolo_or_detr(weights), digest(weights)[:16]
+        self.imgsz, self.conf = meta['imgsz'], meta['operating_conf'] if conf is None else conf
+        self.clf, self.tau, self.cal = pipeline_type_model()
+        self.gate = load_gate() if check else None
+        self.face = FaceTool() if self.gate and self.gate['quality_check'] else None
+        self.domain = DomainScore.load(ROOT / self.gate['domain_stats']) if self.gate and self.gate['domain_check'] else None
+
+    def versions(self):
+        return dict(detector=self.det_version, type_model=self.clf.version, detector_confidence_threshold=self.conf,
+                    type_calibration=self.cal, input_check=bool(self.face), domain_check=bool(self.domain))
+
+    def analyze(self, image, name=None):
+        """image: BGR uint8 array."""
+        from input_gate import MESSAGES, judge, measure
+        out = dict(image=name, engine='pipeline', analysis_status='ok', image_size=[int(image.shape[1]), int(image.shape[0])])
+        if self.face:
+            metrics = measure(image, self.face)
+            fails = judge(metrics, self.gate['thresholds'])
+            out['input_check'] = dict(passed=not fails, reasons=[dict(code=f, message=MESSAGES[f]) for f in fails],
+                                      metrics={k: round(v, 4) if isinstance(v, float) else v for k, v in metrics.items()})
+            if fails:
+                return dict(out, analysis_status='retake_photo', lesion_count=None, predictions=[])
+        r = self.detector.predict(image, imgsz=self.imgsz, conf=self.conf, max_det=500, verbose=False)[0]
+        boxes, score = r.boxes.xyxy.cpu().numpy().reshape(-1, 4), r.boxes.conf.cpu().numpy()
+        crops = []
+        for (x1, y1, x2, y2) in boxes:
+            x0, y0, side = crop_box([x1, y1, x2 - x1, y2 - y1], image.shape[1], image.shape[0])
+            crops.append(image[y0:y0 + side, x0:x0 + side])
+        feats, logits = self.clf.embed(crops)
+        tops = topk(softmax(logits / self.clf.temperature), self.clf.classes)
+        preds = [dict(bbox=[round(float(v), 1) for v in b], detection_confidence=round(float(c), 4), **with_status(t, self.tau))
+                 for b, c, t in zip(boxes, score, tops)]
+        if self.domain and len(feats):
+            limit = self.gate['thresholds']['domain_max']
+            d = self.domain.photo(feats)
+            out['domain_check'] = dict(score=None if d is None else round(d, 3), threshold=round(limit, 3),
+                                       in_domain=None if d is None else d <= limit)
+            if d is None:  # 1-2 lesions: too few to verify the photo -> treated as unverified, types withheld
+                out['domain_check'].update(status='unverified', crop_scores=[round(float(v), 3) for v in self.domain.crops(feats)])
+                out.update(analysis_status='location_only', message=MESSAGES['domain_unverified'])
+            elif d > limit:
+                out.update(analysis_status='location_only', message=MESSAGES['out_of_domain'])
+            if out['analysis_status'] == 'location_only':
+                for p in preds:
+                    p['type_status'] = 'uncertain'
+        out.update(lesion_count=len(boxes), detector_version=self.det_version, detector_confidence_threshold=self.conf,
+                   type_model_version=self.clf.version)
+        if self.cal:
+            out.update(type_calibration=self.cal,
+                       uncertain_type_count=sum(p.get('type_status') == 'uncertain' for p in preds) if self.tau else None)
+        return dict(out, predictions=preds)
+
+
+def face_pipeline(path, conf, check=True):
+    return AcnePipeline(conf, check).analyze(cv2.imread(str(path)), str(path))
 
 
 def main():
