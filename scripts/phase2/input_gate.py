@@ -8,7 +8,9 @@ Two parts:
                 validation images by scripts/phase2/evaluate_input_gate.py.
   domain(feats) after classification. Class-conditional Mahalanobis distance (shared Ledoit-Wolf covariance) of
                 the classifier features of the detected lesion crops to the training crops; the photo's score is
-                the median over its lesions (needs >= MIN_LESIONS). High = unlike the training photos.
+                the median over its lesions (needs >= MIN_LESIONS). High = unlike the training photos. With 1 to
+                MIN_LESIONS - 1 lesions the photo cannot be verified and the pipeline treats it as unverified
+                (location only): no clean ACNE-DET val/test photo has so few lesions, so this costs nothing in domain.
 """
 import json
 from pathlib import Path
@@ -36,7 +38,8 @@ MESSAGES = dict(no_face='Không thấy rõ khuôn mặt: chụp chính diện, c
                 noisy='Ảnh bị nhiễu hạt: chụp ở nơi đủ sáng.',
                 too_dark='Ảnh quá tối: chụp ở nơi đủ sáng, ánh sáng chiếu đều lên mặt.',
                 too_bright='Ảnh quá sáng hoặc bị cháy sáng: tránh đèn flash và nắng trực tiếp.',
-                out_of_domain='Ảnh khác nhiều so với ảnh dùng để huấn luyện: loại mụn chưa đủ tin cậy, chỉ hiển thị vị trí.')
+                out_of_domain='Ảnh khác nhiều so với ảnh dùng để huấn luyện: loại mụn chưa đủ tin cậy, chỉ hiển thị vị trí.',
+                domain_unverified='Tìm thấy quá ít nốt để kiểm tra ảnh có giống ảnh huấn luyện không: loại mụn chưa đủ tin cậy, chỉ hiển thị vị trí.')
 
 
 class FaceTool:

@@ -9,7 +9,8 @@ Two modes:
           are temperature-calibrated and each lesion gets type_status 'confident' or 'uncertain' (type withheld,
           location shown; scripts/phase2/calibrate_classifier.py). With models/phase2/input_gate.json the photo
           is checked first (face, size, sharpness, noise, light; scripts/phase2/input_gate.py): a failed check returns
-          analysis_status 'retake_photo' with reasons, a photo unlike the training photos 'location_only'.
+          analysis_status 'retake_photo' with reasons, a photo unlike the training photos (or with only 1-2 lesions,
+          too few to verify) 'location_only'.
           --no-check skips it. Engine 'det5': the one-stage RT-DETR-L 5-class detector
           (models/phase2/best_acne_det5.pt) with a calibrated confidence = P(box and type correct); about 7-10x
           faster, but less accurate than the two-stage pipeline in 5-fold CV (reports/phase2_cv_summary.md).
@@ -170,12 +171,17 @@ def face_pipeline(path, conf, check=True):
     tops = topk(softmax(logits / clf.temperature), clf.classes)
     preds = [dict(bbox=[round(float(v), 1) for v in b], detection_confidence=round(float(c), 4), **with_status(t, tau))
              for b, c, t in zip(boxes, score, tops)]
-    if gate and gate['domain_check']:
-        d = DomainScore.load(ROOT / gate['domain_stats']).photo(feats)
-        out['domain_check'] = dict(score=None if d is None else round(d, 3), threshold=round(gate['thresholds']['domain_max'], 3),
-                                   in_domain=None if d is None else d <= gate['thresholds']['domain_max'])
-        if d is not None and d > gate['thresholds']['domain_max']:
+    if gate and gate['domain_check'] and len(feats):
+        ds, limit = DomainScore.load(ROOT / gate['domain_stats']), gate['thresholds']['domain_max']
+        d = ds.photo(feats)
+        out['domain_check'] = dict(score=None if d is None else round(d, 3), threshold=round(limit, 3),
+                                   in_domain=None if d is None else d <= limit)
+        if d is None:  # 1-2 lesions: too few to verify the photo -> treated as unverified, types withheld
+            out['domain_check'].update(status='unverified', crop_scores=[round(float(v), 3) for v in ds.crops(feats)])
+            out.update(analysis_status='location_only', message=MESSAGES['domain_unverified'])
+        elif d > limit:
             out.update(analysis_status='location_only', message=MESSAGES['out_of_domain'])
+        if out['analysis_status'] == 'location_only':
             for p in preds:
                 p['type_status'] = 'uncertain'
     out.update(lesion_count=len(boxes), detector_version=det_version, detector_confidence_threshold=threshold,
