@@ -19,6 +19,7 @@ Output: JSON with boxes (face mode), types, model versions and the disclaimer.
 Usage:
   venv/Scripts/python.exe scripts/phase2/predict_acne_type.py --face test_img/test6.jpg --out pred.json
   venv/Scripts/python.exe scripts/phase2/predict_acne_type.py --face test_img/test6.jpg --conf 0.30 --out pred030.json
+  venv/Scripts/python.exe scripts/phase2/predict_acne_type.py --face test_img/test6.jpg --demo
   venv/Scripts/python.exe scripts/phase2/predict_acne_type.py --face test_img/test6.jpg --engine det5
   venv/Scripts/python.exe scripts/phase2/predict_acne_type.py --crop a.jpg b.jpg
 """
@@ -35,6 +36,13 @@ from common2 import ACNE_CLASSES, MODELS, ROOT, digest, read_json
 from make_crops import crop_box
 
 DISCLAIMER = 'Kết quả phân tích hình ảnh chỉ mang tính tham khảo chăm sóc da.'
+TYPE_VI = dict(closed_comedo='Mụn đầu trắng', open_comedo='Mụn đầu đen', papule='Mụn sẩn', pustule='Mụn mủ', nodule='Mụn nốt')
+# Demo mode (no labelled customer photos yet): the input and domain checks are still measured and reported, but
+# never withhold the analysis; the detector runs at DEMO_CONF (finds about 2x more lesions on phone photos than
+# the operating threshold). Types on photos unlike the training photos were 21-28 % correct on DetectDataSkin-2.
+DEMO_CONF = 0.30
+DEMO_MESSAGE = ('Chế độ thử nghiệm: model được huấn luyện trên ảnh da liễu chụp bằng máy chuyên dụng, '
+                'loại mụn trên ảnh điện thoại có độ tin cậy thấp.')
 
 
 def softmax(z):
@@ -154,14 +162,18 @@ class AcnePipeline:
     """The deployed two-stage pipeline with every model loaded once (CLI --face and api/server.py).
     check: apply the input check of models/phase2/input_gate.json (evaluate_input_gate.py).
     analysis_status: 'ok'; 'retake_photo' (quality check failed: no lesions are reported, reasons say why);
-    'location_only' (photo unlike the training photos, or only 1-2 lesions to verify it: every type 'uncertain')."""
+    'location_only' (photo unlike the training photos, or only 1-2 lesions to verify it: every type 'uncertain').
+    demo=True: status 'demo' instead of 'retake_photo' / 'location_only'; the checks are still reported, every
+    lesion keeps its own calibrated type_status and gets 'type' / 'type_vi' (top-1), detector at DEMO_CONF."""
 
     def __init__(self, conf=None, check=True, weights=ROOT / 'models/phase1/best_acne_detector.pt',
-                 meta_path=ROOT / 'models/phase1/model_metadata.json'):
+                 meta_path=ROOT / 'models/phase1/model_metadata.json', demo=False):
         from input_gate import DomainScore, FaceTool, load_gate
         meta = read_json(meta_path)
         self.detector, self.det_version = load_yolo_or_detr(weights), digest(weights)[:16]
-        self.imgsz, self.conf = meta['imgsz'], meta['operating_conf'] if conf is None else conf
+        self.demo = demo
+        self.imgsz = meta['imgsz']
+        self.conf = conf if conf is not None else DEMO_CONF if demo else meta['operating_conf']
         self.clf, self.tau, self.cal = pipeline_type_model()
         self.gate = load_gate() if check else None
         self.face = FaceTool() if self.gate and self.gate['quality_check'] else None
@@ -169,7 +181,7 @@ class AcnePipeline:
 
     def versions(self):
         return dict(detector=self.det_version, type_model=self.clf.version, detector_confidence_threshold=self.conf,
-                    type_calibration=self.cal, input_check=bool(self.face), domain_check=bool(self.domain))
+                    type_calibration=self.cal, input_check=bool(self.face), domain_check=bool(self.domain), demo=self.demo)
 
     def analyze(self, image, name=None):
         """image: BGR uint8 array."""
@@ -180,7 +192,7 @@ class AcnePipeline:
             fails = judge(metrics, self.gate['thresholds'])
             out['input_check'] = dict(passed=not fails, reasons=[dict(code=f, message=MESSAGES[f]) for f in fails],
                                       metrics={k: round(v, 4) if isinstance(v, float) else v for k, v in metrics.items()})
-            if fails:
+            if fails and not self.demo:
                 return dict(out, analysis_status='retake_photo', lesion_count=None, predictions=[])
         r = self.detector.predict(image, imgsz=self.imgsz, conf=self.conf, max_det=500, verbose=False)[0]
         boxes, score = r.boxes.xyxy.cpu().numpy().reshape(-1, 4), r.boxes.conf.cpu().numpy()
@@ -202,9 +214,14 @@ class AcnePipeline:
                 out.update(analysis_status='location_only', message=MESSAGES['domain_unverified'])
             elif d > limit:
                 out.update(analysis_status='location_only', message=MESSAGES['out_of_domain'])
-            if out['analysis_status'] == 'location_only':
+            if out['analysis_status'] == 'location_only' and not self.demo:
                 for p in preds:
                     p['type_status'] = 'uncertain'
+        if self.demo:
+            out.update(analysis_status='demo', message=DEMO_MESSAGE)
+            for p in preds:
+                p.update(type=p['top3'][0]['type'], type_vi=TYPE_VI[p['top3'][0]['type']])
+            out['type_counts'] = {t: sum(p['type'] == t for p in preds) for t in self.clf.classes}
         out.update(lesion_count=len(boxes), detector_version=self.det_version, detector_confidence_threshold=self.conf,
                    type_model_version=self.clf.version)
         if self.cal:
@@ -213,8 +230,8 @@ class AcnePipeline:
         return dict(out, predictions=preds)
 
 
-def face_pipeline(path, conf, check=True):
-    return AcnePipeline(conf, check).analyze(cv2.imread(str(path)), str(path))
+def face_pipeline(path, conf, check=True, demo=False):
+    return AcnePipeline(conf, check, demo=demo).analyze(cv2.imread(str(path)), str(path))
 
 
 def main():
@@ -225,6 +242,7 @@ def main():
     p.add_argument('--engine', choices=['pipeline', 'det5'], default='pipeline', help='--face only (default pipeline)')
     p.add_argument('--conf', type=float, help='Detector confidence for --face only; default: deployed metadata')
     p.add_argument('--no-check', action='store_true', help='--face pipeline: skip the input check (analyse anyway)')
+    p.add_argument('--demo', action='store_true', help='--face pipeline: demo mode (checks reported, never withheld)')
     p.add_argument('--out', type=Path)
     a = p.parse_args()
     if a.conf is not None:
@@ -240,7 +258,7 @@ def main():
         if cal:
             result['type_calibration'] = cal
     else:
-        result = face_det5(a.face, a.conf) if a.engine == 'det5' else face_pipeline(a.face, a.conf, check=not a.no_check)
+        result = face_det5(a.face, a.conf) if a.engine == 'det5' else face_pipeline(a.face, a.conf, check=not a.no_check, demo=a.demo)
     result.update(disclaimer=DISCLAIMER)
     text = json.dumps(result, ensure_ascii=False, indent=2)
     if a.out:

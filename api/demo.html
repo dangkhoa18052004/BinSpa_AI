@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BinSpa AI – Thử nghiệm</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { --bg: #f6f7f8; --card: #fff; --text: #1d2327; --muted: #5f6b73; --line: #dde2e5; --accent: #167d8d;
+          --warn-bg: #fff6e0; --warn-text: #7a5300; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 20px; margin: 4px 0 2px; }
+  .sub { color: var(--muted); margin: 0 0 16px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin-bottom: 14px; }
+  .buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+  label.btn, button { display: inline-block; border: 0; border-radius: 8px; padding: 10px 16px; font: inherit; cursor: pointer;
+                      background: var(--accent); color: #fff; }
+  label.btn.secondary { background: #e7eef0; color: var(--text); }
+  input[type=file] { display: none; }
+  .key { margin-top: 10px; display: none; }
+  .key input { width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 6px; font: inherit; }
+  .tips { color: var(--muted); font-size: 13px; margin: 10px 0 0; padding-left: 18px; }
+  .note { background: var(--warn-bg); color: var(--warn-text); border-radius: 8px; padding: 10px 12px; margin: 0 0 10px; font-size: 14px; }
+  .error { background: #fde8e8; color: #8a1c1c; }
+  canvas { width: 100%; height: auto; border-radius: 8px; display: block; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 10px 0 0; font-size: 14px; }
+  .legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px;
+                         vertical-align: -1px; background: var(--c); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--line); }
+  td.num { width: 32px; font-weight: 600; }
+  .low { color: var(--muted); }
+  .muted { color: var(--muted); font-size: 13px; }
+  #busy { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>BinSpa AI – Phân tích mụn</h1>
+  <p class="sub">Bản thử nghiệm: chụp hoặc chọn ảnh khuôn mặt, AI đánh dấu vị trí và đoán loại mụn.</p>
+
+  <div class="card">
+    <div class="buttons">
+      <label class="btn">📷 Chụp ảnh<input id="cam" type="file" accept="image/*" capture="environment"></label>
+      <label class="btn secondary">🖼 Chọn ảnh có sẵn<input id="pick" type="file" accept="image/*"></label>
+    </div>
+    <div class="key" id="keyBox"><input id="key" type="password" placeholder="API key (BINSPA_AI_KEY)"></div>
+    <ul class="tips">
+      <li>Dùng camera sau, chụp gần (khuôn mặt chiếm gần hết khung hình), nơi đủ sáng, không bật flash.</li>
+      <li>Gửi ảnh gốc; ảnh đã qua Zalo/Messenger bị nén nhỏ nên AI thấy ít nốt hơn.</li>
+    </ul>
+  </div>
+
+  <div class="card" id="busy">Đang phân tích…</div>
+  <div id="result"></div>
+</main>
+
+<script>
+const COLORS = { closed_comedo: '#e8a33d', open_comedo: '#6b4f3a', papule: '#d64545', pustule: '#c03fbf', nodule: '#3274a1' };
+const NAMES = { closed_comedo: 'Mụn đầu trắng', open_comedo: 'Mụn đầu đen', papule: 'Mụn sẩn', pustule: 'Mụn mủ', nodule: 'Mụn nốt' };
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let key = '';
+try { key = localStorage.getItem('binspa_key') || ''; } catch (e) {}
+$('key').value = key;
+
+for (const id of ['cam', 'pick']) $(id).addEventListener('change', e => { if (e.target.files[0]) analyze(e.target.files[0]); e.target.value = ''; });
+
+async function analyze(file) {
+  $('result').innerHTML = '';
+  $('busy').style.display = 'block';
+  key = $('key').value.trim();
+  try { localStorage.setItem('binspa_key', key); } catch (e) {}
+  const form = new FormData();
+  form.append('image', file);
+  try {
+    const res = await fetch('analyze', { method: 'POST', body: form, headers: key ? { 'X-API-Key': key } : {} });
+    const data = await res.json();
+    if (res.status === 401) { $('keyBox').style.display = 'block'; throw new Error('Cần nhập API key rồi chọn lại ảnh.'); }
+    if (!res.ok) throw new Error(data.error || res.statusText);
+    await show(file, data);
+  } catch (err) {
+    $('result').innerHTML = `<div class="card"><p class="note error">Lỗi: ${esc(err.message)}</p></div>`;
+  } finally {
+    $('busy').style.display = 'none';
+  }
+}
+
+function typeOf(p) { return p.type || p.top3[0].type; }
+function shown(p, status) { return status === 'demo' || p.type_status !== 'uncertain'; }
+
+async function show(file, data) {
+  const notes = [];
+  if (data.message) notes.push(data.message);
+  for (const r of (data.input_check && data.input_check.reasons) || []) notes.push('Chất lượng ảnh: ' + r.message);
+  const dc = data.domain_check;
+  if (data.analysis_status === 'demo' && dc && dc.in_domain === false)
+    notes.push(`Ảnh khác ảnh huấn luyện (điểm ${dc.score} > ngưỡng ${dc.threshold}).`);
+
+  const preds = data.predictions || [];
+  let html = '<div class="card">' + notes.map(n => `<p class="note">${esc(n)}</p>`).join('');
+  if (data.analysis_status === 'retake_photo') {
+    $('result').innerHTML = html + '<p>Vui lòng chụp lại ảnh theo hướng dẫn ở trên.</p></div>';
+    return;
+  }
+  const counts = {};
+  for (const p of preds) if (shown(p, data.analysis_status)) counts[typeOf(p)] = (counts[typeOf(p)] || 0) + 1;
+  html += `<p><b>Tìm thấy ${preds.length} nốt</b> <span class="muted">· ${data.processing_ms} ms</span></p>
+    <canvas id="cv"></canvas>
+    <div class="legend">${Object.keys(NAMES).filter(t => counts[t]).map(t =>
+      `<span style="--c:${COLORS[t]}">${NAMES[t]}: ${counts[t]}</span>`).join('')}
+      ${preds.some(p => !shown(p, data.analysis_status)) ? '<span style="--c:#9aa5ab">Chưa xác định loại</span>' : ''}</div>`;
+  if (preds.length) {
+    html += `<table><thead><tr><th>#</th><th>Loại</th><th>Xác suất</th><th>Khả năng khác</th></tr></thead><tbody>` +
+      preds.map((p, i) => {
+        const t = typeOf(p), low = p.type_status === 'uncertain';
+        const name = shown(p, data.analysis_status) ? NAMES[t] : 'Chưa xác định';
+        return `<tr class="${low ? 'low' : ''}"><td class="num">${i + 1}</td><td>${esc(name)}${low ? ' <small>(độ tin cậy thấp)</small>' : ''}</td>
+          <td>${Math.round(p.top3[0].probability * 100)}%</td>
+          <td>${p.top3.slice(1).map(o => `${NAMES[o.type]} ${Math.round(o.probability * 100)}%`).join(', ')}</td></tr>`;
+      }).join('') + '</tbody></table>';
+  }
+  html += `<p class="muted">${esc(data.disclaimer || '')}</p></div>`;
+  $('result').innerHTML = html;
+
+  const img = new Image();
+  img.src = URL.createObjectURL(file);
+  await img.decode();
+  const [W, H] = data.image_size, cv = $('cv'), ctx = cv.getContext('2d');
+  cv.width = W; cv.height = H;
+  ctx.drawImage(img, 0, 0, W, H);
+  URL.revokeObjectURL(img.src);
+  const lw = Math.max(2, W / 400), fs = Math.max(14, W / 70);
+  ctx.font = `bold ${fs}px system-ui, sans-serif`;
+  preds.forEach((p, i) => {
+    const [x1, y1, x2, y2] = p.bbox, c = shown(p, data.analysis_status) ? COLORS[typeOf(p)] : '#9aa5ab';
+    const pad = lw * 2;
+    ctx.lineWidth = lw; ctx.strokeStyle = c;
+    ctx.setLineDash(p.type_status === 'uncertain' ? [lw * 3, lw * 2] : []);
+    ctx.strokeRect(x1 - pad, y1 - pad, x2 - x1 + 2 * pad, y2 - y1 + 2 * pad);
+    ctx.setLineDash([]);
+    ctx.fillStyle = c; ctx.fillText(String(i + 1), x1 - pad, y1 - pad - lw);
+  });
+}
+</script>
+</body>
+</html>

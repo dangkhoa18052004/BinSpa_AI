@@ -287,14 +287,17 @@ Các script train và chọn model là workflow nghiên cứu, có thể tạo h
 .\venv\Scripts\python.exe api\server.py --port 8008     # nạp model một lần; chỉ nghe trên 127.0.0.1
 # GET  http://127.0.0.1:8008/health
 # POST http://127.0.0.1:8008/analyze   (multipart, trường "image"; tối đa 15 MB)
+# GET  http://127.0.0.1:8008/          trang thử: chụp/chọn ảnh, xem box và loại mụn
+.\venv\Scripts\python.exe api\server.py --demo --host 0.0.0.0   # chế độ demo, thử từ điện thoại cùng Wi-Fi
 ```
 
 Đầu ra gồm `analysis_status`:
 - `ok`: phân tích bình thường.
 - `retake_photo`: ảnh không đạt, có lý do bằng tiếng Việt trong `input_check.reasons`.
 - `location_only`: ảnh khác miền, hoặc chỉ tìm được 1–2 nốt; chỉ hiển thị vị trí.
+- `demo` (chỉ khi chạy `--demo`): luôn hiện loại mụn (`type`, `type_vi`, `type_counts`), detector dùng conf 0,30; kết quả kiểm tra ảnh vẫn được trả về nhưng không chặn. Loại mụn trên ảnh điện thoại có độ tin cậy thấp (đúng 21–28% trên DetectDataSkin-2), chỉ dùng để trình diễn.
 
-`image_size` và `predictions[].bbox` tính theo pixel của ảnh đã xoay đúng theo EXIF. Dịch vụ không lưu ảnh. Nếu đặt biến môi trường `BINSPA_AI_KEY`, mọi request phải gửi header `X-API-Key` khớp với giá trị đó.
+`image_size` và `predictions[].bbox` tính theo pixel của ảnh đã xoay đúng theo EXIF. Dịch vụ không lưu ảnh. Nếu đặt biến môi trường `BINSPA_AI_KEY`, `/health` và `/analyze` phải gửi header `X-API-Key` khớp với giá trị đó.
 
 `artifact_manifest.json` chứa SHA256 các hình và bảng tổng hợp. `confusion_matrices.json` lưu ma trận số nguyên, hướng trục, support và checkpoint hash. Các record ảnh và tọa độ box được giữ riêng, vì vậy bản công khai không cung cấp khả năng tái lập độc lập đầy đủ chỉ bằng một lệnh.
 
