@@ -4,10 +4,11 @@ Bản công khai được xây dựng từ danh sách file cho phép, không dù
 
 ## Nội dung được công bố
 
-- Mã Python, PowerShell và hướng dẫn thực nghiệm.
+- Mã Python, PowerShell và hướng dẫn thực nghiệm; dịch vụ `api/`, cấu hình `configs/selfie_v1/` và `tests/`.
 - Yêu cầu môi trường và file lock.
 - Số liệu tổng hợp, phân bố lớp, ma trận số nguyên và checkpoint hash.
 - Biểu đồ PNG và PDF ma trận, không có ảnh khuôn mặt hay contact sheet.
+- Model card tổng hợp của bản đang phục vụ (`reports/publication/MODEL_CARD_selfie_v1.md`). Báo cáo chi tiết `reports/selfie_v1/` (dự đoán từng ảnh, overlay duyệt) giữ riêng.
 
 Phạm vi hiện tại chỉ gồm phát hiện mụn và phân loại năm loại mụn. Mã và kết quả phát hiện sẹo cũ được giữ riêng tại máy, không nằm trong danh sách công bố hiện tại.
 

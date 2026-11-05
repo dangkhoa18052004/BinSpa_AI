@@ -1,5 +1,7 @@
 # Kế hoạch tăng độ tin cậy — chỉ phát hiện và phân loại mụn
 
+> Cập nhật 04/11/2026: kế hoạch triển khai tiếp theo cho **selfie thực tế** nằm trong [CLAUDE_SELFIE_DEVELOPMENT_PLAN.md](CLAUDE_SELFIE_DEVELOPMENT_PLAN.md); kết quả nghiệm thu ở [model card selfie_v1](../reports/publication/MODEL_CARD_selfie_v1.md). Các bảng tiến độ bên dưới ghi nhận trạng thái lịch sử tháng 10, không thay thế kế hoạch mới.
+
 ## Mục tiêu và phạm vi
 
 Pipeline hiện tại: **ảnh → phát hiện vị trí mụn → crop tổn thương → loại mụn**. Giữ năm lớp `closed_comedo`, `open_comedo`, `papule`, `pustule`, `nodule`. Phát hiện sẹo được bỏ khỏi phạm vi hiện tại. Không có bước huấn luyện mới nào được thực hiện chỉ vì lập kế hoạch này.

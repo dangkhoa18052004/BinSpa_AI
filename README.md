@@ -11,7 +11,7 @@
 ![Status](https://img.shields.io/badge/Status-Research%20prototype-167d8d)
 ![Privacy](https://img.shields.io/badge/Public%20artifacts-Aggregate%20only-3274a1)
 
-[Kết quả tổng hợp](reports/publication/README.md) · [Số liệu JSON](reports/publication/metrics.json) · [PDF 18 ma trận](docs/figures/research/confusion_matrices/all_models_confusion_matrices.pdf) · [Chính sách công bố](docs/PRIVACY.md) · [Kế hoạch tăng độ tin cậy](docs/RELIABILITY_PLAN.md)
+[Kết quả tổng hợp](reports/publication/README.md) · [Số liệu JSON](reports/publication/metrics.json) · [PDF 18 ma trận](docs/figures/research/confusion_matrices/all_models_confusion_matrices.pdf) · [Chính sách công bố](docs/PRIVACY.md) · [Kế hoạch tăng độ tin cậy](docs/RELIABILITY_PLAN.md) · [Model card selfie_v1](reports/publication/MODEL_CARD_selfie_v1.md)
 
 </div>
 
@@ -24,6 +24,8 @@ BinSpa AI nghiên cứu một pipeline gồm hai thành phần: **GĐ1** xác đ
 Detector hiện dùng là **RT-DETR-L @1280**, fine-tune trên ACNE04-v2 và phần train ACNEDET. Trên test ACNE04, model đạt mAP50–95 **0,1883**, precision **0,6018**, recall **0,5224**. Classifier **EfficientNet-B0** đạt accuracy **86,60%**, macro-F1 **0,8053** trên 2.537 crop test ACNEDET.
 
 Đánh giá thăm dò trên 1.275 ảnh DetectDataSkin-2 sau sàng lọc cho kết quả thấp hơn: detector mụn đạt F1 **0,1906**, classifier đạt accuracy **22,35%**. Hai nguồn khác nhau về ảnh, quy ước nhãn và phân bố lớp; kết quả này cho thấy cần kiểm tra khả năng tổng quát, không đủ để quy mọi sai khác cho riêng chất lượng model.
+
+Bản đang phục vụ demo nội bộ là **selfie_v1 `hyb_d1`**: hiển thị theo tầng (tên loại → nhóm viêm/không viêm → chỉ vị trí), ngưỡng chọn trên val. Tên loại được hiển thị đúng **91,9%** trên ACNE-DET (nhãn bác sĩ) và **83,5%** trên ảnh thường DetectDataSkin-2 (nhãn chưa xác minh); recall vị trí khoảng 40%. Chưa kiểm định trên selfie có nhãn chuyên gia. Chi tiết và giới hạn: [model card](reports/publication/MODEL_CARD_selfie_v1.md), [kế hoạch](docs/CLAUDE_SELFIE_DEVELOPMENT_PLAN.md).
 
 ## Mục lục
 
@@ -242,7 +244,13 @@ Ví dụ trên dùng build CUDA tương ứng môi trường thực nghiệm; th
 ```text
 BinSpa_AI/
 ├── scripts/phase1/       # chuẩn bị, train, chấm detector mụn
-├── scripts/phase2/       # master split, crop, train/chấm classifier
+├── scripts/phase2/       # master split, crop, train/chấm classifier, pipeline theo tầng
+├── scripts/data_v2/      # selfie_v1: registry, làm sạch nhãn, chia lineage, trang duyệt
+├── scripts/train_v2/     # selfie_v1: train detector D1 và classifier C1
+├── scripts/evaluation_v2/# selfie_v1: evaluator thống nhất, chọn policy, nghiệm thu
+├── configs/selfie_v1/    # acceptance.yaml (mục tiêu khóa), mapping nhãn, serving.json
+├── api/                  # dịch vụ HTTP cục bộ và trang thử
+├── tests/                # unittest: python -m unittest discover -s tests
 ├── docs/figures/         # chỉ biểu đồ và ma trận tổng hợp
 ├── reports/publication/  # số liệu JSON, manifest artifact công khai
 ├── datasets/             # dữ liệu có quyền truy cập, lưu riêng
@@ -288,22 +296,32 @@ Các script train và chọn model là workflow nghiên cứu, có thể tạo h
 # GET  http://127.0.0.1:8008/health
 # POST http://127.0.0.1:8008/analyze   (multipart, trường "image"; tối đa 15 MB)
 # GET  http://127.0.0.1:8008/          trang thử: chụp/chọn ảnh, xem box và loại mụn
-.\venv\Scripts\python.exe api\server.py --demo --host 0.0.0.0   # chế độ demo, thử từ điện thoại cùng Wi-Fi
+.\venv\Scripts\python.exe api\server.py --host 0.0.0.0   # thử từ điện thoại cùng Wi-Fi
+.\venv\Scripts\python.exe api\server.py --engine legacy --demo   # bản cũ (giữ để quay lại)
 ```
 
-Đầu ra gồm `analysis_status`:
-- `ok`: phân tích bình thường.
-- `retake_photo`: ảnh không đạt, có lý do bằng tiếng Việt trong `input_check.reasons`.
-- `location_only`: ảnh khác miền, hoặc chỉ tìm được 1–2 nốt; chỉ hiển thị vị trí.
-- `demo` (chỉ khi chạy `--demo`): luôn hiện loại mụn (`type`, `type_vi`, `type_counts`), detector dùng conf 0,30; kết quả kiểm tra ảnh vẫn được trả về nhưng không chặn. Loại mụn trên ảnh điện thoại có độ tin cậy thấp (đúng 21–28% trên DetectDataSkin-2), chỉ dùng để trình diễn.
+**Engine mặc định `tiered`.** Đây là bản `hyb_d1` đã nghiệm thu ở P11 ([model card](reports/publication/MODEL_CARD_selfie_v1.md)). Policy được chọn trong `configs/selfie_v1/serving.json`.
+
+Dịch vụ không chặn ảnh nào: `analysis_status` luôn là `ok`. Mỗi phần tử `predictions[]` có `tier`:
+- **`A`:** có `type`, `type_vi`, `group` và `probability`.
+- **`B`:** chỉ có `group` (viêm hoặc không viêm) và `probability`.
+- **`C`:** chỉ có vị trí.
+
+Các trường khác:
+- `warnings[]`: cảnh báo ảnh bằng tiếng Việt, không chặn phân tích.
+- `counts`: số nốt theo loại, theo nhóm và số nốt chỉ có vị trí.
+- `statement`: câu độ chính xác đo được, bắt buộc hiển thị.
+- `?technical=1`: thêm mọi box của detector, chỉ dành cho nhân viên.
+
+Website Spa (repo riêng, `docs/SKIN_ANALYSIS_AI.md`) đọc được cả định dạng này lẫn định dạng legacy (`retake_photo`, `location_only`, `demo`).
 
 `image_size` và `predictions[].bbox` tính theo pixel của ảnh đã xoay đúng theo EXIF. Dịch vụ không lưu ảnh. Nếu đặt biến môi trường `BINSPA_AI_KEY`, `/health` và `/analyze` phải gửi header `X-API-Key` khớp với giá trị đó.
-
-`artifact_manifest.json` chứa SHA256 các hình và bảng tổng hợp. `confusion_matrices.json` lưu ma trận số nguyên, hướng trục, support và checkpoint hash. Các record ảnh và tọa độ box được giữ riêng, vì vậy bản công khai không cung cấp khả năng tái lập độc lập đầy đủ chỉ bằng một lệnh.
 
 ## 8. Công bố dữ liệu và quyền sử dụng
 
 Bản công khai gồm mã nguồn, yêu cầu môi trường, báo cáo tổng hợp, biểu đồ và 18 ma trận: 16 checkpoint trên test gốc và hai kết quả của checkpoint hiện dùng trên DetectDataSkin-2. Ảnh khuôn mặt, crop, nhãn từng ảnh, dự đoán từng ảnh, tài liệu cá nhân, file ZIP dữ liệu, venv và checkpoint không nằm trong bản công bố hiện tại.
+
+`artifact_manifest.json` chứa SHA256 các hình và bảng tổng hợp. `confusion_matrices.json` lưu ma trận số nguyên, hướng trục, support và checkpoint hash. Các record ảnh và tọa độ box được giữ riêng, vì vậy bản công khai không cung cấp khả năng tái lập độc lập đầy đủ chỉ bằng một lệnh.
 
 `.gitignore` bảo vệ việc thêm file mới, **không xóa dữ liệu trong lịch sử Git**. Các commit hoặc nhánh cũ có thể vẫn chứa artifact trước khi dọn. Xem [phạm vi bảo vệ và xử lý lịch sử](docs/PRIVACY.md).
 

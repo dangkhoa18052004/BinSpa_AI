@@ -15,7 +15,10 @@ ROOT = Path(__file__).resolve().parents[1]
 ROOT_FILES = {'.gitignore','.gitattributes','README.md','requirements-phase1.txt','requirements-phase1-lock.txt',
               'extract_acne04_images.py','zip_for_kaggle.py','project_scope.json'}
 REPORT_FILES = {'reports/publication/README.md','reports/publication/metrics.json',
-                'reports/publication/confusion_matrices.json','reports/publication/artifact_manifest.json'}
+                'reports/publication/confusion_matrices.json','reports/publication/artifact_manifest.json',
+                'reports/publication/MODEL_CARD_selfie_v1.md'}
+DOC_FILES = {'docs/PRIVACY.md','docs/RELIABILITY_PLAN.md','docs/CLAUDE_SELFIE_DEVELOPMENT_PLAN.md'}
+CODE_DIRS = {'api':{'.py','.html'},'configs':{'.yaml','.json'},'tests':{'.py'}}
 LEGACY_FIGURES = {'1_precision_recall_map.png','2_map50_95.png','3_inference_time.png','4_model_size.png',
     '5_precision_vs_recall.png','6_tp_fp_fn.png','dataset_stats.png','forest_vs_yolo26s.png',
     'recall_by_density.png','yolo26s_test_F1_curve.png','yolo26s_test_PR_curve.png'}
@@ -33,8 +36,10 @@ SECRET_PATTERNS = {
 
 def allowed(path):
     p=PurePosixPath(path)
-    if path in ROOT_FILES or path in REPORT_FILES or path in {'docs/PRIVACY.md','docs/RELIABILITY_PLAN.md'}:
+    if path in ROOT_FILES or path in REPORT_FILES or path in DOC_FILES:
         return True
+    if p.parts[0] in CODE_DIRS and p.suffix in CODE_DIRS[p.parts[0]]:
+        return not any(part=='__pycache__' or part.startswith('.') for part in p.parts)
     if p.parts[0]=='scripts' and p.suffix in {'.py','.ps1','.md'}:
         return not any(part in {'__pycache__','Ultralytics','phase3'} or part.startswith('.') for part in p.parts)
     if p.parent==PurePosixPath('docs/figures'):
@@ -49,8 +54,8 @@ def allowed(path):
 
 
 def publication_paths():
-    candidates=[ROOT / p for p in ROOT_FILES | REPORT_FILES | {'docs/PRIVACY.md','docs/RELIABILITY_PLAN.md'}]
-    candidates+=list((ROOT/'scripts').rglob('*'))+list((ROOT/'docs/figures').rglob('*'))
+    candidates=[ROOT / p for p in ROOT_FILES | REPORT_FILES | DOC_FILES]
+    candidates+=[f for d in ['scripts',*CODE_DIRS] for f in (ROOT/d).rglob('*')]+list((ROOT/'docs/figures').rglob('*'))
     return sorted({p.relative_to(ROOT).as_posix() for p in candidates if p.is_file() and allowed(p.relative_to(ROOT).as_posix())})
 
 

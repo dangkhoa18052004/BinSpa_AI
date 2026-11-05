@@ -105,3 +105,7 @@ id_ed25519*
 /scripts/phase3/
 /docs/figures/research/confusion_matrices/phase3/
 /docs/figures/research/confusion_matrices/phase3_comparison.png
+
+# Prompt giao việc cho Claude, giữ tại máy.
+/docs/CLAUDE_SELFIE_TASK.md
+/docs/figures/*.json
