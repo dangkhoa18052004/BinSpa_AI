@@ -34,12 +34,15 @@
   .low { color: var(--muted); }
   .muted { color: var(--muted); font-size: 13px; }
   #busy { display: none; }
+  .staff input { display: inline; vertical-align: -2px; }
+  .tech { border: 2px dashed #9aa5ab; }
+  details summary { cursor: pointer; font-weight: 600; margin: 6px 0; }
 </style>
 </head>
 <body>
 <main>
   <h1>BinSpa AI – Phân tích mụn</h1>
-  <p class="sub">Bản thử nghiệm: chụp hoặc chọn ảnh khuôn mặt, AI đánh dấu vị trí và đoán loại mụn.</p>
+  <p class="sub">Bản thử nghiệm: chụp hoặc chọn ảnh khuôn mặt. AI khoanh các nốt nghi là mụn; khi đủ chắc thì ghi loại mụn hoặc nhóm (viêm / không viêm).</p>
 
   <div class="card">
     <div class="buttons">
@@ -48,9 +51,10 @@
     </div>
     <div class="key" id="keyBox"><input id="key" type="password" placeholder="API key (BINSPA_AI_KEY)"></div>
     <ul class="tips">
-      <li>Dùng camera sau, chụp gần (khuôn mặt chiếm gần hết khung hình), nơi đủ sáng, không bật flash.</li>
+      <li>Ảnh nào cũng phân tích được. Để AI ghi được loại mụn cho nhiều nốt hơn: chụp gần vùng da có mụn, nơi đủ sáng, không bật flash.</li>
       <li>Gửi ảnh gốc; ảnh đã qua Zalo/Messenger bị nén nhỏ nên AI thấy ít nốt hơn.</li>
     </ul>
+    <label class="muted staff"><input id="tech" type="checkbox"> Xem mọi dự đoán (kỹ thuật, chỉ cho nhân viên)</label>
   </div>
 
   <div class="card" id="busy">Đang phân tích…</div>
@@ -60,6 +64,9 @@
 <script>
 const COLORS = { closed_comedo: '#e8a33d', open_comedo: '#6b4f3a', papule: '#d64545', pustule: '#c03fbf', nodule: '#3274a1' };
 const NAMES = { closed_comedo: 'Mụn đầu trắng', open_comedo: 'Mụn đầu đen', papule: 'Mụn sẩn', pustule: 'Mụn mủ', nodule: 'Mụn nốt' };
+const GROUP_COLORS = { inflammatory: '#e4572e', non_inflammatory: '#f2c14e' };
+const GROUP_NAMES = { inflammatory: 'Mụn viêm (chưa rõ loại)', non_inflammatory: 'Mụn không viêm (chưa rõ loại)' };
+const LOC_COLOR = '#9aa5ab';
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 let key = '';
@@ -76,7 +83,7 @@ async function analyze(file) {
   const form = new FormData();
   form.append('image', file);
   try {
-    const res = await fetch('analyze', { method: 'POST', body: form, headers: key ? { 'X-API-Key': key } : {} });
+    const res = await fetch($('tech').checked ? 'analyze?technical=1' : 'analyze', { method: 'POST', body: form, headers: key ? { 'X-API-Key': key } : {} });
     const data = await res.json();
     if (res.status === 401) { $('keyBox').style.display = 'block'; throw new Error('Cần nhập API key rồi chọn lại ảnh.'); }
     if (!res.ok) throw new Error(data.error || res.statusText);
@@ -92,6 +99,7 @@ function typeOf(p) { return p.type || p.top3[0].type; }
 function shown(p, status) { return status === 'demo' || p.type_status !== 'uncertain'; }
 
 async function show(file, data) {
+  if (data.engine === 'tiered') return showTiered(file, data);
   const notes = [];
   if (data.message) notes.push(data.message);
   for (const r of (data.input_check && data.input_check.reasons) || []) notes.push('Chất lượng ảnh: ' + r.message);
@@ -143,6 +151,72 @@ async function show(file, data) {
     ctx.setLineDash([]);
     ctx.fillStyle = c; ctx.fillText(String(i + 1), x1 - pad, y1 - pad - lw);
   });
+}
+
+async function draw(canvasId, file, size, boxes) {
+  const img = new Image();
+  img.src = URL.createObjectURL(file);
+  await img.decode();
+  const [W, H] = size, cv = $(canvasId), ctx = cv.getContext('2d');
+  cv.width = W; cv.height = H;
+  ctx.drawImage(img, 0, 0, W, H);
+  URL.revokeObjectURL(img.src);
+  const lw = Math.max(2, W / 400), fs = Math.max(14, W / 70), pad = lw * 2;
+  ctx.font = `bold ${fs}px system-ui, sans-serif`;
+  boxes.forEach((b, i) => {
+    const [x1, y1, x2, y2] = b.bbox;
+    ctx.lineWidth = lw; ctx.strokeStyle = b.color;
+    ctx.setLineDash(b.dashed ? [lw * 3, lw * 2] : []);
+    ctx.strokeRect(x1 - pad, y1 - pad, x2 - x1 + 2 * pad, y2 - y1 + 2 * pad);
+    ctx.setLineDash([]);
+    ctx.fillStyle = b.color; ctx.fillText(String(i + 1), x1 - pad, y1 - pad - lw);
+  });
+}
+
+function label(p) {
+  if (p.tier === 'A') return { name: NAMES[p.type], color: COLORS[p.type], key: p.type };
+  const guess = p.guess_type ? `AI đoán: ${NAMES[p.guess_type]} (chưa chắc)` : '';
+  if (p.tier === 'B') return { name: GROUP_NAMES[p.group] + (guess ? ' · ' + guess : ''), color: GROUP_COLORS[p.group], key: p.group };
+  if (guess) return { name: guess, color: COLORS[p.guess_type], key: 'guess' };
+  return { name: 'Nghi là mụn (chưa rõ loại)', color: LOC_COLOR, key: 'loc' };
+}
+
+async function showTiered(file, data) {
+  const preds = data.predictions || [], c = data.counts || {};
+  const nA = preds.filter(p => p.tier === 'A').length, nB = preds.filter(p => p.tier === 'B').length;
+  let html = '<div class="card">' + (data.warnings || []).map(w => `<p class="note">${esc(w.message)}</p>`).join('');
+  html += `<p><b>AI khoanh ${preds.length} nốt</b>: ${nA} nốt ghi loại, ${nB} nốt ghi nhóm, ${c.location_only || 0} nốt chỉ khoanh vị trí
+    <span class="muted">· ${data.processing_ms} ms</span></p>`;
+  if (!preds.length) html += '<p class="muted">Không có nốt nào đủ chắc để khoanh. Thử chụp gần hơn vùng da có mụn, nơi đủ sáng.</p>';
+  const legend = [];
+  for (const t of Object.keys(NAMES)) if ((c.type || {})[t]) legend.push(`<span style="--c:${COLORS[t]}">${NAMES[t]}: ${c.type[t]}</span>`);
+  for (const g of Object.keys(GROUP_NAMES)) if ((c.group || {})[g]) legend.push(`<span style="--c:${GROUP_COLORS[g]}">${GROUP_NAMES[g]}: ${c.group[g]}</span>`);
+  const nGuess = preds.filter(p => p.tier === 'C' && p.guess_type).length;
+  if (nGuess) legend.push(`<span style="--c:${LOC_COLOR}">AI đoán loại (chưa chắc), nét đứt: ${nGuess}</span>`);
+  if (c.location_only - nGuess > 0) legend.push(`<span style="--c:${LOC_COLOR}">Nghi là mụn (chưa rõ loại): ${c.location_only - nGuess}</span>`);
+  html += `<canvas id="cv"></canvas><div class="legend">${legend.join('')}</div>`;
+  if (preds.length) {
+    html += '<table><thead><tr><th>#</th><th>AI ghi</th><th>Khả năng đúng</th></tr></thead><tbody>' + preds.map((p, i) => {
+      const l = label(p);
+      const prob = p.tier === 'C' ? (p.guess_type ? `${Math.round(p.guess_probability * 100)}% đúng loại` : `${Math.round(p.lesion_probability * 100)}% là mụn`)
+        : `${Math.round(p.probability * 100)}%`;
+      return `<tr class="${p.tier === 'C' ? 'low' : ''}"><td class="num">${i + 1}</td><td>${esc(l.name)}</td><td>${prob}</td></tr>`;
+    }).join('') + '</tbody></table>';
+  }
+  html += `<p class="muted">${esc(data.statement || '')} ${esc(data.disclaimer || '')}</p></div>`;
+  if (data.technical) {
+    const t = data.technical;
+    html += `<div class="card tech"><p class="note">${esc(t.note)}</p>
+      <p class="muted">Nhóm rủi ro: ${esc(data.risk)} ${t.risk_reasons.length ? '(' + esc(t.risk_reasons.join(', ')) + ')' : ''} · domain score: ${t.domain_score ?? '–'}</p>
+      <canvas id="cvTech"></canvas>
+      <details><summary>${t.boxes.length} box detector</summary><table><thead><tr><th>#</th><th>Loại top-1</th><th>softmax</th><th>q loại / nhóm / vị trí</th><th>det</th></tr></thead><tbody>` +
+      t.boxes.map((b, i) => `<tr><td class="num">${i + 1}</td><td>${esc(b.type_vi)}</td><td>${Math.round(b.type_softmax * 100)}%</td>
+        <td>${Math.round(b.q.A * 100)}% / ${Math.round(b.q.B * 100)}% / ${Math.round(b.q.C * 100)}%</td><td>${b.detection_confidence}</td></tr>`).join('') +
+      '</tbody></table></details></div>';
+  }
+  $('result').innerHTML = html;
+  await draw('cv', file, data.image_size, preds.map(p => ({ bbox: p.bbox, color: label(p).color, dashed: p.tier === 'C' })));
+  if (data.technical) await draw('cvTech', file, data.image_size, data.technical.boxes.map(b => ({ bbox: b.bbox, color: COLORS[b.type], dashed: true })));
 }
 </script>
 </body>
