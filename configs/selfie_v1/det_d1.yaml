@@ -1,0 +1,27 @@
+# P06 experiment D1: fine-tune the deployed RT-DETR-L (sha a0ce9424) on mixed clinical + phone-like data.
+# Reason: the baseline detector finds 41 % of DetectDataSkin-2 val lesions at 26 % precision (P05) and marks almost
+# nothing confident on the test_img phone photos; it never saw phone photos. Data: datasets/selfie_v1/det_v1
+# (scripts/data_v2/build_det_dataset.py). Selection: our evaluator on val (P08b), not Ultralytics fitness alone.
+name: det_d1
+start: models/phase1/best_acne_detector.pt
+data: datasets/selfie_v1/det_v1/data.yaml
+train:
+  imgsz: 1280
+  epochs: 15
+  patience: 6
+  batch: 2
+  optimizer: AdamW
+  lr0: 0.0001
+  lrf: 0.05
+  weight_decay: 0.0001
+  warmup_epochs: 1
+  warmup_bias_lr: 0.0
+  close_mosaic: 3
+  max_det: 300
+  hsv_v: 0.5
+  degrees: 5.0
+  cache: false
+  workers: 4
+  seed: 42
+  deterministic: true
+  amp: true

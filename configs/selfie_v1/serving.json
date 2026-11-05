@@ -1,0 +1,26 @@
+{
+  "_comment": "Display policy served by api/server.py (scripts/phase2/tiered_pipeline.py). The policy names its detector, classifier and domain statistics and their hashes are checked at start-up. Switch candidate / roll back by changing 'policy'. 'published' holds the plan 6.3 numbers, filled only from the final evaluation (P11); null shows 'being evaluated'.",
+  "policy": "models/candidates/selfie_v1/hyb_d1/display_policy.json",
+  "published": {
+    "clinical_type_precision": 0.9191176470588235,
+    "phone_type_precision": 0.8353846153846154,
+    "source": "reports/selfie_v1/final_evaluation/results.json (P11, IoU 0.3, T1 / T2 overall tier A precision of the released policy)",
+    "policy_sha256": "3e2905f04ab32056050464095a295833ecc2713c50cb4e1bc2e14faeba7a4d87",
+    "guess_precision_clinical": 0.6117936117936118,
+    "guess_precision_phone": 0.5263157894736842
+  },
+  "guess_types": {
+    "low": [
+      "closed_comedo",
+      "open_comedo",
+      "papule",
+      "pustule"
+    ],
+    "high": [
+      "papule",
+      "pustule"
+    ],
+    "policy_sha256": "3e2905f04ab32056050464095a295833ecc2713c50cb4e1bc2e14faeba7a4d87",
+    "source": "reports/selfie_v1/final_evaluation/guess_layer.json (val rule)"
+  }
+}

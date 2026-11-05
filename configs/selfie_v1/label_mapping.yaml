@@ -1,0 +1,92 @@
+# selfie_v1 label mapping (P01). Raw label of each source -> canonical label.
+# Canonical: the five acne types; acne_untyped (lesion box without a type: detector only, evaluator scores
+# location only); ignore (neither target nor background: no detector background loss, never scored right or
+# wrong); drop (category entry with no annotations, e.g. the Roboflow supercategory; build_registry.py checks
+# that it is unused). Changing this file changes the dataset version: bump `version`.
+version: selfie_v1-labels-1
+
+canonical_classes: [closed_comedo, open_comedo, papule, pustule, nodule]
+groups:
+  non_inflammatory: [closed_comedo, open_comedo]
+  inflammatory: [papule, pustule, nodule]
+
+sources:
+  acnedet_author:
+    label_trust: dermatologist        # 6 dermatologists of the DSDH authors (Wei et al., KBS 2024); not re-reviewed here
+    completeness: all_lesions_of_listed_classes
+    geometry: polygon
+    map: &acnedet
+      closed_comedo: closed_comedo
+      open_comedo: open_comedo
+      papule: papule
+      pustule: pustule
+      nodule: nodule
+      atrophic_scar: ignore           # scar, not an active lesion; out of scope
+      hypertrophic_scar: ignore
+      melasma: ignore                 # pigmentation
+      nevus: ignore                   # mole
+      other: ignore
+      ACNE-Nprb: drop                 # Roboflow supercategory (mirror only)
+  acnedet_mirror:
+    label_trust: dermatologist
+    completeness: all_lesions_of_listed_classes
+    geometry: box
+    map: *acnedet
+
+  acne04v2:
+    label_trust: expert               # AcneAI authors' experts (Acne04-v2 README); one class, no type
+    completeness: mostly_complete     # phase 1 found unlabelled lesions behind many false positives
+    geometry: circle                  # centre + radius -> square box
+    map:
+      acne: acne_untyped
+
+  kbm0q:
+    label_trust: unverified           # Roboflow user, annotator unknown
+    completeness: unknown
+    geometry: box
+    map:
+      whiteheads: closed_comedo       # whitehead = closed comedo
+      blackheads: open_comedo         # blackhead = open comedo
+      papules: papule
+      pustules: pustule
+      nodules: nodule
+      dark spot: ignore               # post-inflammatory pigmentation, not an active lesion
+      acne: drop                      # supercategory
+
+  xnbio:
+    label_trust: unverified
+    completeness: unknown
+    geometry: box
+    map:
+      Whiteheads: closed_comedo
+      Blackheads: open_comedo
+      Papules: papule
+      Pustules: pustule
+      Nodules: nodule
+      Cysts: ignore                   # no cyst class in ACNE-DET; not merged into nodule (plan, section 5)
+      acne-Moz6: drop
+
+  detectdataskin2:
+    label_trust: unverified
+    completeness: unknown
+    geometry: box
+    map:
+      Whitehead: closed_comedo
+      Blackhead: open_comedo
+      Papule: papule
+      Pustule: pustule
+      Nodule: nodule
+      Nodules: nodule                 # same class, two spellings in the export
+      Cysts: ignore
+      Bekas Jerawat: ignore           # Indonesian: acne scar
+      Pori-Pori: ignore               # Indonesian: pores; candidate hard negative only as a P07 experiment
+      skin-disease-9-skin-disease-8: drop
+
+  scin:
+    label_trust: dermatologist_case_level   # weighted differential per case, no lesion boxes
+    completeness: none_at_lesion_level
+    geometry: none
+    case_rule:                        # weight = sum of weighted_skin_condition_label entries whose name contains "acne"
+      acne_case: ">= 0.5"
+      non_acne_case: "== 0"
+      uncertain_case: "0 < weight < 0.5"   # excluded from T4

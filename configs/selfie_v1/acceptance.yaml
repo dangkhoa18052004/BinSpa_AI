@@ -1,0 +1,57 @@
+# selfie_v1 acceptance criteria (plan section 6). Locked at P03: its SHA256 is stored in
+# datasets/selfie_v1/split_manifest.json before any training or any look at T2. Do not edit after locking;
+# a changed hash makes later results "exploratory" in every report.
+version: selfie_v1-acceptance-1
+
+matching:
+  primary_iou: 0.3            # lesions are 6-20 px at 1280; location display is the purpose
+  secondary_iou: 0.5          # always reported
+  assignment: one_to_one_by_confidence
+  ignore_regions: not_scored  # a shown box overlapping an `ignore` box (IoU >= primary_iou) counts neither way
+  every_photo_in_denominator: true
+
+tiers:
+  A: specific type (one of five)
+  B: group (inflammatory = papule, pustule, nodule; non_inflammatory = closed_comedo, open_comedo)
+  C: location only ("suspected lesion")
+  threshold_choice: on validation only, worst source must meet the target
+
+targets:
+  T1:                         # ACNE-DET author, dermatologist labels, master-split test (+ grouped CV for stability)
+    tier_A_precision: 0.90
+    tier_B_precision: 0.92
+    location_precision: 0.70
+    location_recall: 0.50
+    coverage_A_or_B_on_found: 0.60
+    ece_max: 0.05
+    ci_lower_slack: 0.05      # lower bound of the 95 % CI must be >= target - slack
+    macro_f1_regression_max_drop: 0.03   # box+type macro-F1 vs the P05 baseline, same evaluator
+  T2:                         # DetectDataSkin-2 + xnbio lineage groups, labels unverified, proxy-test
+    tier_A_precision: 0.80
+    tier_B_precision: 0.85
+    location_precision: 0.60
+    location_recall: 0.45
+    coverage_A_or_B_on_found: 0.40
+    ece_max: 0.08
+    ci_lower_slack: 0.05
+  T3:                         # T1 photos with simulated phone degradations
+    max_tier_precision_drop: 0.05   # tiers A and B, each degradation, vs clean T1
+  T4:                         # SCIN head/neck cases, case-level dermatologist labels
+    auc_min: 0.70
+    min_cases_per_side: 20    # fewer -> inconclusive
+  T5:                         # owner review, non-expert
+    max_share_boxes_clearly_off_skin_or_spot: 0.10
+    processing_errors: 0
+  service:
+    photos_with_result: 1.0   # every decodable photo gets a result; no blocking status
+    latency_p95_seconds: 5.0  # batch 1, full pipeline, this machine's GPU
+
+fallback:                     # applied, never a reason to retune on test
+  tier_A_fails_T2: show tier A only for low-risk photos; others stop at tier B
+  tier_B_fails_T2: show location only
+  nodule_unmeasurable: never show "nodule" at tier A; show group "inflammatory"
+
+bootstrap:
+  unit: lineage_group
+  resamples: 1000
+  ci: 0.95

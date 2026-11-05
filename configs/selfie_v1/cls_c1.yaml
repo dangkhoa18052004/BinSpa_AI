@@ -1,0 +1,16 @@
+# P07 experiment C1: EfficientNet-B0 (ImageNet init) on mixed typed crops, phone-photo degradations p 0.5.
+# Reason: the deployed classifier (ACNE-DET crops only) is right on 23 % of DetectDataSkin-2 found lesions (P05),
+# mostly calling pustules/papules comedones. Data: datasets/selfie_v1/crops_v1 (scripts/data_v2/build_cls_dataset.py).
+# Selection: mean of the per-source val macro-F1 (ACNE-DET, ACNE04-kbm0q, DetectDataSkin-2), so no source dominates.
+name: cls_c1
+crops: datasets/selfie_v1/crops_v1
+timm_name: efficientnet_b0.ra_in1k
+lr: 0.0003
+weight_decay: 0.05
+batch: 32
+epochs: 20
+patience: 5
+label_smoothing: 0.1
+sampler: class_sqrt        # weights ~ 1 / sqrt(class frequency)
+degrade: 0.5
+seed: 42
