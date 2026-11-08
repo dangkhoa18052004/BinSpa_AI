@@ -9,7 +9,7 @@ Các file ở đây chỉ chứa thống kê tổng hợp, checkpoint hash và m
 
 ## Kết quả mới nhất
 
-README chính trình bày benchmark `bench_v1` (3 detector × 2 classifier, kết quả qua seed 42/43/44) và đối chiếu với pipeline demo `hyb_d1`. Pipeline chọn trên validation là YOLO26s + ConvNeXt-Tiny; cấu hình demo vẫn giữ `hyb_d1`. Detector seed 43/44 chỉ train lại chặng C; T1–T4 là các bộ đánh giá phát triển đã được xem trước. Ma trận bên dưới thuộc các đợt lịch sử, không phải ma trận mới của bench_v1.
+README chính trình bày benchmark `bench_v1` (3 detector × 2 classifier, kết quả qua seed 42/43/44) và đối chiếu với pipeline demo RT-DETR-L + 2×EfficientNet-B0. Pipeline chọn trên validation là YOLO26s + ConvNeXt-Tiny; cấu hình demo vẫn giữ RT-DETR-L + 2×EfficientNet-B0. Detector seed 43/44 chỉ train lại chặng C; T1–T4 là các bộ đánh giá phát triển đã được xem trước. Ma trận bên dưới thuộc các đợt lịch sử, không phải ma trận mới của bench_v1.
 
 ## Ma trận từng checkpoint — các đợt lịch sử
 

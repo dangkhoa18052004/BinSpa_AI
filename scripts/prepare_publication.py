@@ -217,8 +217,8 @@ def bench_tables(bench):
         t2 = ' / '.join(stat(p['T2'][k], percent=True) for k in ('location_precision', 'location_recall'))
         rows.append(f'| {name} | {stat(p["val_select"]["location_recall"], percent=True)} | {eligibility} | {t1} | {t2} |')
     rows += ['', 'Recall dùng để xếp hạng trong quy tắc chọn là **trung bình recall theo nguồn từ số đếm gộp ba seed**, khác cột recall gộp ảnh ở bảng trên. Pipeline được chọn là ứng viên duy nhất qua điều kiện precision, nên các bước phá hòa theo recall/coverage không làm thay đổi lựa chọn.', '',
-             '**Đối chiếu pipeline được chọn với `hyb_d1`.** `hyb_d1` là một lần chạy P11; benchmark là trung bình ± SD, không phải CI 95%. Precision tầng A/B tính trên các box được ghi loại/nhóm; coverage tính trên nốt tìm đúng.', '',
-             '| Tập | Chỉ số | `hyb_d1` — mốc demo | YOLO26s + ConvNeXt-Tiny |',
+             '**Đối chiếu pipeline được chọn với RT-DETR-L + 2×EfficientNet-B0.** RT-DETR-L + 2×EfficientNet-B0 là một lần chạy P11; benchmark là trung bình ± SD, không phải CI 95%. Precision tầng A/B tính trên các box được ghi loại/nhóm; coverage tính trên nốt tìm đúng.', '',
+             '| Tập | Chỉ số | RT-DETR-L + 2×EfficientNet-B0 — mốc demo | YOLO26s + ConvNeXt-Tiny |',
              '| --- | --- | ---: | ---: |']
     ref = bench['references']['hyb_d1_served']
     labels = [('location_precision', 'Precision vị trí', True, 1),
@@ -234,21 +234,21 @@ def bench_tables(bench):
             ref_value = '—' if value is None else num(value * (100 if percent else 1), digits)
             rows.append(f'| {dataset} | {label}{" (%)" if percent else ""} | {ref_value} | '
                         f'{stat(bench["pipelines"][chosen][dataset][key], percent, digits)} |')
-    rows += ['', 'Trên T1, precision tầng A 97,7% chỉ được tính ở **hai seed có đầu ra tầng A**; ba seed lần lượt hiện **44, 1 và 0 box**. Không diễn giải đây là accuracy toàn hệ thống hoặc bằng chứng chắc chắn rằng model tốt hơn mốc 91,9% trên 136 box của `hyb_d1`. Nhãn đúng/ảnh T1 là **4,96 ± 1,88**, so với **4,98** của `hyb_d1`.', '',
+    rows += ['', 'Trên T1, precision tầng A 97,7% chỉ được tính ở **hai seed có đầu ra tầng A**; ba seed lần lượt hiện **44, 1 và 0 box**. Không diễn giải đây là accuracy toàn hệ thống hoặc bằng chứng chắc chắn rằng model tốt hơn mốc 91,9% trên 136 box của RT-DETR-L + 2×EfficientNet-B0. Nhãn đúng/ảnh T1 là **4,96 ± 1,88**, so với **4,98** của RT-DETR-L + 2×EfficientNet-B0.', '',
              '**T3 — độ bền trên bảy biến đổi ảnh.** Cột benchmark là số seed đạt trên ba seed; một tầng không được hiển thị không có phép đo precision của tầng đó.', '',
-             '| Biến đổi | `hyb_d1` (P11) | YOLO26s + ConvNeXt-Tiny |',
+             '| Biến đổi | RT-DETR-L + 2×EfficientNet-B0 (P11) | YOLO26s + ConvNeXt-Tiny |',
              '| --- | --- | ---: |']
     reference_t3 = dict(downscale_1080='Trượt', jpeg_q35='Trượt', noise_s8='Đạt', dark_x0_6='Đạt',
                         warm_wb='Đạt', rotate_5='Đạt', phone_combo='Trượt')
     for variant, counts in bench['pipelines'][chosen]['T3'].items():
         rows.append(f'| `{variant}` | {reference_t3[variant.replace(".", "_")]} | {counts.get("pass", 0)}/3 |')
     p = bench['pipelines'][chosen]
-    rows += ['', 'Seed 42/43/44 lần lượt đạt **6/7, 5/7 và 7/7** biến đổi; `hyb_d1` đạt **4/7**. Kết quả này không xóa hạn chế ít box tầng A và không chứng minh độ bền trên mọi selfie.', '',
+    rows += ['', 'Seed 42/43/44 lần lượt đạt **6/7, 5/7 và 7/7** biến đổi; RT-DETR-L + 2×EfficientNet-B0 đạt **4/7**. Kết quả này không xóa hạn chế ít box tầng A và không chứng minh độ bền trên mọi selfie.', '',
              f'**T4:** AUC của pipeline được chọn là **{stat(p["T4_auc"], digits=3)}**, so với '
-             f'**{num(ref["T4_auc"], 3)}** của `hyb_d1`; cả hai dưới mục tiêu 0,70. Benchmark dùng **25 ca dương / 361 ca âm**, báo cáo P11 dùng **27 / 362**, nên không diễn giải chênh lệch nhỏ này như so sánh ghép cặp trên cùng tập ca.', '',
+             f'**{num(ref["T4_auc"], 3)}** của RT-DETR-L + 2×EfficientNet-B0; cả hai dưới mục tiêu 0,70. Benchmark dùng **25 ca dương / 361 ca âm**, báo cáo P11 dùng **27 / 362**, nên không diễn giải chênh lệch nhỏ này như so sánh ghép cặp trên cùng tập ca.', '',
              f'**Thời gian:** p95 detector + classifier của pipeline mới là **{stat(p["seconds_p95"], digits=2)} giây/ảnh**. '
-             'Mốc **1,40 giây/ảnh** của `hyb_d1` tính cả dịch vụ; hai phạm vi đo khác nhau, không suy ra mức tăng tốc trực tiếp.', '',
-             '**Quyết định demo: giữ `hyb_d1`.** YOLO26s + ConvNeXt thắng theo quy tắc validation nhưng recall T1/T2 thấp hơn mốc demo, ít tên loại và dao động coverage lớn. RT-DETR đạt recall cao hơn trong các ứng viên mới nhưng trượt điều kiện precision trên validation; không chọn lại bằng cách xem T1/T2.']
+             'Mốc **1,40 giây/ảnh** của RT-DETR-L + 2×EfficientNet-B0 tính cả dịch vụ; hai phạm vi đo khác nhau, không suy ra mức tăng tốc trực tiếp.', '',
+             '**Quyết định demo: giữ RT-DETR-L + 2×EfficientNet-B0.** YOLO26s + ConvNeXt thắng theo quy tắc validation nhưng recall T1/T2 thấp hơn mốc demo, ít tên loại và dao động coverage lớn. RT-DETR đạt recall cao hơn trong các ứng viên mới nhưng trượt điều kiện precision trên validation; không chọn lại bằng cách xem T1/T2.']
     return '\n'.join(rows)
 
 
@@ -260,7 +260,7 @@ def publication_index(data):
         '- [Ma trận dưới dạng số nguyên](confusion_matrices.json)',
         '- [PDF 18 trang](../../docs/figures/research/confusion_matrices/all_models_confusion_matrices.pdf)','',
         '## Kết quả mới nhất','',
-        'README chính trình bày benchmark `bench_v1` (3 detector × 2 classifier, kết quả qua seed 42/43/44) và đối chiếu với pipeline demo `hyb_d1`. Pipeline chọn trên validation là YOLO26s + ConvNeXt-Tiny; cấu hình demo vẫn giữ `hyb_d1`. Detector seed 43/44 chỉ train lại chặng C; T1–T4 là các bộ đánh giá phát triển đã được xem trước. Ma trận bên dưới thuộc các đợt lịch sử, không phải ma trận mới của bench_v1.','',
+        'README chính trình bày benchmark `bench_v1` (3 detector × 2 classifier, kết quả qua seed 42/43/44) và đối chiếu với pipeline demo RT-DETR-L + 2×EfficientNet-B0. Pipeline chọn trên validation là YOLO26s + ConvNeXt-Tiny; cấu hình demo vẫn giữ RT-DETR-L + 2×EfficientNet-B0. Detector seed 43/44 chỉ train lại chặng C; T1–T4 là các bộ đánh giá phát triển đã được xem trước. Ma trận bên dưới thuộc các đợt lịch sử, không phải ma trận mới của bench_v1.','',
         '## Ma trận từng checkpoint — các đợt lịch sử','',
         '| Giai đoạn | Model | Tập dữ liệu | Hình |','| --- | --- | --- | --- |']
     for item in read('reports/publication/confusion_matrices.json')['matrices']:

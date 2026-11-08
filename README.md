@@ -21,11 +21,11 @@
 
 **Cập nhật 08/11/2026:** đã hoàn thành `bench_v1`, so sánh **YOLO26s, RT-DETR-L, Faster R-CNN × EfficientNet-B0, ConvNeXt-Tiny**. Pipeline **YOLO26s + ConvNeXt-Tiny** là ứng viên duy nhất đạt mọi điều kiện precision theo nguồn trên `val_select`, nên được chọn theo quy tắc đã khóa. Đây là lựa chọn của benchmark, **chưa thay thế pipeline demo**.
 
-**Demo vẫn dùng `selfie_v1 / hyb_d1`: RT-DETR-L D1 @1280 + hai checkpoint EfficientNet-B0 + định tuyến theo rủi ro ảnh.** Trên T1, recall vị trí của `hyb_d1` là **40,4%**, còn pipeline được chọn đạt **36,2 ± 1,5%**; số nhãn đúng/ảnh gần bằng nhau (**4,98** so với **4,96 ± 1,88**). Pipeline mới ít hiện tên loại và coverage dao động lớn giữa seed, nên giữ `hyb_d1` cho demo. [Xem kết quả mới và quyết định sử dụng](#41-bench_v1--kết-quả-mới-nhất-08112026).
+**Demo vẫn dùng RT-DETR-L + 2×EfficientNet-B0 (định tuyến theo miền ảnh).** Trên T1, recall vị trí của RT-DETR-L + 2×EfficientNet-B0 là **40,4%**, còn pipeline được chọn đạt **36,2 ± 1,5%**; số nhãn đúng/ảnh gần bằng nhau (**4,98** so với **4,96 ± 1,88**). Pipeline mới ít hiện tên loại và coverage dao động lớn giữa seed, nên giữ RT-DETR-L + 2×EfficientNet-B0 cho demo. [Xem kết quả mới và quyết định sử dụng](#41-bench_v1--kết-quả-mới-nhất-08112026).
 
 BinSpa AI dùng kiến trúc có sẵn; đóng góp của dự án nằm ở chuẩn bị dữ liệu, so sánh thực nghiệm, kiểm tra artifact và phân tích giới hạn khi chuyển miền. Các bảng 14 checkpoint detector và hai classifier ở đợt trước được giữ dưới nhãn **kết quả lịch sử**, không dùng số crop accuracy 86,60% để mô tả toàn pipeline hiện tại.
 
-`hyb_d1` hiển thị theo tầng: tên loại → nhóm viêm/không viêm → chỉ vị trí. Precision của phần được ghi tên loại là **91,9%** trên T1 (ACNE-DET, nhãn bác sĩ) và **83,5%** trên T2 (ảnh thường, nhãn chưa xác minh). Đây không phải accuracy toàn bộ ảnh. T1–T4 đã được dùng trong quá trình phát triển; chưa có kiểm định độc lập mới trên selfie có nhãn chuyên gia. [Số liệu tổng hợp](reports/publication/metrics.json) có khóa `bench_v1`; [model card](reports/publication/MODEL_CARD_selfie_v1.md) mô tả mốc demo P11.
+RT-DETR-L + 2×EfficientNet-B0 hiển thị theo tầng: tên loại → nhóm viêm/không viêm → chỉ vị trí. Precision của phần được ghi tên loại là **91,9%** trên T1 (ACNE-DET, nhãn bác sĩ) và **83,5%** trên T2 (ảnh thường, nhãn chưa xác minh). Đây không phải accuracy toàn bộ ảnh. T1–T4 đã được dùng trong quá trình phát triển; chưa có kiểm định độc lập mới trên selfie có nhãn chuyên gia. [Số liệu tổng hợp](reports/publication/metrics.json) có khóa `bench_v1`; [model card](reports/publication/MODEL_CARD_selfie_v1.md) mô tả mốc demo P11.
 
 ## Mục lục
 
@@ -41,7 +41,7 @@ BinSpa AI dùng kiến trúc có sẵn; đóng góp của dự án nằm ở chu
 
 ## 1. Bài toán và kiến trúc
 
-GĐ1 nhận ảnh khuôn mặt. GĐ2 nhận crop tổn thương, từ box có nhãn khi benchmark classifier hoặc từ box GĐ1 khi chạy pipeline thực tế. `hyb_d1` dùng một detector và hai classifier train riêng; kết quả classifier được chọn theo rủi ro của **cả ảnh**, không lấy trung bình hai dự đoán.
+GĐ1 nhận ảnh khuôn mặt. GĐ2 nhận crop tổn thương, từ box có nhãn khi benchmark classifier hoặc từ box GĐ1 khi chạy pipeline thực tế. RT-DETR-L + 2×EfficientNet-B0 dùng một detector và hai classifier train riêng; kết quả classifier được chọn theo rủi ro của **cả ảnh**, không lấy trung bình hai dự đoán.
 
 ```mermaid
 flowchart LR
@@ -60,16 +60,16 @@ flowchart LR
     style D fill:#167d8d,color:#fff
 ```
 
-*Hình 1. Luồng suy luận của `hyb_d1`. Code tính cả C0 và C1; bộ định tuyến chọn kết quả, không train một mạng end-to-end mới. Đánh giá từng model và đánh giá pipeline là hai bài toán khác nhau.*
+*Hình 1. Luồng suy luận của RT-DETR-L + 2×EfficientNet-B0. Code tính cả C0 và C1; bộ định tuyến chọn kết quả, không train một mạng end-to-end mới. Đánh giá từng model và đánh giá pipeline là hai bài toán khác nhau.*
 
-| Thành phần đang dùng trong `hyb_d1` | Vai trò | Checkpoint / cấu hình cục bộ |
+| Thành phần đang dùng trong RT-DETR-L + 2×EfficientNet-B0 | Vai trò | Checkpoint / cấu hình cục bộ |
 | --- | --- | --- |
 | **D1 — RT-DETR-L @1280** | Tìm vùng nghi mụn; detector confidence 0,30 | `models/candidates/selfie_v1/hyb_d1/detector.pt` (`675ad751…`) |
 | **C0 — EfficientNet-B0 robust @224** | Loại mụn trên ảnh rủi ro thấp | `models/phase2/best_acne_type_robust.pth` (`5dd4daff…`) |
 | **C1 — EfficientNet-B0 @224, dữ liệu trộn** | Loại mụn trên ảnh rủi ro cao; đặc trưng đánh giá miền | `models/candidates/selfie_v1/hyb_d1/classifier.pth` (`6e6f2123…`) |
 | Policy và thống kê miền | Hiệu chỉnh điểm, định tuyến, ngưỡng A/B/C | `models/candidates/selfie_v1/hyb_d1/{display_policy.json,domain_stats.npz}` |
 
-Policy được chọn trong `configs/selfie_v1/serving.json`. Ngưỡng A/B/C cho ảnh rủi ro thấp lần lượt **0,82 / 0,86 / 0,43**; nhóm cao **0,71 / tắt / 0,53**. Đây là điểm đã hiệu chỉnh, không phải softmax đơn thuần. Hai classifier vẫn dự đoán năm lớp, nhưng policy không hiện tên `nodule` ở tầng A vì chưa đủ bằng chứng. Ngưỡng loại 80% của engine legacy không điều khiển `hyb_d1`.
+Policy được chọn trong `configs/selfie_v1/serving.json`. Ngưỡng A/B/C cho ảnh rủi ro thấp lần lượt **0,82 / 0,86 / 0,43**; nhóm cao **0,71 / tắt / 0,53**. Đây là điểm đã hiệu chỉnh, không phải softmax đơn thuần. Hai classifier vẫn dự đoán năm lớp, nhưng policy không hiện tên `nodule` ở tầng A vì chưa đủ bằng chứng. Ngưỡng loại 80% của engine legacy không điều khiển RT-DETR-L + 2×EfficientNet-B0.
 
 ## 2. Dữ liệu và cách chia tập
 
@@ -121,7 +121,7 @@ Mirror ACNEDET có **275 ảnh và 31.502 annotation** thuộc nhiều lớp. D�
 
 ### 3.1 Huấn luyện và lựa chọn
 
-Mục 3.1–3.3 ghi giao thức của các đợt lịch sử; cách train `hyb_d1` ở mục 3.4, giao thức `bench_v1` ở mục 3.5.
+Mục 3.1–3.3 ghi giao thức của các đợt lịch sử; cách train RT-DETR-L + 2×EfficientNet-B0 ở mục 3.4, giao thức `bench_v1` ở mục 3.5.
 
 GĐ1 so sánh YOLO26n, YOLO26s, YOLO11s, YOLOv5su, Faster R-CNN và RT-DETR-L, gồm các run kiểm soát đủ lịch, chạy ở 1280 và fine-tune dữ liệu gộp. Ngân sách và lịch train khác nhau giữa các đợt; 14 checkpoint không đại diện cho 14 kiến trúc được tuning hoàn toàn ngang nhau.
 
@@ -146,7 +146,7 @@ Bootstrap ghép cặp 1.000 lần theo **ảnh gốc** được dùng cho so sá
 
 Môi trường thực nghiệm: Windows, Python 3.12, PyTorch, torchvision, timm, Ultralytics; GPU RTX 5050 Laptop 8 GB. Phiên bản đã cài được lưu trong [file lock](requirements-phase1-lock.txt). Các lệnh tải pretrained cần kết nối mạng. Thời gian suy luận phụ thuộc thiết bị, batch và bước tiền xử lý.
 
-### 3.4 Cách train các thành phần của hyb_d1
+### 3.4 Cách train RT-DETR-L và hai classifier EfficientNet-B0
 
 | Thành phần | Khởi tạo và dữ liệu | Epoch thực chạy / trần; checkpoint được chọn | Thông số chính |
 | --- | --- | --- | --- |
@@ -158,7 +158,7 @@ Môi trường thực nghiệm: Windows, Python 3.12, PyTorch, torchvision, timm
 
 Các thành phần trên dùng seed 42. C0/C1 train riêng, đều có label smoothing 0,1 và augmentation điện thoại xác suất 0,5; C1 dùng sampler cân bằng lớp theo nghịch đảo căn tần suất, C0 không dùng sampler. C1 được chọn bằng trung bình macro-F1 theo nguồn trên val; C0 dùng macro-F1 val. Sau đó mới ghép checkpoint và fit policy, không train chung một mạng mới. D1 chặng cuối mất 6,18 giờ, C1 khoảng 32,5 phút; các số này không phải thời gian train của `bench_v1`.
 
-Cấu hình nguồn: `configs/selfie_v1/det_d1.yaml`, `cls_c1.yaml`, các `completed.json` của run tương ứng. Hiệu chỉnh và ngưỡng `hyb_d1` được chọn bằng val/OOF theo lineage ở P08/P11; khác cách tách `val_select`/`val_cal` của benchmark mới.
+Cấu hình nguồn: `configs/selfie_v1/det_d1.yaml`, `cls_c1.yaml`, các `completed.json` của run tương ứng. Hiệu chỉnh và ngưỡng RT-DETR-L + 2×EfficientNet-B0 được chọn bằng val/OOF theo lineage ở P08/P11; khác cách tách `val_select`/`val_cal` của benchmark mới.
 
 ### 3.5 Giao thức thực chạy của bench_v1
 
@@ -206,9 +206,9 @@ Số liệu dưới đây được xuất từ `reports/bench_v1/results.json` v
 
 Recall dùng để xếp hạng trong quy tắc chọn là **trung bình recall theo nguồn từ số đếm gộp ba seed**, khác cột recall gộp ảnh ở bảng trên. Pipeline được chọn là ứng viên duy nhất qua điều kiện precision, nên các bước phá hòa theo recall/coverage không làm thay đổi lựa chọn.
 
-**Đối chiếu pipeline được chọn với `hyb_d1`.** `hyb_d1` là một lần chạy P11; benchmark là trung bình ± SD, không phải CI 95%. Precision tầng A/B tính trên các box được ghi loại/nhóm; coverage tính trên nốt tìm đúng.
+**Đối chiếu pipeline được chọn với RT-DETR-L + 2×EfficientNet-B0.** RT-DETR-L + 2×EfficientNet-B0 là một lần chạy P11; benchmark là trung bình ± SD, không phải CI 95%. Precision tầng A/B tính trên các box được ghi loại/nhóm; coverage tính trên nốt tìm đúng.
 
-| Tập | Chỉ số | `hyb_d1` — mốc demo | YOLO26s + ConvNeXt-Tiny |
+| Tập | Chỉ số | RT-DETR-L + 2×EfficientNet-B0 — mốc demo | YOLO26s + ConvNeXt-Tiny |
 | --- | --- | ---: | ---: |
 | T1 | Precision vị trí (%) | 74,3 | 75,9 ± 1,5 |
 | T1 | Recall vị trí (%) | 40,4 | 36,2 ± 1,5 |
@@ -225,11 +225,11 @@ Recall dùng để xếp hạng trong quy tắc chọn là **trung bình recall 
 | T2 | Số box tầng B | 0 | 433 ± 376 |
 | T2 | Coverage A+B (%) | 39,7 | 41,7 ± 15,2 |
 
-Trên T1, precision tầng A 97,7% chỉ được tính ở **hai seed có đầu ra tầng A**; ba seed lần lượt hiện **44, 1 và 0 box**. Không diễn giải đây là accuracy toàn hệ thống hoặc bằng chứng chắc chắn rằng model tốt hơn mốc 91,9% trên 136 box của `hyb_d1`. Nhãn đúng/ảnh T1 là **4,96 ± 1,88**, so với **4,98** của `hyb_d1`.
+Trên T1, precision tầng A 97,7% chỉ được tính ở **hai seed có đầu ra tầng A**; ba seed lần lượt hiện **44, 1 và 0 box**. Không diễn giải đây là accuracy toàn hệ thống hoặc bằng chứng chắc chắn rằng model tốt hơn mốc 91,9% trên 136 box của RT-DETR-L + 2×EfficientNet-B0. Nhãn đúng/ảnh T1 là **4,96 ± 1,88**, so với **4,98** của RT-DETR-L + 2×EfficientNet-B0.
 
 **T3 — độ bền trên bảy biến đổi ảnh.** Cột benchmark là số seed đạt trên ba seed; một tầng không được hiển thị không có phép đo precision của tầng đó.
 
-| Biến đổi | `hyb_d1` (P11) | YOLO26s + ConvNeXt-Tiny |
+| Biến đổi | RT-DETR-L + 2×EfficientNet-B0 (P11) | YOLO26s + ConvNeXt-Tiny |
 | --- | --- | ---: |
 | `downscale_1080` | Trượt | 1/3 |
 | `jpeg_q35` | Trượt | 3/3 |
@@ -239,13 +239,13 @@ Trên T1, precision tầng A 97,7% chỉ được tính ở **hai seed có đầ
 | `rotate_5` | Đạt | 3/3 |
 | `phone_combo` | Trượt | 2/3 |
 
-Seed 42/43/44 lần lượt đạt **6/7, 5/7 và 7/7** biến đổi; `hyb_d1` đạt **4/7**. Kết quả này không xóa hạn chế ít box tầng A và không chứng minh độ bền trên mọi selfie.
+Seed 42/43/44 lần lượt đạt **6/7, 5/7 và 7/7** biến đổi; RT-DETR-L + 2×EfficientNet-B0 đạt **4/7**. Kết quả này không xóa hạn chế ít box tầng A và không chứng minh độ bền trên mọi selfie.
 
-**T4:** AUC của pipeline được chọn là **0,667 ± 0,029**, so với **0,662** của `hyb_d1`; cả hai dưới mục tiêu 0,70. Benchmark dùng **25 ca dương / 361 ca âm**, báo cáo P11 dùng **27 / 362**, nên không diễn giải chênh lệch nhỏ này như so sánh ghép cặp trên cùng tập ca.
+**T4:** AUC của pipeline được chọn là **0,667 ± 0,029**, so với **0,662** của RT-DETR-L + 2×EfficientNet-B0; cả hai dưới mục tiêu 0,70. Benchmark dùng **25 ca dương / 361 ca âm**, báo cáo P11 dùng **27 / 362**, nên không diễn giải chênh lệch nhỏ này như so sánh ghép cặp trên cùng tập ca.
 
-**Thời gian:** p95 detector + classifier của pipeline mới là **0,55 ± 0,05 giây/ảnh**. Mốc **1,40 giây/ảnh** của `hyb_d1` tính cả dịch vụ; hai phạm vi đo khác nhau, không suy ra mức tăng tốc trực tiếp.
+**Thời gian:** p95 detector + classifier của pipeline mới là **0,55 ± 0,05 giây/ảnh**. Mốc **1,40 giây/ảnh** của RT-DETR-L + 2×EfficientNet-B0 tính cả dịch vụ; hai phạm vi đo khác nhau, không suy ra mức tăng tốc trực tiếp.
 
-**Quyết định demo: giữ `hyb_d1`.** YOLO26s + ConvNeXt thắng theo quy tắc validation nhưng recall T1/T2 thấp hơn mốc demo, ít tên loại và dao động coverage lớn. RT-DETR đạt recall cao hơn trong các ứng viên mới nhưng trượt điều kiện precision trên validation; không chọn lại bằng cách xem T1/T2.
+**Quyết định demo: giữ RT-DETR-L + 2×EfficientNet-B0.** YOLO26s + ConvNeXt thắng theo quy tắc validation nhưng recall T1/T2 thấp hơn mốc demo, ít tên loại và dao động coverage lớn. RT-DETR đạt recall cao hơn trong các ứng viên mới nhưng trượt điều kiện precision trên validation; không chọn lại bằng cách xem T1/T2.
 
 <!-- /BENCH_V1_TABLES -->
 
@@ -276,7 +276,7 @@ Seed 42/43/44 lần lượt đạt **6/7, 5/7 và 7/7** biến đổi; `hyb_d1` 
 
 ![Benchmark 14 checkpoint GĐ1](docs/figures/research/phase1_benchmark.png)
 
-*Hình 3. mAP50–95 và recall của 14 checkpoint lịch sử. Màu xanh ngọc đánh dấu mốc RT-DETR-L fine-tune của engine legacy, không phải detector D1 trong `hyb_d1`. Run đủ lịch và fine-tune là các biến thể thực nghiệm; biểu đồ không chứng minh chênh lệch có ý nghĩa thống kê.*
+*Hình 3. mAP50–95 và recall của 14 checkpoint lịch sử. Màu xanh ngọc đánh dấu mốc RT-DETR-L fine-tune của engine legacy, không phải detector D1 trong RT-DETR-L + 2×EfficientNet-B0. Run đủ lịch và fine-tune là các biến thể thực nghiệm; biểu đồ không chứng minh chênh lệch có ý nghĩa thống kê.*
 
 ![Ma trận detector mụn @1280](docs/figures/research/confusion_matrices/phase1_1280_comparison.png)
 
@@ -295,7 +295,7 @@ Seed 42/43/44 lần lượt đạt **6/7, 5/7 và 7/7** biến đổi; `hyb_d1` 
 
 <!-- /PHASE2_TABLE -->
 
-Chênh lệch macro-F1 ConvNeXt-Tiny trừ EfficientNet-B0 là **+0,0269**, CI 95% **[−0,0123; +0,0741]**. Chưa đủ bằng chứng cho khác biệt có ý nghĩa thống kê trong đợt này. Đây là hai checkpoint lịch sử, không phải C0/C1 của `hyb_d1` hay hai classifier train mới trong `bench_v1`; không dùng bảng này để thay thế kết quả mục 4.1.
+Chênh lệch macro-F1 ConvNeXt-Tiny trừ EfficientNet-B0 là **+0,0269**, CI 95% **[−0,0123; +0,0741]**. Chưa đủ bằng chứng cho khác biệt có ý nghĩa thống kê trong đợt này. Đây là hai checkpoint lịch sử, không phải C0/C1 của RT-DETR-L + 2×EfficientNet-B0 hay hai classifier train mới trong `bench_v1`; không dùng bảng này để thay thế kết quả mục 4.1.
 
 ![Ma trận hai classifier](docs/figures/research/confusion_matrices/phase2_comparison.png)
 
@@ -336,14 +336,14 @@ Checkpoint, confidence và cách tiền xử lý được giữ cố định tr�
 
 ## 6. Thảo luận và hạn chế
 
-`bench_v1` cho thấy điểm mạnh khác nhau: YOLO26s có mAP50–95 trung bình nguồn cao nhất; RT-DETR tìm được nhiều nốt hơn; ConvNeXt có macro-F1 trung bình nguồn cao hơn EfficientNet. Tuy vậy, pipeline thắng trên validation chưa cải thiện recall và số nhãn đúng/ảnh so với `hyb_d1`. Giữ `hyb_d1` cho demo là quyết định sử dụng; không đổi người thắng benchmark theo T1/T2. Bằng chứng hiện tại **chưa đủ để khẳng định hệ thống đáng tin cậy trên selfie thực tế**.
+`bench_v1` cho thấy điểm mạnh khác nhau: YOLO26s có mAP50–95 trung bình nguồn cao nhất; RT-DETR tìm được nhiều nốt hơn; ConvNeXt có macro-F1 trung bình nguồn cao hơn EfficientNet. Tuy vậy, pipeline thắng trên validation chưa cải thiện recall và số nhãn đúng/ảnh so với RT-DETR-L + 2×EfficientNet-B0. Giữ RT-DETR-L + 2×EfficientNet-B0 cho demo là quyết định sử dụng; không đổi người thắng benchmark theo T1/T2. Bằng chứng hiện tại **chưa đủ để khẳng định hệ thống đáng tin cậy trên selfie thực tế**.
 
 | Hạn chế | Ảnh hưởng tới diễn giải | Thực nghiệm cần bổ sung |
 | --- | --- | --- |
 | Thiếu ID bệnh nhân đã xác minh | Chưa bảo đảm người ở test khác người ở train | Cohort mới, chia theo người trước tạo crop |
 | Nhãn selfie chưa được thẩm định | Sai khác ontology có thể bị tính như lỗi model | Review pilot và thống nhất hướng dẫn gán nhãn |
 | Chỉ 45 ảnh test ACNEDET; mất cân bằng lớp | CI rộng; lớp hiếm thiếu ổn định | Tăng số người và số mẫu lớp hiếm |
-| `hyb_d1` và các đợt lịch sử chủ yếu một seed | Không có SD của baseline để kiểm định trực tiếp với benchmark | Không tuyên bố chênh lệch nhỏ là có ý nghĩa thống kê |
+| RT-DETR-L + 2×EfficientNet-B0 và các đợt lịch sử chủ yếu một seed | Không có SD của baseline để kiểm định trực tiếp với benchmark | Không tuyên bố chênh lệch nhỏ là có ý nghĩa thống kê |
 | Seed 43/44 detector của bench_v1 chỉ train chặng C | SD chưa phản ánh ngẫu nhiên của chặng A/B | Nếu cần đo toàn quy trình, chạy lại đủ chuỗi ở mỗi seed |
 | Tầng A rất ít box hoặc không hiển thị ở một số seed | Precision cao nhưng coverage thấp, số seed hợp lệ khác nhau | Báo support và số seed có đầu ra, không lấy 97,7% làm accuracy toàn hệ thống |
 | Test đã được xem trong tiến trình nghiên cứu | Kết quả tiếp theo trên cùng test là thăm dò | Khóa một test mới trước cải tiến |
@@ -431,7 +431,7 @@ Các script train và chọn model là workflow nghiên cứu, có thể tạo h
 .\venv\Scripts\python.exe api\server.py --engine legacy --demo   # bản cũ (giữ để quay lại)
 ```
 
-**Engine mặc định `tiered`.** Đây là bản `hyb_d1` đã nghiệm thu ở P11 ([model card](reports/publication/MODEL_CARD_selfie_v1.md)). Policy được chọn trong `configs/selfie_v1/serving.json`.
+**Engine mặc định `tiered`.** Đây là bản RT-DETR-L + 2×EfficientNet-B0 đã nghiệm thu ở P11 ([model card](reports/publication/MODEL_CARD_selfie_v1.md)). Policy được chọn trong `configs/selfie_v1/serving.json`.
 
 Dịch vụ không chặn ảnh nào: `analysis_status` luôn là `ok`. Mỗi phần tử `predictions[]` có `tier`:
 - **`A`:** có `type`, `type_vi`, `group` và `probability`.
@@ -446,7 +446,7 @@ Các trường khác:
 
 Website Spa (repo riêng, `docs/SKIN_ANALYSIS_AI.md`) đọc được cả định dạng này lẫn định dạng legacy (`retake_photo`, `location_only`, `demo`).
 
-Kết quả benchmark không tự thay `serving.json`: **YOLO26s + ConvNeXt-Tiny được chọn trên validation, demo vẫn dùng `hyb_d1`**. `B`/`C` có thể kèm `guess_type`/`guess_probability` khi policy cho phép, phải hiển thị là **AI đoán (chưa chắc)**; không gộp vào tầng A hoặc câu công bố precision tên loại.
+Kết quả benchmark không tự thay `serving.json`: **YOLO26s + ConvNeXt-Tiny được chọn trên validation, demo vẫn dùng RT-DETR-L + 2×EfficientNet-B0**. `B`/`C` có thể kèm `guess_type`/`guess_probability` khi policy cho phép, phải hiển thị là **AI đoán (chưa chắc)**; không gộp vào tầng A hoặc câu công bố precision tên loại.
 
 `image_size` và `predictions[].bbox` tính theo pixel của ảnh đã xoay đúng theo EXIF. Dịch vụ không lưu ảnh. Nếu đặt biến môi trường `BINSPA_AI_KEY`, `/health` và `/analyze` phải gửi header `X-API-Key` khớp với giá trị đó.
 
