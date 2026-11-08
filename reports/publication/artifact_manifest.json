@@ -143,13 +143,13 @@
     },
     {
       "path": "reports/publication/metrics.json",
-      "bytes": 20062,
-      "sha256": "6edfaab231e4f949ed22a10c48ac8a24732e83b2d0be46063d532a725f6a83e0"
+      "bytes": 107337,
+      "sha256": "97aeb51b4e0451925cd5fd2bd357bb6d34438d37f893f38336583d8637bcfe9f"
     },
     {
       "path": "reports/publication/README.md",
-      "bytes": 3757,
-      "sha256": "fb8f14fb82ba5c209209740cb121713931f06874ba9667d492d1220b4cd408ec"
+      "bytes": 4338,
+      "sha256": "f43f734b466db17bbf3b1fded19eb6286a178e57504a58c5ca18c33dc5219722"
     }
   ]
 }

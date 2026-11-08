@@ -63,6 +63,14 @@ def export_metrics():
         external=dict(phase1=external['phase1_binary_detection'],
             phase2=external['phase2_gt_crop_classifier'], pipeline=external['phase1_plus_phase2_pipeline'],
             confidence_diagnostics=read('reports/detectdataskin2_audit/frozen_evaluation/classifier_confidence_diagnostics.json')))
+    bench_source = ROOT / 'reports/bench_v1/results.json'
+    if bench_source.exists():
+        result['bench_v1'] = read('reports/bench_v1/results.json')
+    elif (PUBLIC / 'metrics.json').exists():
+        # Keep the frozen aggregate when only the historical private reports are available.
+        previous = read('reports/publication/metrics.json')
+        if 'bench_v1' in previous:
+            result['bench_v1'] = previous['bench_v1']
     write(PUBLIC / 'metrics.json', result)
     safe_matrices = []
     for item in matrices:
@@ -132,11 +140,11 @@ def readme_tables(data):
     p1 = ['| Model | mAP50 | mAP50–95 | Precision | Recall | F1 |',
           '| --- | ---: | ---: | ---: | ---: | ---: |']
     for row in data['phase1']:
-        name = row['model'] + (' **(đang dùng)**' if row['key']=='phase1_rtdetr_ft' else '')
+        name = row['model'] + (' **(mốc legacy)**' if row['key']=='phase1_rtdetr_ft' else '')
         p1.append('| '+name+' | '+' | '.join(f'{row[k]:.4f}' for k in ['mAP50','mAP50_95','precision','recall','f1'])+' |')
     p2 = ['| Model | Accuracy | Macro-F1 [CI 95%] | Balanced accuracy |',
           '| --- | ---: | --- | ---: |']
-    for key, name, ci_key in [('efficientnet_b0','EfficientNet-B0 **(đang dùng)**','efficientnet_macro_f1_ci'),
+    for key, name, ci_key in [('efficientnet_b0','EfficientNet-B0 **(checkpoint lịch sử)**','efficientnet_macro_f1_ci'),
                              ('convnext_tiny','ConvNeXt-Tiny','convnext_macro_f1_ci')]:
         row=data['phase2'][key]
         lo,hi=data['phase2_bootstrap'][ci_key]
@@ -150,7 +158,126 @@ def readme_tables(data):
         else:
             assert start in text
             text=text.replace(start,replacement)
+    bench = data.get('bench_v1')
+    if bench and '<!-- BENCH_V1_TABLES -->' in text:
+        start, end = '<!-- BENCH_V1_TABLES -->', '<!-- /BENCH_V1_TABLES -->'
+        assert end in text
+        replacement = start + '\n\n' + bench_tables(bench) + '\n\n' + end
+        text = re.sub(re.escape(start)+'.*?'+re.escape(end),lambda _:replacement,text,flags=re.S)
     (ROOT/'README.md').write_text(text,encoding='utf-8',newline='\n')
+
+
+def bench_tables(bench):
+    """Render only frozen aggregate measurements; never infer, train or reselect models."""
+    names = dict(yolo26s='YOLO26s', rtdetr='RT-DETR-L', frcnn='Faster R-CNN',
+                 effnet='EfficientNet-B0', convnext='ConvNeXt-Tiny')
+
+    def num(x, digits=1):
+        return f'{x:.{digits}f}'.replace('.', ',')
+
+    def stat(v, percent=False, digits=1):
+        mean, sd, n = v
+        if mean is None:
+            return '—'
+        scale = 100 if percent else 1
+        value = f'{num(mean * scale, digits)} ± {num(sd * scale, digits)}'
+        return value + (f' ({n}/3 seed)' if n != 3 else '')
+
+    def pname(key):
+        d, c = key.split('+')
+        return names[d] + ' + ' + names[c]
+
+    chosen = bench['selection']['chosen']
+    rows = ['**Detector trên `val_select`.** mAP là thang 0–1; recall tính bằng %. Điểm mAP trung bình nguồn cho mỗi nguồn trọng số ngang nhau.', '',
+            '| Detector | mAP50–95 TB nguồn | mAP50 TB nguồn | Recall nốt nhỏ | Recall nốt vừa | Recall nốt lớn |',
+            '| --- | ---: | ---: | ---: | ---: | ---: |']
+    for key, d in bench['detectors'].items():
+        values = [stat(d['mean_source_mAP50_95'], digits=3), stat(d['mean_source_mAP50'], digits=3)]
+        values += [stat(d['recall_by_size'][s], percent=True) for s in ('small', 'medium', 'large')]
+        rows.append('| ' + names[key] + ' | ' + ' | '.join(values) + ' |')
+    rows += ['', '**Classifier trên crop GT `val_select`.** Các điểm macro-F1 là thang 0–1, chưa tính lỗi bỏ sót hoặc báo nhầm của detector.', '',
+             '| Classifier | Macro-F1 TB nguồn | Macro-F1 gộp | ACNE-DET | DetectDataSkin-2 |',
+             '| --- | ---: | ---: | ---: | ---: |']
+    for key, c in bench['classifiers'].items():
+        values = [stat(c[k], digits=3) for k in ('val_mean_source_macro_f1', 'val_macro_f1',
+                                                'val_f1_acnedet_author', 'val_f1_detectdataskin2')]
+        rows.append('| ' + names[key] + ' | ' + ' | '.join(values) + ' |')
+    rows += ['', '**Sáu pipeline sau policy, IoU 0,3.** P/R là precision/recall vị trí (%), gộp ảnh trong mỗi tập rồi lấy trung bình ± SD qua seed. Cột precision ghi điều kiện loại trên `val_select`, xét riêng từng nguồn; không phải kết quả nghiệm thu trên T1/T2.', '',
+             '| Pipeline | R `val_select` | Precision `val_select` | P / R T1 | P / R T2 |',
+             '| --- | ---: | --- | --- | --- |']
+    fail_names = {'acnedet_author: location precision': 'P vị trí ACNE-DET',
+                  'acnedet_author: tier A precision': 'P tầng A ACNE-DET',
+                  'acnedet_author: tier B precision': 'P tầng B ACNE-DET',
+                  'detectdataskin2: tier B precision': 'P tầng B DetectDataSkin-2'}
+    for key, p in bench['pipelines'].items():
+        fails = bench['selection']['log']['stats'][key]['fails']
+        eligibility = 'Đạt' if not fails else 'Trượt: ' + '; '.join(fail_names.get(f, f) for f in fails)
+        name = pname(key) + (' **(chọn trên validation)**' if key == chosen else '')
+        t1 = ' / '.join(stat(p['T1'][k], percent=True) for k in ('location_precision', 'location_recall'))
+        t2 = ' / '.join(stat(p['T2'][k], percent=True) for k in ('location_precision', 'location_recall'))
+        rows.append(f'| {name} | {stat(p["val_select"]["location_recall"], percent=True)} | {eligibility} | {t1} | {t2} |')
+    rows += ['', 'Recall dùng để xếp hạng trong quy tắc chọn là **trung bình recall theo nguồn từ số đếm gộp ba seed**, khác cột recall gộp ảnh ở bảng trên. Pipeline được chọn là ứng viên duy nhất qua điều kiện precision, nên các bước phá hòa theo recall/coverage không làm thay đổi lựa chọn.', '',
+             '**Đối chiếu pipeline được chọn với `hyb_d1`.** `hyb_d1` là một lần chạy P11; benchmark là trung bình ± SD, không phải CI 95%. Precision tầng A/B tính trên các box được ghi loại/nhóm; coverage tính trên nốt tìm đúng.', '',
+             '| Tập | Chỉ số | `hyb_d1` — mốc demo | YOLO26s + ConvNeXt-Tiny |',
+             '| --- | --- | ---: | ---: |']
+    ref = bench['references']['hyb_d1_served']
+    labels = [('location_precision', 'Precision vị trí', True, 1),
+              ('location_recall', 'Recall vị trí', True, 1),
+              ('tier_A_precision', 'Precision tầng A', True, 1),
+              ('tier_A_shown', 'Số box tầng A', False, 0),
+              ('tier_B_precision', 'Precision tầng B', True, 1),
+              ('tier_B_shown', 'Số box tầng B', False, 0),
+              ('coverage_A_or_B_on_found', 'Coverage A+B', True, 1)]
+    for dataset in ('T1', 'T2'):
+        for key, label, percent, digits in labels:
+            value = ref[dataset][key]
+            ref_value = '—' if value is None else num(value * (100 if percent else 1), digits)
+            rows.append(f'| {dataset} | {label}{" (%)" if percent else ""} | {ref_value} | '
+                        f'{stat(bench["pipelines"][chosen][dataset][key], percent, digits)} |')
+    rows += ['', 'Trên T1, precision tầng A 97,7% chỉ được tính ở **hai seed có đầu ra tầng A**; ba seed lần lượt hiện **44, 1 và 0 box**. Không diễn giải đây là accuracy toàn hệ thống hoặc bằng chứng chắc chắn rằng model tốt hơn mốc 91,9% trên 136 box của `hyb_d1`. Nhãn đúng/ảnh T1 là **4,96 ± 1,88**, so với **4,98** của `hyb_d1`.', '',
+             '**T3 — độ bền trên bảy biến đổi ảnh.** Cột benchmark là số seed đạt trên ba seed; một tầng không được hiển thị không có phép đo precision của tầng đó.', '',
+             '| Biến đổi | `hyb_d1` (P11) | YOLO26s + ConvNeXt-Tiny |',
+             '| --- | --- | ---: |']
+    reference_t3 = dict(downscale_1080='Trượt', jpeg_q35='Trượt', noise_s8='Đạt', dark_x0_6='Đạt',
+                        warm_wb='Đạt', rotate_5='Đạt', phone_combo='Trượt')
+    for variant, counts in bench['pipelines'][chosen]['T3'].items():
+        rows.append(f'| `{variant}` | {reference_t3[variant.replace(".", "_")]} | {counts.get("pass", 0)}/3 |')
+    p = bench['pipelines'][chosen]
+    rows += ['', 'Seed 42/43/44 lần lượt đạt **6/7, 5/7 và 7/7** biến đổi; `hyb_d1` đạt **4/7**. Kết quả này không xóa hạn chế ít box tầng A và không chứng minh độ bền trên mọi selfie.', '',
+             f'**T4:** AUC của pipeline được chọn là **{stat(p["T4_auc"], digits=3)}**, so với '
+             f'**{num(ref["T4_auc"], 3)}** của `hyb_d1`; cả hai dưới mục tiêu 0,70. Benchmark dùng **25 ca dương / 361 ca âm**, báo cáo P11 dùng **27 / 362**, nên không diễn giải chênh lệch nhỏ này như so sánh ghép cặp trên cùng tập ca.', '',
+             f'**Thời gian:** p95 detector + classifier của pipeline mới là **{stat(p["seconds_p95"], digits=2)} giây/ảnh**. '
+             'Mốc **1,40 giây/ảnh** của `hyb_d1` tính cả dịch vụ; hai phạm vi đo khác nhau, không suy ra mức tăng tốc trực tiếp.', '',
+             '**Quyết định demo: giữ `hyb_d1`.** YOLO26s + ConvNeXt thắng theo quy tắc validation nhưng recall T1/T2 thấp hơn mốc demo, ít tên loại và dao động coverage lớn. RT-DETR đạt recall cao hơn trong các ứng viên mới nhưng trượt điều kiện precision trên validation; không chọn lại bằng cách xem T1/T2.']
+    return '\n'.join(rows)
+
+
+def publication_index(data):
+    rows=['# Kết quả tổng hợp công khai','',
+        'Các file ở đây chỉ chứa thống kê tổng hợp, checkpoint hash và ma trận. Ảnh khuôn mặt, ID ảnh/người, tọa độ box, dự đoán từng ảnh, tài liệu cá nhân và đường dẫn máy cá nhân không được xuất.','',
+        '- [Báo cáo chính và các hình hiển thị trực tiếp](../../README.md)',
+        '- [Số liệu các thực nghiệm, gồm bench_v1 trong khóa `bench_v1`](metrics.json)',
+        '- [Ma trận dưới dạng số nguyên](confusion_matrices.json)',
+        '- [PDF 18 trang](../../docs/figures/research/confusion_matrices/all_models_confusion_matrices.pdf)','',
+        '## Kết quả mới nhất','',
+        'README chính trình bày benchmark `bench_v1` (3 detector × 2 classifier, kết quả qua seed 42/43/44) và đối chiếu với pipeline demo `hyb_d1`. Pipeline chọn trên validation là YOLO26s + ConvNeXt-Tiny; cấu hình demo vẫn giữ `hyb_d1`. Detector seed 43/44 chỉ train lại chặng C; T1–T4 là các bộ đánh giá phát triển đã được xem trước. Ma trận bên dưới thuộc các đợt lịch sử, không phải ma trận mới của bench_v1.','',
+        '## Ma trận từng checkpoint — các đợt lịch sử','',
+        '| Giai đoạn | Model | Tập dữ liệu | Hình |','| --- | --- | --- | --- |']
+    for item in read('reports/publication/confusion_matrices.json')['matrices']:
+        rows.append(f'| {item["phase"]} | {item["model"]} | {item["dataset"]} | [Mở](../../{item["figure"]}) |')
+    rows += ['', '## Tái lập và phạm vi', '',
+        '`python scripts/prepare_publication.py` xuất lại các artifact này từ báo cáo đánh giá lưu riêng. Script không chạy model hay chọn lại ngưỡng. Muốn chấm lại từ đầu cần dữ liệu được cấp quyền, manifest chia tập và checkpoint tương ứng; các đầu vào đó không nằm trong bản công khai.', '',
+        'Dữ liệu DetectDataSkin-2 là thăm dò với mapping nhãn tạm thời. Không diễn giải kết quả này như kiểm định lâm sàng hoặc kiểm định độc lập theo bệnh nhân.', '']
+    (PUBLIC/'README.md').write_text('\n'.join(rows),encoding='utf-8',newline='\n')
+
+
+def publication_manifest():
+    artifacts=sorted([p for p in FIGURES.rglob('*') if p.is_file() and 'phase3' not in p.parts and 'phase3' not in p.name] +
+                     [PUBLIC/'metrics.json',PUBLIC/'confusion_matrices.json',PUBLIC/'README.md'])
+    write(PUBLIC/'artifact_manifest.json',dict(privacy='Aggregate figures and metrics only; no per-image records',
+        artifacts=[dict(path=p.relative_to(ROOT).as_posix(),bytes=p.stat().st_size,
+                        sha256=hashlib.sha256(p.read_bytes()).hexdigest()) for p in artifacts]))
+    print(f'Exported {len(artifacts)} aggregate publication artifacts')
 
 
 def main():
@@ -159,26 +286,8 @@ def main():
     data=export_metrics()
     charts(data)
     readme_tables(data)
-    rows=['# Kết quả tổng hợp công khai','',
-        'Các file ở đây chỉ chứa thống kê tổng hợp, checkpoint hash và ma trận. Ảnh khuôn mặt, ID ảnh/người, tọa độ box, dự đoán từng ảnh, tài liệu cá nhân và đường dẫn máy cá nhân không được xuất.','',
-        '- [Báo cáo chính và các hình hiển thị trực tiếp](../../README.md)',
-        '- [Số liệu các thực nghiệm](metrics.json)',
-        '- [Ma trận dưới dạng số nguyên](confusion_matrices.json)',
-        '- [PDF 18 trang](../../docs/figures/research/confusion_matrices/all_models_confusion_matrices.pdf)','',
-        '## Ma trận từng checkpoint','',
-        '| Giai đoạn | Model | Tập dữ liệu | Hình |','| --- | --- | --- | --- |']
-    for item in read('reports/publication/confusion_matrices.json')['matrices']:
-        rows.append(f'| {item["phase"]} | {item["model"]} | {item["dataset"]} | [Mở](../../{item["figure"]}) |')
-    rows += ['', '## Tái lập và phạm vi', '',
-        '`python scripts/prepare_publication.py` xuất lại các artifact này từ báo cáo đánh giá lưu riêng. Script không chạy model hay chọn lại ngưỡng. Muốn chấm lại từ đầu cần dữ liệu được cấp quyền, manifest chia tập và checkpoint tương ứng; các đầu vào đó không nằm trong bản công khai.', '',
-        'Dữ liệu DetectDataSkin-2 là thăm dò với mapping nhãn tạm thời. Không diễn giải kết quả này như kiểm định lâm sàng hoặc kiểm định độc lập theo bệnh nhân.', '']
-    (PUBLIC/'README.md').write_text('\n'.join(rows),encoding='utf-8',newline='\n')
-    artifacts=sorted([p for p in FIGURES.rglob('*') if p.is_file() and 'phase3' not in p.parts and 'phase3' not in p.name] +
-                     [PUBLIC/'metrics.json',PUBLIC/'confusion_matrices.json',PUBLIC/'README.md'])
-    write(PUBLIC/'artifact_manifest.json',dict(privacy='Aggregate figures and metrics only; no per-image records',
-        artifacts=[dict(path=p.relative_to(ROOT).as_posix(),bytes=p.stat().st_size,
-                        sha256=hashlib.sha256(p.read_bytes()).hexdigest()) for p in artifacts]))
-    print(f'Exported {len(artifacts)} aggregate publication artifacts')
+    publication_index(data)
+    publication_manifest()
 
 
 if __name__=='__main__':

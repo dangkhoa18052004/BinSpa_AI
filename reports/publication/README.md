@@ -3,11 +3,15 @@
 Các file ở đây chỉ chứa thống kê tổng hợp, checkpoint hash và ma trận. Ảnh khuôn mặt, ID ảnh/người, tọa độ box, dự đoán từng ảnh, tài liệu cá nhân và đường dẫn máy cá nhân không được xuất.
 
 - [Báo cáo chính và các hình hiển thị trực tiếp](../../README.md)
-- [Số liệu các thực nghiệm](metrics.json)
+- [Số liệu các thực nghiệm, gồm bench_v1 trong khóa `bench_v1`](metrics.json)
 - [Ma trận dưới dạng số nguyên](confusion_matrices.json)
 - [PDF 18 trang](../../docs/figures/research/confusion_matrices/all_models_confusion_matrices.pdf)
 
-## Ma trận từng checkpoint
+## Kết quả mới nhất
+
+README chính trình bày benchmark `bench_v1` (3 detector × 2 classifier, kết quả qua seed 42/43/44) và đối chiếu với pipeline demo `hyb_d1`. Pipeline chọn trên validation là YOLO26s + ConvNeXt-Tiny; cấu hình demo vẫn giữ `hyb_d1`. Detector seed 43/44 chỉ train lại chặng C; T1–T4 là các bộ đánh giá phát triển đã được xem trước. Ma trận bên dưới thuộc các đợt lịch sử, không phải ma trận mới của bench_v1.
+
+## Ma trận từng checkpoint — các đợt lịch sử
 
 | Giai đoạn | Model | Tập dữ liệu | Hình |
 | --- | --- | --- | --- |

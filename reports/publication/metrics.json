@@ -750,5 +750,3326 @@
       ],
       "fitted_calibration": false
     }
+  },
+  "bench_v1": {
+    "utc": "2026-11-08T12:32:33+00:00",
+    "selection": {
+      "chosen": "yolo26s+convnext",
+      "rule": ", on val_select only (written to runs/bench_v1/pipeline_selection.json before any T-set number is\nread; the rule is fixed before any pipeline result):\n  1. counts of the three seeds are pooled per lineage group (seed-averaged metrics);\n  2. eligible = every val_select source meets its acceptance.yaml precision target (ACNE-DET, ACNE04: T1 targets;\n     DetectDataSkin-2: T2) for location precision and for tier A / tier B precision where the tier is shown;\n     no eligible pipeline -> all are ranked and the report says no pipeline met every target;\n  3. criteria in order: mean per-source location recall, mean per-source coverage A+B on found, correct labels (A\n     right type + B right group) per typed photo. At each step the leader is kept together with every pipeline whose\n     paired bootstrap difference to it (1000 resamples of lineage groups, 95 %) contains 0; one left -> chosen;\n     still tied after the last criterion -> the leader of the last criterion.",
+      "log": {
+        "note": "eligible pipelines ranked",
+        "steps": [
+          {
+            "criterion": "location_recall_mean_source",
+            "leader": "yolo26s+convnext",
+            "kept": [
+              "yolo26s+convnext"
+            ],
+            "diff_ci": {}
+          }
+        ],
+        "stats": {
+          "yolo26s+effnet": {
+            "criteria": {
+              "location_recall_mean_source": 0.4409542958902752,
+              "coverage_AB_mean_source": 0.43779470250990826,
+              "correct_labels_per_typed_photo": 3.897018970189702
+            },
+            "fails": [
+              "detectdataskin2: tier B precision"
+            ]
+          },
+          "yolo26s+convnext": {
+            "criteria": {
+              "location_recall_mean_source": 0.4431145976819453,
+              "coverage_AB_mean_source": 0.3663307537683959,
+              "correct_labels_per_typed_photo": 2.970189701897019
+            },
+            "fails": []
+          },
+          "rtdetr+effnet": {
+            "criteria": {
+              "location_recall_mean_source": 0.5043946959992526,
+              "coverage_AB_mean_source": 0.3022654735120362,
+              "correct_labels_per_typed_photo": 3.205962059620596
+            },
+            "fails": [
+              "acnedet_author: location precision",
+              "acnedet_author: tier A precision"
+            ]
+          },
+          "rtdetr+convnext": {
+            "criteria": {
+              "location_recall_mean_source": 0.5138019983717665,
+              "coverage_AB_mean_source": 0.3010111925289934,
+              "correct_labels_per_typed_photo": 3.2439024390243905
+            },
+            "fails": [
+              "acnedet_author: location precision",
+              "acnedet_author: tier A precision",
+              "detectdataskin2: tier B precision"
+            ]
+          },
+          "frcnn+effnet": {
+            "criteria": {
+              "location_recall_mean_source": 0.42104633036877726,
+              "coverage_AB_mean_source": 0.40381830724509804,
+              "correct_labels_per_typed_photo": 2.1219512195121952
+            },
+            "fails": [
+              "acnedet_author: tier B precision"
+            ]
+          },
+          "frcnn+convnext": {
+            "criteria": {
+              "location_recall_mean_source": 0.4217570026537441,
+              "coverage_AB_mean_source": 0.4219770198476513,
+              "correct_labels_per_typed_photo": 2.5745257452574526
+            },
+            "fails": [
+              "acnedet_author: tier A precision",
+              "acnedet_author: tier B precision",
+              "detectdataskin2: tier B precision"
+            ]
+          }
+        }
+      },
+      "locked_utc": "2026-11-08T12:32:33+00:00",
+      "acceptance_sha256": "608e8db009dd80d3ce7d7356d7c144aada610cbe43c897826a51e24e3c0bebb9"
+    },
+    "recipes": {
+      "detector": {
+        "yolo26s": "R1",
+        "rtdetr": "R1",
+        "frcnn": "R1"
+      },
+      "classifier": {
+        "effnet": "R1",
+        "convnext": "R1"
+      }
+    },
+    "detectors": {
+      "yolo26s": {
+        "mean_source_mAP50_95": [
+          0.14645065735793214,
+          0.0016427586329767602,
+          3
+        ],
+        "mean_source_mAP50": [
+          0.4209596617564881,
+          0.007377433469199149,
+          3
+        ],
+        "per_source": {
+          "acne04": [
+            0.20924686433176798,
+            0.0046975875705700856,
+            3
+          ],
+          "acnedet_author": [
+            0.11520299079721792,
+            0.0050601074215125405,
+            3
+          ],
+          "detectdataskin2": [
+            0.1149021169448104,
+            0.006293240981173995,
+            3
+          ]
+        },
+        "recall_by_size": {
+          "small": [
+            0.23619206217041355,
+            0.014187485894123846,
+            3
+          ],
+          "medium": [
+            0.47912353347135955,
+            0.006594725622365908,
+            3
+          ],
+          "large": [
+            0.5381400208986417,
+            0.011009042583963164,
+            3
+          ]
+        },
+        "photos_at_box_cap": [
+          140,
+          140,
+          150
+        ]
+      },
+      "rtdetr": {
+        "mean_source_mAP50_95": [
+          0.14092731098426056,
+          0.002663496302548683,
+          3
+        ],
+        "mean_source_mAP50": [
+          0.4295943035889751,
+          0.0034213712410680348,
+          3
+        ],
+        "per_source": {
+          "acne04": [
+            0.20461264888958966,
+            0.0007514207933741934,
+            3
+          ],
+          "acnedet_author": [
+            0.11204226594889616,
+            0.004128769814840101,
+            3
+          ],
+          "detectdataskin2": [
+            0.10612701811429588,
+            0.0046847326582490035,
+            3
+          ]
+        },
+        "recall_by_size": {
+          "small": [
+            0.283097418817652,
+            0.009006372877928371,
+            3
+          ],
+          "medium": [
+            0.5124223602484471,
+            0.014427908762698113,
+            3
+          ],
+          "large": [
+            0.574414091655471,
+            0.009576960700012214,
+            3
+          ]
+        },
+        "photos_at_box_cap": [
+          214,
+          214,
+          214
+        ]
+      },
+      "frcnn": {
+        "mean_source_mAP50_95": [
+          0.12255606587819663,
+          0.002757630829505229,
+          3
+        ],
+        "mean_source_mAP50": [
+          0.38206810936411256,
+          0.010626149685226818,
+          3
+        ],
+        "per_source": {
+          "acne04": [
+            0.1858768649427295,
+            0.00883210080876914,
+            3
+          ],
+          "acnedet_author": [
+            0.10182173803441975,
+            0.0004399639133353315,
+            3
+          ],
+          "detectdataskin2": [
+            0.0799695946574407,
+            0.006309458452338378,
+            3
+          ]
+        },
+        "recall_by_size": {
+          "small": [
+            0.20316402997502084,
+            0.008200547711736972,
+            3
+          ],
+          "medium": [
+            0.4473775017253278,
+            0.019062334910101994,
+            3
+          ],
+          "large": [
+            0.5375429168532617,
+            0.008465410884465039,
+            3
+          ]
+        },
+        "photos_at_box_cap": [
+          180,
+          213,
+          140
+        ]
+      }
+    },
+    "classifiers": {
+      "effnet": {
+        "val_mean_source_macro_f1": [
+          0.6962254902440037,
+          0.00560128191914378,
+          3
+        ],
+        "val_macro_f1": [
+          0.7356246645168407,
+          0.007327180187871323,
+          3
+        ],
+        "val_f1_acne04": [
+          0.6555080597561423,
+          0.01953498836672777,
+          3
+        ],
+        "val_f1_acnedet_author": [
+          0.8187959686418577,
+          0.027554265997393867,
+          3
+        ],
+        "val_f1_detectdataskin2": [
+          0.6143724423340107,
+          0.011092489466741507,
+          3
+        ]
+      },
+      "convnext": {
+        "val_mean_source_macro_f1": [
+          0.7087610363674016,
+          0.0016317828620239377,
+          3
+        ],
+        "val_macro_f1": [
+          0.7479282869235849,
+          0.005475709191811168,
+          3
+        ],
+        "val_f1_acne04": [
+          0.657051411124832,
+          0.005535168648643058,
+          3
+        ],
+        "val_f1_acnedet_author": [
+          0.8178890914974005,
+          0.0071068295067860604,
+          3
+        ],
+        "val_f1_detectdataskin2": [
+          0.6513426064799726,
+          0.012735348049892788,
+          3
+        ]
+      }
+    },
+    "pipelines": {
+      "yolo26s+effnet": {
+        "val_select": {
+          "location_precision": [
+            0.7273285752082687,
+            0.016818014620497406,
+            3
+          ],
+          "location_recall": [
+            0.4562801037421267,
+            0.016869288533282265,
+            3
+          ],
+          "fp_per_photo": [
+            4.277777777777778,
+            0.34483748980622364,
+            3
+          ],
+          "tier_A_precision": [
+            0.8997392625441406,
+            0.06118943905694618,
+            3
+          ],
+          "tier_A_shown": [
+            89.66666666666667,
+            67.26316475853135,
+            3
+          ],
+          "tier_B_precision": [
+            0.8679947712059874,
+            0.009708120371074037,
+            3
+          ],
+          "tier_B_shown": [
+            462.6666666666667,
+            101.2784939329833,
+            3
+          ],
+          "coverage_A_or_B_on_found": [
+            0.45635175682411666,
+            0.10105336247893328,
+            3
+          ],
+          "ece_displayed": [
+            0.02265414983502491,
+            0.008391553101196658,
+            3
+          ],
+          "macro_f1_box_type": [
+            0.032752296146212174,
+            0.0202425236457464,
+            3
+          ],
+          "correct_labels_per_typed_photo": [
+            3.897018970189702,
+            0.6033995685152393,
+            3
+          ]
+        },
+        "T1": {
+          "location_precision": [
+            0.7591379728160684,
+            0.013496941304798763,
+            3
+          ],
+          "location_recall": [
+            0.36342136381553014,
+            0.014337038612119202,
+            3
+          ],
+          "fp_per_photo": [
+            6.51111111111111,
+            0.626966043540706,
+            3
+          ],
+          "tier_A_precision": [
+            0.9487179487179487,
+            0.07252377242938947,
+            2
+          ],
+          "tier_A_shown": [
+            26.333333333333332,
+            44.747439405326126,
+            3
+          ],
+          "tier_B_precision": [
+            0.9297085975346571,
+            0.026041831766954553,
+            3
+          ],
+          "tier_B_shown": [
+            262.6666666666667,
+            146.15174762326086,
+            3
+          ],
+          "coverage_A_or_B_on_found": [
+            0.2945702522385934,
+            0.09406538758670839,
+            3
+          ],
+          "ece_displayed": [
+            0.0338161346651737,
+            0.00789302575994568,
+            3
+          ],
+          "macro_f1_box_type": [
+            0.011711113623019813,
+            0.018518389507840252,
+            3
+          ],
+          "correct_labels_per_typed_photo": [
+            5.896296296296296,
+            2.040374370554693,
+            3
+          ],
+          "acceptance": [
+            {
+              "tier_A_precision": "not_shown",
+              "tier_B_precision": "fail",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "pass",
+              "tier_B_precision": "pass",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "fail",
+              "tier_B_precision": "pass",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "pass"
+            }
+          ]
+        },
+        "T2": {
+          "location_precision": [
+            0.7393338433296771,
+            0.03265987470763705,
+            3
+          ],
+          "location_recall": [
+            0.3476865472051351,
+            0.024969114772899308,
+            3
+          ],
+          "fp_per_photo": [
+            1.624413145539906,
+            0.30583845725933284,
+            3
+          ],
+          "tier_A_precision": [
+            0.8755142521304731,
+            0.05677840962657187,
+            2
+          ],
+          "tier_A_shown": [
+            164.66666666666666,
+            164.00406499027193,
+            3
+          ],
+          "tier_B_precision": [
+            0.8296253720057661,
+            0.02034743983971895,
+            3
+          ],
+          "tier_B_shown": [
+            711.0,
+            212.34641508629244,
+            3
+          ],
+          "coverage_A_or_B_on_found": [
+            0.5750359797001466,
+            0.03427280689603494,
+            3
+          ],
+          "ece_displayed": [
+            0.02614197433916962,
+            0.009599229878527136,
+            3
+          ],
+          "macro_f1_box_type": [
+            0.038020495835189745,
+            0.035676447178820465,
+            3
+          ],
+          "correct_labels_per_typed_photo": [
+            2.5856807511737094,
+            0.366490492863756,
+            3
+          ],
+          "acceptance": [
+            {
+              "tier_A_precision": "pass",
+              "tier_B_precision": "fail",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "pass",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "pass",
+              "tier_B_precision": "fail",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "pass",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "not_shown",
+              "tier_B_precision": "fail",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "pass",
+              "ece_max": "pass"
+            }
+          ]
+        },
+        "val_select_per_source": {
+          "acnedet_author": {
+            "location_precision": [
+              0.7293949733345338,
+              0.01780479859172199,
+              3
+            ],
+            "location_recall": [
+              0.36754850088183416,
+              0.023216201300746864,
+              3
+            ],
+            "tier_A_precision": [
+              0.9696969696969697,
+              0.0428549564355483,
+              2
+            ],
+            "tier_B_precision": [
+              0.9405325443786982,
+              0.00961879775562651,
+              3
+            ],
+            "coverage_A_or_B_on_found": [
+              0.33654093113296146,
+              0.11300113114220141,
+              3
+            ]
+          },
+          "detectdataskin2": {
+            "location_precision": [
+              0.7416451530416855,
+              0.03738825884624276,
+              3
+            ],
+            "location_recall": [
+              0.3434959349593496,
+              0.016390869204467896,
+              3
+            ],
+            "tier_A_precision": [
+              0.8793882072256305,
+              0.07236155795884831,
+              2
+            ],
+            "tier_B_precision": [
+              0.8427626943308332,
+              0.025220426177595456,
+              3
+            ],
+            "coverage_A_or_B_on_found": [
+              0.6007930986388538,
+              0.024451726892280506,
+              3
+            ]
+          },
+          "acne04": {
+            "location_precision": [
+              0.7213999569907691,
+              0.010465291272333149,
+              3
+            ],
+            "location_recall": [
+              0.5647414118535297,
+              0.015114187405940066,
+              3
+            ],
+            "tier_A_precision": [
+              null,
+              null,
+              0
+            ],
+            "tier_B_precision": [
+              null,
+              null,
+              0
+            ],
+            "coverage_A_or_B_on_found": [
+              0.42464421444938233,
+              0.13555313056696192,
+              3
+            ]
+          }
+        },
+        "T3": {
+          "downscale_1080": {
+            "pass": 1,
+            "fail": 2
+          },
+          "jpeg_q35": {
+            "pass": 3
+          },
+          "noise_s8": {
+            "pass": 2,
+            "fail": 1
+          },
+          "dark_x0.6": {
+            "pass": 3
+          },
+          "warm_wb": {
+            "pass": 3
+          },
+          "rotate_5": {
+            "pass": 3
+          },
+          "phone_combo": {
+            "fail": 3
+          }
+        },
+        "T4_auc": [
+          0.671006463527239,
+          0.02636434263207612,
+          3
+        ],
+        "seconds_p95": [
+          0.6001083333333334,
+          0.08332556755482275,
+          3
+        ],
+        "thresholds": [
+          {
+            "low": {
+              "C": 0.43,
+              "A": null,
+              "B": 0.82
+            },
+            "high": {
+              "C": 0.45,
+              "A": 0.85,
+              "B": 0.71
+            }
+          },
+          {
+            "low": {
+              "C": 0.45,
+              "A": null,
+              "B": 0.83
+            },
+            "high": {
+              "C": 0.49,
+              "A": 0.79,
+              "B": 0.76
+            }
+          },
+          {
+            "low": {
+              "C": 0.45,
+              "A": 0.85,
+              "B": 0.87
+            },
+            "high": {
+              "C": 0.47,
+              "A": null,
+              "B": 0.72
+            }
+          }
+        ]
+      },
+      "yolo26s+convnext": {
+        "val_select": {
+          "location_precision": [
+            0.7284761236112113,
+            0.010550589104413477,
+            3
+          ],
+          "location_recall": [
+            0.4586884031122638,
+            0.01971277992485026,
+            3
+          ],
+          "fp_per_photo": [
+            4.271604938271605,
+            0.21463381050263827,
+            3
+          ],
+          "tier_A_precision": [
+            0.8782927718530672,
+            0.0013212732671884202,
+            2
+          ],
+          "tier_A_shown": [
+            104.33333333333333,
+            103.51006392295066,
+            3
+          ],
+          "tier_B_precision": [
+            0.8991198908614407,
+            0.055781448870678915,
+            3
+          ],
+          "tier_B_shown": [
+            311.6666666666667,
+            220.09619109228885,
+            3
+          ],
+          "coverage_A_or_B_on_found": [
+            0.38994117363219183,
+            0.10257473184780766,
+            3
+          ],
+          "ece_displayed": [
+            0.030293631125379084,
+            0.014738502669713454,
+            3
+          ],
+          "macro_f1_box_type": [
+            0.03732549756340863,
+            0.03667598556233569,
+            3
+          ],
+          "correct_labels_per_typed_photo": [
+            2.9701897018970187,
+            0.967388577159975,
+            3
+          ]
+        },
+        "T1": {
+          "location_precision": [
+            0.758820430696422,
+            0.015434211343893589,
+            3
+          ],
+          "location_recall": [
+            0.3617133096833531,
+            0.014516527806983506,
+            3
+          ],
+          "fp_per_photo": [
+            6.496296296296296,
+            0.7129605579565017,
+            3
+          ],
+          "tier_A_precision": [
+            0.9772727272727273,
+            0.03214121732666122,
+            2
+          ],
+          "tier_A_shown": [
+            15.0,
+            25.11971337416094,
+            3
+          ],
+          "tier_B_precision": [
+            0.9451331265230541,
+            0.024475571259042372,
+            3
+          ],
+          "tier_B_shown": [
+            223.0,
+            110.43550153822818,
+            3
+          ],
+          "coverage_A_or_B_on_found": [
+            0.2511070154701174,
+            0.10203606532992207,
+            3
+          ],
+          "ece_displayed": [
+            0.0544187361148877,
+            0.002043315019890331,
+            3
+          ],
+          "macro_f1_box_type": [
+            0.014759693217132367,
+            0.023792245283938317,
+            3
+          ],
+          "correct_labels_per_typed_photo": [
+            4.962962962962963,
+            1.8822541428925619,
+            3
+          ],
+          "acceptance": [
+            {
+              "tier_A_precision": "pass",
+              "tier_B_precision": "pass",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "fail"
+            },
+            {
+              "tier_A_precision": "pass",
+              "tier_B_precision": "fail",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "fail"
+            },
+            {
+              "tier_A_precision": "not_shown",
+              "tier_B_precision": "pass",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "fail"
+            }
+          ]
+        },
+        "T2": {
+          "location_precision": [
+            0.7357399744952383,
+            0.009699339983300071,
+            3
+          ],
+          "location_recall": [
+            0.3538379245787644,
+            0.02906371299112601,
+            3
+          ],
+          "fp_per_photo": [
+            1.67018779342723,
+            0.08741570977166872,
+            3
+          ],
+          "tier_A_precision": [
+            0.864352766798419,
+            0.011843339862758866,
+            2
+          ],
+          "tier_A_shown": [
+            196.0,
+            185.1701919856433,
+            3
+          ],
+          "tier_B_precision": [
+            0.8279863887302494,
+            0.029052221787471258,
+            2
+          ],
+          "tier_B_shown": [
+            432.6666666666667,
+            375.98049594803894,
+            3
+          ],
+          "coverage_A_or_B_on_found": [
+            0.416710289468524,
+            0.15246508472470505,
+            3
+          ],
+          "ece_displayed": [
+            0.022216764520221144,
+            0.012490299722719577,
+            3
+          ],
+          "macro_f1_box_type": [
+            0.04529536143174758,
+            0.04075913863430198,
+            3
+          ],
+          "correct_labels_per_typed_photo": [
+            1.8579812206572772,
+            0.6788503492916922,
+            3
+          ],
+          "acceptance": [
+            {
+              "tier_A_precision": "pass",
+              "tier_B_precision": "not_shown",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "pass",
+              "tier_B_precision": "fail",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "pass",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "not_shown",
+              "tier_B_precision": "fail",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "pass",
+              "ece_max": "pass"
+            }
+          ]
+        },
+        "val_select_per_source": {
+          "acnedet_author": {
+            "location_precision": [
+              0.733574828274758,
+              0.024779756023688187,
+              3
+            ],
+            "location_recall": [
+              0.3689594356261023,
+              0.021487822801436376,
+              3
+            ],
+            "tier_A_precision": [
+              0.90625,
+              0.0,
+              1
+            ],
+            "tier_B_precision": [
+              0.9376996489731774,
+              0.032327757559873785,
+              3
+            ],
+            "coverage_A_or_B_on_found": [
+              0.2825987817123347,
+              0.08744317413817898,
+              3
+            ]
+          },
+          "detectdataskin2": {
+            "location_precision": [
+              0.7408925158925159,
+              0.009838929141341103,
+              3
+            ],
+            "location_recall": [
+              0.34866962305986693,
+              0.030528092711783538,
+              3
+            ],
+            "tier_A_precision": [
+              0.8758221024258761,
+              0.002172780944885873,
+              2
+            ],
+            "tier_B_precision": [
+              0.853818301514154,
+              0.06242463420481633,
+              2
+            ],
+            "coverage_A_or_B_on_found": [
+              0.4429076899961191,
+              0.1688822669098433,
+              3
+            ]
+          },
+          "acne04": {
+            "location_precision": [
+              0.7224080471076486,
+              0.008422904510523741,
+              3
+            ],
+            "location_recall": [
+              0.5656222473889518,
+              0.01533570965106655,
+              3
+            ],
+            "tier_A_precision": [
+              null,
+              null,
+              0
+            ],
+            "tier_B_precision": [
+              null,
+              null,
+              0
+            ],
+            "coverage_A_or_B_on_found": [
+              0.39374409366534374,
+              0.0918721418798167,
+              3
+            ]
+          }
+        },
+        "T3": {
+          "downscale_1080": {
+            "fail": 2,
+            "pass": 1
+          },
+          "jpeg_q35": {
+            "pass": 3
+          },
+          "noise_s8": {
+            "pass": 3
+          },
+          "dark_x0.6": {
+            "pass": 3
+          },
+          "warm_wb": {
+            "pass": 3
+          },
+          "rotate_5": {
+            "pass": 3
+          },
+          "phone_combo": {
+            "pass": 2,
+            "fail": 1
+          }
+        },
+        "T4_auc": [
+          0.6673314866112651,
+          0.028836782409730026,
+          3
+        ],
+        "seconds_p95": [
+          0.5522416666666666,
+          0.04583983211502124,
+          3
+        ],
+        "thresholds": [
+          {
+            "low": {
+              "C": 0.43,
+              "A": 0.88,
+              "B": 0.88
+            },
+            "high": {
+              "C": 0.45,
+              "A": 0.76,
+              "B": null
+            }
+          },
+          {
+            "low": {
+              "C": 0.45,
+              "A": null,
+              "B": 0.82
+            },
+            "high": {
+              "C": 0.46,
+              "A": 0.85,
+              "B": 0.75
+            }
+          },
+          {
+            "low": {
+              "C": 0.45,
+              "A": null,
+              "B": 0.87
+            },
+            "high": {
+              "C": 0.49,
+              "A": null,
+              "B": 0.75
+            }
+          }
+        ]
+      },
+      "rtdetr+effnet": {
+        "val_select": {
+          "location_precision": [
+            0.7449079763453715,
+            0.017884266415687314,
+            3
+          ],
+          "location_recall": [
+            0.5108064715326665,
+            0.028217220513823915,
+            3
+          ],
+          "fp_per_photo": [
+            4.390432098765433,
+            0.6336732446446743,
+            3
+          ],
+          "tier_A_precision": [
+            0.839994651791327,
+            0.035036619912001084,
+            3
+          ],
+          "tier_A_shown": [
+            357.0,
+            75.02666192761077,
+            3
+          ],
+          "tier_B_precision": [
+            0.9354281490866856,
+            0.015612925054087012,
+            3
+          ],
+          "tier_B_shown": [
+            103.0,
+            40.779897008207364,
+            3
+          ],
+          "coverage_A_or_B_on_found": [
+            0.3262055294871569,
+            0.04062931969627074,
+            3
+          ],
+          "ece_displayed": [
+            0.0506629492134447,
+            0.016975185614721992,
+            3
+          ],
+          "macro_f1_box_type": [
+            0.09909853978197904,
+            0.013913956243249212,
+            3
+          ],
+          "correct_labels_per_typed_photo": [
+            3.205962059620596,
+            0.6957912117580927,
+            3
+          ]
+        },
+        "T1": {
+          "location_precision": [
+            0.7103045402376217,
+            0.00959333792937198,
+            3
+          ],
+          "location_recall": [
+            0.44527657338063326,
+            0.00952817803669209,
+            3
+          ],
+          "fp_per_photo": [
+            10.237037037037037,
+            0.3176560243317268,
+            3
+          ],
+          "tier_A_precision": [
+            0.9343000358037952,
+            0.006329276594938692,
+            2
+          ],
+          "tier_A_shown": [
+            51.666666666666664,
+            49.21720566360237,
+            3
+          ],
+          "tier_B_precision": [
+            0.9372994021507498,
+            0.033111603015478906,
+            3
+          ],
+          "tier_B_shown": [
+            151.0,
+            27.622454633866266,
+            3
+          ],
+          "coverage_A_or_B_on_found": [
+            0.17278579377566292,
+            0.06016322273074677,
+            3
+          ],
+          "ece_displayed": [
+            0.0525301482215417,
+            0.03083226425368923,
+            3
+          ],
+          "macro_f1_box_type": [
+            0.048877462736453346,
+            0.043348884522509366,
+            3
+          ],
+          "correct_labels_per_typed_photo": [
+            4.207407407407407,
+            1.3666817222898504,
+            3
+          ],
+          "acceptance": [
+            {
+              "tier_A_precision": "pass",
+              "tier_B_precision": "fail",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "fail"
+            },
+            {
+              "tier_A_precision": "pass",
+              "tier_B_precision": "pass",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "not_shown",
+              "tier_B_precision": "pass",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "fail"
+            }
+          ]
+        },
+        "T2": {
+          "location_precision": [
+            0.7379693704814433,
+            0.04003412288529358,
+            3
+          ],
+          "location_recall": [
+            0.43237942408843716,
+            0.05732467561536215,
+            3
+          ],
+          "fp_per_photo": [
+            2.0715962441314555,
+            0.6714220318095858,
+            3
+          ],
+          "tier_A_precision": [
+            0.8241965568325672,
+            0.038241149490289346,
+            3
+          ],
+          "tier_A_shown": [
+            747.3333333333334,
+            247.63750389093596,
+            3
+          ],
+          "tier_B_precision": [
+            0.7889447236180904,
+            0.0,
+            1
+          ],
+          "tier_B_shown": [
+            66.33333333333333,
+            114.89270356873554,
+            3
+          ],
+          "coverage_A_or_B_on_found": [
+            0.4509733795970674,
+            0.17970549729091836,
+            3
+          ],
+          "ece_displayed": [
+            0.039964605712711966,
+            0.023503164596109665,
+            3
+          ],
+          "macro_f1_box_type": [
+            0.1162817295387782,
+            0.03150612986993675,
+            3
+          ],
+          "correct_labels_per_typed_photo": [
+            2.330985915492958,
+            0.8928608269258312,
+            3
+          ],
+          "acceptance": [
+            {
+              "tier_A_precision": "pass",
+              "tier_B_precision": "not_shown",
+              "location_precision": "pass",
+              "location_recall": "pass",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "pass",
+              "tier_B_precision": "not_shown",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "pass",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "fail",
+              "tier_B_precision": "fail",
+              "location_precision": "pass",
+              "location_recall": "pass",
+              "coverage_A_or_B_on_found": "pass",
+              "ece_max": "pass"
+            }
+          ]
+        },
+        "val_select_per_source": {
+          "acnedet_author": {
+            "location_precision": [
+              0.6690616291076251,
+              0.012975882611253434,
+              3
+            ],
+            "location_recall": [
+              0.4712522045855379,
+              0.01253570063062917,
+              3
+            ],
+            "tier_A_precision": [
+              0.898989898989899,
+              0.014284985478516124,
+              2
+            ],
+            "tier_B_precision": [
+              0.9328550496714808,
+              0.019563241927759413,
+              3
+            ],
+            "coverage_A_or_B_on_found": [
+              0.20482858339939577,
+              0.07723020297092824,
+              3
+            ]
+          },
+          "detectdataskin2": {
+            "location_precision": [
+              0.7780136652650915,
+              0.052754799080693124,
+              3
+            ],
+            "location_recall": [
+              0.4259053954175906,
+              0.060190300086386254,
+              3
+            ],
+            "tier_A_precision": [
+              0.8371574589618612,
+              0.0362742753171395,
+              3
+            ],
+            "tier_B_precision": [
+              0.9247311827956989,
+              0.0,
+              1
+            ],
+            "coverage_A_or_B_on_found": [
+              0.43895388988017153,
+              0.1795891114854737,
+              3
+            ]
+          },
+          "acne04": {
+            "location_precision": [
+              0.755475025278681,
+              0.006155351903790336,
+              3
+            ],
+            "location_recall": [
+              0.5827356235057254,
+              0.014286968631218462,
+              3
+            ],
+            "tier_A_precision": [
+              null,
+              null,
+              0
+            ],
+            "tier_B_precision": [
+              null,
+              null,
+              0
+            ],
+            "coverage_A_or_B_on_found": [
+              0.3081771809266607,
+              0.05757298501354948,
+              3
+            ]
+          }
+        },
+        "T3": {
+          "downscale_1080": {
+            "fail": 3
+          },
+          "jpeg_q35": {
+            "pass": 3
+          },
+          "noise_s8": {
+            "fail": 1,
+            "pass": 2
+          },
+          "dark_x0.6": {
+            "pass": 3
+          },
+          "warm_wb": {
+            "pass": 3
+          },
+          "rotate_5": {
+            "pass": 3
+          },
+          "phone_combo": {
+            "fail": 2,
+            "pass": 1
+          }
+        },
+        "T4_auc": [
+          0.6278116343490304,
+          0.006076024319492633,
+          3
+        ],
+        "seconds_p95": [
+          1.1421416666666666,
+          0.16365018395447445,
+          3
+        ],
+        "thresholds": [
+          {
+            "low": {
+              "C": 0.45,
+              "A": 0.83,
+              "B": 0.84
+            },
+            "high": {
+              "C": 0.46,
+              "A": 0.74,
+              "B": null
+            }
+          },
+          {
+            "low": {
+              "C": 0.44,
+              "A": 0.87,
+              "B": 0.87
+            },
+            "high": {
+              "C": 0.59,
+              "A": 0.68,
+              "B": null
+            }
+          },
+          {
+            "low": {
+              "C": 0.46,
+              "A": null,
+              "B": 0.87
+            },
+            "high": {
+              "C": 0.51,
+              "A": 0.66,
+              "B": 0.8
+            }
+          }
+        ]
+      },
+      "rtdetr+convnext": {
+        "val_select": {
+          "location_precision": [
+            0.734870799695272,
+            0.011767759025935961,
+            3
+          ],
+          "location_recall": [
+            0.5232184759787576,
+            0.011253818789424637,
+            3
+          ],
+          "fp_per_photo": [
+            4.722222222222222,
+            0.3421856942987476,
+            3
+          ],
+          "tier_A_precision": [
+            0.9005645161290323,
+            0.013343789257875204,
+            2
+          ],
+          "tier_A_shown": [
+            149.33333333333334,
+            131.53453285481092,
+            3
+          ],
+          "tier_B_precision": [
+            0.9030620682794596,
+            0.04172952669536946,
+            3
+          ],
+          "tier_B_shown": [
+            302.3333333333333,
+            314.99259250549585,
+            3
+          ],
+          "coverage_A_or_B_on_found": [
+            0.32196126369320927,
+            0.09989544765003595,
+            3
+          ],
+          "ece_displayed": [
+            0.05266954663601723,
+            0.019728778360214683,
+            3
+          ],
+          "macro_f1_box_type": [
+            0.05055824360411768,
+            0.044327516014529354,
+            3
+          ],
+          "correct_labels_per_typed_photo": [
+            3.24390243902439,
+            1.225378842732324,
+            3
+          ]
+        },
+        "T1": {
+          "location_precision": [
+            0.7138804320000837,
+            0.008188184395893777,
+            3
+          ],
+          "location_recall": [
+            0.44383129680725264,
+            0.015102281482592048,
+            3
+          ],
+          "fp_per_photo": [
+            10.02962962962963,
+            0.45397195395687595,
+            3
+          ],
+          "tier_A_precision": [
+            0.9139784946236559,
+            0.0,
+            1
+          ],
+          "tier_A_shown": [
+            31.0,
+            53.693575034635195,
+            3
+          ],
+          "tier_B_precision": [
+            0.953110410830999,
+            0.027097911662958094,
+            3
+          ],
+          "tier_B_shown": [
+            202.0,
+            121.50308638055249,
+            3
+          ],
+          "coverage_A_or_B_on_found": [
+            0.19721203519037456,
+            0.05179357054235829,
+            3
+          ],
+          "ece_displayed": [
+            0.05408239892324455,
+            0.008112289356735592,
+            3
+          ],
+          "macro_f1_box_type": [
+            0.02768271221052272,
+            0.047947864039932696,
+            3
+          ],
+          "correct_labels_per_typed_photo": [
+            4.859259259259259,
+            1.416365254791088,
+            3
+          ],
+          "acceptance": [
+            {
+              "tier_A_precision": "fail",
+              "tier_B_precision": "pass",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "fail"
+            },
+            {
+              "tier_A_precision": "not_shown",
+              "tier_B_precision": "pass",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "not_shown",
+              "tier_B_precision": "pass",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "fail"
+            }
+          ]
+        },
+        "T2": {
+          "location_precision": [
+            0.7059147741336037,
+            0.022262631447626413,
+            3
+          ],
+          "location_recall": [
+            0.47615226887759654,
+            0.006100779927226736,
+            3
+          ],
+          "fp_per_photo": [
+            2.619718309859155,
+            0.3069647143338501,
+            3
+          ],
+          "tier_A_precision": [
+            0.8624846536100556,
+            0.05562600904791692,
+            2
+          ],
+          "tier_A_shown": [
+            299.0,
+            311.6937599632049,
+            3
+          ],
+          "tier_B_precision": [
+            0.8903576173782196,
+            0.08363281712204143,
+            2
+          ],
+          "tier_B_shown": [
+            486.6666666666667,
+            678.717417879734,
+            3
+          ],
+          "coverage_A_or_B_on_found": [
+            0.38569963608096164,
+            0.1846578142764965,
+            3
+          ],
+          "ece_displayed": [
+            0.03709414836740261,
+            0.025882901549763894,
+            3
+          ],
+          "macro_f1_box_type": [
+            0.056835435722442484,
+            0.05782295681152421,
+            3
+          ],
+          "correct_labels_per_typed_photo": [
+            2.3438967136150235,
+            1.176564015693942,
+            3
+          ],
+          "acceptance": [
+            {
+              "tier_A_precision": "pass",
+              "tier_B_precision": "pass",
+              "location_precision": "pass",
+              "location_recall": "pass",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "not_shown",
+              "tier_B_precision": "fail",
+              "location_precision": "pass",
+              "location_recall": "pass",
+              "coverage_A_or_B_on_found": "pass",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "pass",
+              "tier_B_precision": "not_shown",
+              "location_precision": "pass",
+              "location_recall": "pass",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "pass"
+            }
+          ]
+        },
+        "val_select_per_source": {
+          "acnedet_author": {
+            "location_precision": [
+              0.6737703313858594,
+              0.017488510727406866,
+              3
+            ],
+            "location_recall": [
+              0.4698412698412699,
+              0.016427698091280436,
+              3
+            ],
+            "tier_A_precision": [
+              0.8852459016393442,
+              0.0,
+              1
+            ],
+            "tier_B_precision": [
+              0.9588874588874589,
+              0.04387163051663347,
+              3
+            ],
+            "coverage_A_or_B_on_found": [
+              0.22761866294582753,
+              0.05037186856505864,
+              3
+            ]
+          },
+          "detectdataskin2": {
+            "location_precision": [
+              0.7416630498307692,
+              0.0483217409270521,
+              3
+            ],
+            "location_recall": [
+              0.46341463414634143,
+              0.01665740487950856,
+              3
+            ],
+            "tier_A_precision": [
+              0.9059961708052913,
+              0.021025308967167925,
+              2
+            ],
+            "tier_B_precision": [
+              0.8807839754648266,
+              0.06328314282844523,
+              2
+            ],
+            "coverage_A_or_B_on_found": [
+              0.3686756361494718,
+              0.17173054966184975,
+              3
+            ]
+          },
+          "acne04": {
+            "location_precision": [
+              0.7523387549938675,
+              0.006127876647612705,
+              3
+            ],
+            "location_recall": [
+              0.5829872908015603,
+              0.012881211383652181,
+              3
+            ],
+            "tier_A_precision": [
+              null,
+              null,
+              0
+            ],
+            "tier_B_precision": [
+              null,
+              null,
+              0
+            ],
+            "coverage_A_or_B_on_found": [
+              0.3227315065695253,
+              0.08629381163448817,
+              3
+            ]
+          }
+        },
+        "T3": {
+          "downscale_1080": {
+            "pass": 3
+          },
+          "jpeg_q35": {
+            "pass": 3
+          },
+          "noise_s8": {
+            "pass": 3
+          },
+          "dark_x0.6": {
+            "pass": 3
+          },
+          "warm_wb": {
+            "pass": 3
+          },
+          "rotate_5": {
+            "pass": 3
+          },
+          "phone_combo": {
+            "pass": 3
+          }
+        },
+        "T4_auc": [
+          0.6324469067405355,
+          0.010036165652276816,
+          3
+        ],
+        "seconds_p95": [
+          0.9454666666666666,
+          0.07183581250555557,
+          3
+        ],
+        "thresholds": [
+          {
+            "low": {
+              "C": 0.45,
+              "A": 0.82,
+              "B": 0.88
+            },
+            "high": {
+              "C": 0.46,
+              "A": 0.79,
+              "B": 0.84
+            }
+          },
+          {
+            "low": {
+              "C": 0.45,
+              "A": null,
+              "B": 0.86
+            },
+            "high": {
+              "C": 0.48,
+              "A": null,
+              "B": 0.71
+            }
+          },
+          {
+            "low": {
+              "C": 0.45,
+              "A": null,
+              "B": 0.83
+            },
+            "high": {
+              "C": 0.49,
+              "A": 0.76,
+              "B": null
+            }
+          }
+        ]
+      },
+      "frcnn+effnet": {
+        "val_select": {
+          "location_precision": [
+            0.7323635204552805,
+            0.029240514983440154,
+            3
+          ],
+          "location_recall": [
+            0.43793997776954424,
+            0.07270096411657015,
+            3
+          ],
+          "fp_per_photo": [
+            4.0740740740740735,
+            1.16922668862061,
+            3
+          ],
+          "tier_A_precision": [
+            0.921875,
+            0.0,
+            1
+          ],
+          "tier_A_shown": [
+            21.333333333333332,
+            36.950417228136054,
+            3
+          ],
+          "tier_B_precision": [
+            0.8609783368273934,
+            0.02232641738211112,
+            3
+          ],
+          "tier_B_shown": [
+            281.0,
+            49.3254498205541,
+            3
+          ],
+          "coverage_A_or_B_on_found": [
+            0.4212577812623224,
+            0.14187949775434078,
+            3
+          ],
+          "ece_displayed": [
+            0.04454797925150273,
+            0.015960604631448244,
+            3
+          ],
+          "macro_f1_box_type": [
+            0.010156099354357798,
+            0.01759088008846518,
+            3
+          ],
+          "correct_labels_per_typed_photo": [
+            2.1219512195121952,
+            0.5443512919401853,
+            3
+          ]
+        },
+        "T1": {
+          "location_precision": [
+            0.8122622770952476,
+            0.028010908105440643,
+            3
+          ],
+          "location_recall": [
+            0.30876363158586256,
+            0.060193127610560976,
+            3
+          ],
+          "fp_per_photo": [
+            4.133333333333333,
+            1.4303586703781417,
+            3
+          ],
+          "tier_A_precision": [
+            0.9320388349514563,
+            0.0,
+            1
+          ],
+          "tier_A_shown": [
+            34.333333333333336,
+            59.46707772653145,
+            3
+          ],
+          "tier_B_precision": [
+            0.9149709385150152,
+            0.04890152953734592,
+            3
+          ],
+          "tier_B_shown": [
+            291.3333333333333,
+            194.6723743455484,
+            3
+          ],
+          "coverage_A_or_B_on_found": [
+            0.4110359108934822,
+            0.23024058138691902,
+            3
+          ],
+          "ece_displayed": [
+            0.018828118416795225,
+            0.010343642023871306,
+            3
+          ],
+          "macro_f1_box_type": [
+            0.015135027104075922,
+            0.026214635918191544,
+            3
+          ],
+          "correct_labels_per_typed_photo": [
+            6.496296296296297,
+            2.5610890173386225,
+            3
+          ],
+          "acceptance": [
+            {
+              "tier_A_precision": "not_shown",
+              "tier_B_precision": "fail",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "not_shown",
+              "tier_B_precision": "fail",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "pass",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "pass",
+              "tier_B_precision": "pass",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "pass"
+            }
+          ]
+        },
+        "T2": {
+          "location_precision": [
+            0.6569845775405813,
+            0.0888552590528225,
+            3
+          ],
+          "location_recall": [
+            0.37033074797182847,
+            0.13094469630753672,
+            3
+          ],
+          "fp_per_photo": [
+            2.8098591549295775,
+            1.618431822222335,
+            3
+          ],
+          "tier_A_precision": [
+            null,
+            null,
+            0
+          ],
+          "tier_A_shown": [
+            0.0,
+            0.0,
+            3
+          ],
+          "tier_B_precision": [
+            0.9010382691889541,
+            0.02681698178979006,
+            3
+          ],
+          "tier_B_shown": [
+            349.6666666666667,
+            310.3648390738444,
+            3
+          ],
+          "coverage_A_or_B_on_found": [
+            0.22118139352035524,
+            0.1376849219207273,
+            3
+          ],
+          "ece_displayed": [
+            0.019962678316103055,
+            0.008970777441668612,
+            3
+          ],
+          "macro_f1_box_type": [
+            0.0,
+            0.0,
+            3
+          ],
+          "correct_labels_per_typed_photo": [
+            1.091549295774648,
+            0.9436816794242308,
+            3
+          ],
+          "acceptance": [
+            {
+              "tier_A_precision": "not_shown",
+              "tier_B_precision": "pass",
+              "location_precision": "fail",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "not_shown",
+              "tier_B_precision": "pass",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "not_shown",
+              "tier_B_precision": "pass",
+              "location_precision": "pass",
+              "location_recall": "pass",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "pass"
+            }
+          ]
+        },
+        "val_select_per_source": {
+          "acnedet_author": {
+            "location_precision": [
+              0.8005856314067649,
+              0.02290934596288336,
+              3
+            ],
+            "location_recall": [
+              0.3417989417989418,
+              0.05744579702916386,
+              3
+            ],
+            "tier_A_precision": [
+              0.921875,
+              0.0,
+              1
+            ],
+            "tier_B_precision": [
+              0.8904864574101753,
+              0.05921598261228972,
+              3
+            ],
+            "coverage_A_or_B_on_found": [
+              0.4576277366591404,
+              0.23884253943800232,
+              3
+            ]
+          },
+          "detectdataskin2": {
+            "location_precision": [
+              0.6702392752489436,
+              0.09331862351824222,
+              3
+            ],
+            "location_recall": [
+              0.34552845528455284,
+              0.1262524256931479,
+              3
+            ],
+            "tier_A_precision": [
+              null,
+              null,
+              0
+            ],
+            "tier_B_precision": [
+              0.8696964052896257,
+              0.0468891876796092,
+              3
+            ],
+            "coverage_A_or_B_on_found": [
+              0.20102701236290355,
+              0.12618631288913942,
+              3
+            ]
+          },
+          "acne04": {
+            "location_precision": [
+              0.7570094438510525,
+              0.007968038318736551,
+              3
+            ],
+            "location_recall": [
+              0.5351705045929281,
+              0.042091496297263685,
+              3
+            ],
+            "tier_A_precision": [
+              null,
+              null,
+              0
+            ],
+            "tier_B_precision": [
+              null,
+              null,
+              0
+            ],
+            "coverage_A_or_B_on_found": [
+              0.49572059466865825,
+              0.1769972303696628,
+              3
+            ]
+          }
+        },
+        "T3": {
+          "downscale_1080": {
+            "pass": 2,
+            "fail": 1
+          },
+          "jpeg_q35": {
+            "pass": 3
+          },
+          "noise_s8": {
+            "pass": 2,
+            "fail": 1
+          },
+          "dark_x0.6": {
+            "pass": 2,
+            "fail": 1
+          },
+          "warm_wb": {
+            "pass": 3
+          },
+          "rotate_5": {
+            "pass": 2,
+            "fail": 1
+          },
+          "phone_combo": {
+            "pass": 2,
+            "fail": 1
+          }
+        },
+        "T4_auc": [
+          0.612982456140351,
+          0.029008171286313285,
+          3
+        ],
+        "seconds_p95": [
+          0.8225083333333334,
+          0.14224205894647807,
+          3
+        ],
+        "thresholds": [
+          {
+            "low": {
+              "C": 0.48,
+              "A": null,
+              "B": 0.85
+            },
+            "high": {
+              "C": 0.41,
+              "A": null,
+              "B": 0.87
+            }
+          },
+          {
+            "low": {
+              "C": 0.55,
+              "A": null,
+              "B": 0.8
+            },
+            "high": {
+              "C": 0.59,
+              "A": null,
+              "B": 0.88
+            }
+          },
+          {
+            "low": {
+              "C": 0.47,
+              "A": 0.88,
+              "B": 0.93
+            },
+            "high": {
+              "C": 0.42,
+              "A": null,
+              "B": 0.8
+            }
+          }
+        ]
+      },
+      "frcnn+convnext": {
+        "val_select": {
+          "location_precision": [
+            0.7323168713849859,
+            0.027086618868009255,
+            3
+          ],
+          "location_recall": [
+            0.43905150055576136,
+            0.07070945989592052,
+            3
+          ],
+          "fp_per_photo": [
+            4.080246913580247,
+            1.132229223941164,
+            3
+          ],
+          "tier_A_precision": [
+            0.8673469387755102,
+            0.0,
+            1
+          ],
+          "tier_A_shown": [
+            32.666666666666664,
+            56.58032638058333,
+            3
+          ],
+          "tier_B_precision": [
+            0.8430410312273057,
+            0.020736214982339893,
+            3
+          ],
+          "tier_B_shown": [
+            343.6666666666667,
+            100.85798596706825,
+            3
+          ],
+          "coverage_A_or_B_on_found": [
+            0.45625260152883307,
+            0.1811151155281331,
+            3
+          ],
+          "ece_displayed": [
+            0.038629439341302106,
+            0.010491667604922775,
+            3
+          ],
+          "macro_f1_box_type": [
+            0.013494555252877335,
+            0.023373255323529022,
+            3
+          ],
+          "correct_labels_per_typed_photo": [
+            2.574525745257453,
+            0.48789520392272356,
+            3
+          ]
+        },
+        "T1": {
+          "location_precision": [
+            0.8137654263868291,
+            0.02717682974070359,
+            3
+          ],
+          "location_recall": [
+            0.3071869662330837,
+            0.05888313885117523,
+            3
+          ],
+          "fp_per_photo": [
+            4.066666666666666,
+            1.386175126555617,
+            3
+          ],
+          "tier_A_precision": [
+            0.8725490196078431,
+            0.0,
+            1
+          ],
+          "tier_A_shown": [
+            68.0,
+            117.77945491468365,
+            3
+          ],
+          "tier_B_precision": [
+            0.8932972915295834,
+            0.0232638143585409,
+            2
+          ],
+          "tier_B_shown": [
+            227.66666666666666,
+            207.44718203276065,
+            3
+          ],
+          "coverage_A_or_B_on_found": [
+            0.37822502498811583,
+            0.20387070652964026,
+            3
+          ],
+          "ece_displayed": [
+            0.0346407766463571,
+            0.0031978728586434762,
+            3
+          ],
+          "macro_f1_box_type": [
+            0.04246310855334947,
+            0.07354826146171384,
+            3
+          ],
+          "correct_labels_per_typed_photo": [
+            5.822222222222223,
+            1.9871190138762806,
+            3
+          ],
+          "acceptance": [
+            {
+              "tier_A_precision": "not_shown",
+              "tier_B_precision": "fail",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "not_shown",
+              "tier_B_precision": "fail",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "pass",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "fail",
+              "tier_B_precision": "not_shown",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "pass"
+            }
+          ]
+        },
+        "T2": {
+          "location_precision": [
+            0.6503463680118137,
+            0.07739570664565737,
+            3
+          ],
+          "location_recall": [
+            0.3754123205848266,
+            0.13076266446666351,
+            3
+          ],
+          "fp_per_photo": [
+            2.886150234741784,
+            1.5483605265061233,
+            3
+          ],
+          "tier_A_precision": [
+            null,
+            null,
+            0
+          ],
+          "tier_A_shown": [
+            0.0,
+            0.0,
+            3
+          ],
+          "tier_B_precision": [
+            0.8591662647590642,
+            0.028581252620253995,
+            3
+          ],
+          "tier_B_shown": [
+            561.3333333333334,
+            144.2440062301839,
+            3
+          ],
+          "coverage_A_or_B_on_found": [
+            0.38292168678343885,
+            0.19035172584110055,
+            3
+          ],
+          "ece_displayed": [
+            0.03410043978274952,
+            0.011450397502401273,
+            3
+          ],
+          "macro_f1_box_type": [
+            0.0,
+            0.0,
+            3
+          ],
+          "correct_labels_per_typed_photo": [
+            1.6901408450704227,
+            0.399193916014286,
+            3
+          ],
+          "acceptance": [
+            {
+              "tier_A_precision": "not_shown",
+              "tier_B_precision": "pass",
+              "location_precision": "fail",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "not_shown",
+              "tier_B_precision": "fail",
+              "location_precision": "pass",
+              "location_recall": "fail",
+              "coverage_A_or_B_on_found": "pass",
+              "ece_max": "pass"
+            },
+            {
+              "tier_A_precision": "not_shown",
+              "tier_B_precision": "pass",
+              "location_precision": "pass",
+              "location_recall": "pass",
+              "coverage_A_or_B_on_found": "fail",
+              "ece_max": "pass"
+            }
+          ]
+        },
+        "val_select_per_source": {
+          "acnedet_author": {
+            "location_precision": [
+              0.8026092977236409,
+              0.019928409323540685,
+              3
+            ],
+            "location_recall": [
+              0.34109347442680776,
+              0.05700879171579369,
+              3
+            ],
+            "tier_A_precision": [
+              0.8673469387755102,
+              0.0,
+              1
+            ],
+            "tier_B_precision": [
+              0.8664342025469982,
+              0.02251249606567237,
+              2
+            ],
+            "coverage_A_or_B_on_found": [
+              0.42075792624623626,
+              0.2130294576064188,
+              3
+            ]
+          },
+          "detectdataskin2": {
+            "location_precision": [
+              0.6647825154424433,
+              0.08551779220336365,
+              3
+            ],
+            "location_recall": [
+              0.35014781966001474,
+              0.12441614587644628,
+              3
+            ],
+            "tier_A_precision": [
+              null,
+              null,
+              0
+            ],
+            "tier_B_precision": [
+              0.8273707849453632,
+              0.03024029805173236,
+              3
+            ],
+            "coverage_A_or_B_on_found": [
+              0.34733333104340297,
+              0.1885721173092373,
+              3
+            ]
+          },
+          "acne04": {
+            "location_precision": [
+              0.7589733791679442,
+              0.009584103444499113,
+              3
+            ],
+            "location_recall": [
+              0.5345413363533409,
+              0.03997234123653922,
+              3
+            ],
+            "tier_A_precision": [
+              null,
+              null,
+              0
+            ],
+            "tier_B_precision": [
+              null,
+              null,
+              0
+            ],
+            "coverage_A_or_B_on_found": [
+              0.5108945042930221,
+              0.1679746123926779,
+              3
+            ]
+          }
+        },
+        "T3": {
+          "downscale_1080": {
+            "pass": 3
+          },
+          "jpeg_q35": {
+            "pass": 3
+          },
+          "noise_s8": {
+            "pass": 3
+          },
+          "dark_x0.6": {
+            "pass": 3
+          },
+          "warm_wb": {
+            "pass": 3
+          },
+          "rotate_5": {
+            "pass": 3
+          },
+          "phone_combo": {
+            "pass": 2,
+            "fail": 1
+          }
+        },
+        "T4_auc": [
+          0.6121698984302862,
+          0.029111258323409574,
+          3
+        ],
+        "seconds_p95": [
+          0.686925,
+          0.0687600765342797,
+          3
+        ],
+        "thresholds": [
+          {
+            "low": {
+              "C": 0.49,
+              "A": null,
+              "B": 0.88
+            },
+            "high": {
+              "C": 0.42,
+              "A": null,
+              "B": 0.78
+            }
+          },
+          {
+            "low": {
+              "C": 0.55,
+              "A": null,
+              "B": 0.82
+            },
+            "high": {
+              "C": 0.58,
+              "A": null,
+              "B": 0.76
+            }
+          },
+          {
+            "low": {
+              "C": 0.47,
+              "A": 0.85,
+              "B": null
+            },
+            "high": {
+              "C": 0.4,
+              "A": null,
+              "B": 0.8
+            }
+          }
+        ]
+      }
+    },
+    "paired_vs_chosen": {
+      "val_select": {
+        "yolo26s+effnet": {
+          "location_recall_mean_source": [
+            -0.00345898446940479,
+            -0.0008714626969560844
+          ],
+          "coverage_AB_mean_source": [
+            0.057862687409098675,
+            0.08494597670081058
+          ],
+          "correct_labels_per_typed_photo": [
+            0.6143704850361196,
+            1.2974305555555552
+          ]
+        },
+        "rtdetr+effnet": {
+          "location_recall_mean_source": [
+            0.03637280894205104,
+            0.08617197807817771
+          ],
+          "coverage_AB_mean_source": [
+            -0.08474606693855155,
+            -0.03317907422840179
+          ],
+          "correct_labels_per_typed_photo": [
+            -0.1970579858737756,
+            0.7026616915422886
+          ]
+        },
+        "rtdetr+convnext": {
+          "location_recall_mean_source": [
+            0.044554428424488285,
+            0.09597812802777025
+          ],
+          "coverage_AB_mean_source": [
+            -0.08330157725970512,
+            -0.02243837996192132
+          ],
+          "correct_labels_per_typed_photo": [
+            -0.0839335664335667,
+            0.6367317376008829
+          ]
+        },
+        "frcnn+effnet": {
+          "location_recall_mean_source": [
+            -0.043694709342322564,
+            0.00030860632492924476
+          ],
+          "coverage_AB_mean_source": [
+            0.005031116715817146,
+            0.06445366364769048
+          ],
+          "correct_labels_per_typed_photo": [
+            -1.5655314009661834,
+            -0.14945410469524675
+          ]
+        },
+        "frcnn+convnext": {
+          "location_recall_mean_source": [
+            -0.04289409009618368,
+            0.0012399048867437832
+          ],
+          "coverage_AB_mean_source": [
+            0.030654997100860632,
+            0.07784304738340479
+          ],
+          "correct_labels_per_typed_photo": [
+            -1.0103931759455014,
+            0.17146215853112368
+          ]
+        }
+      },
+      "T1": {
+        "yolo26s+effnet": {
+          "location_recall_mean_source": [
+            0.0,
+            0.0028045912205805555
+          ],
+          "coverage_AB_mean_source": [
+            0.04216725008097638,
+            0.05243352958745805
+          ],
+          "correct_labels_per_typed_photo": [
+            0.7481111111111105,
+            1.2250416666666673
+          ]
+        },
+        "rtdetr+effnet": {
+          "location_recall_mean_source": [
+            0.06950615622094454,
+            0.10268826382038664
+          ],
+          "coverage_AB_mean_source": [
+            -0.12092139009405167,
+            -0.04598233425997256
+          ],
+          "correct_labels_per_typed_photo": [
+            -1.5999999999999996,
+            -0.11333333333333329
+          ]
+        },
+        "rtdetr+convnext": {
+          "location_recall_mean_source": [
+            0.06808035714285715,
+            0.10095964478673468
+          ],
+          "coverage_AB_mean_source": [
+            -0.09263940671670791,
+            -0.02193623103175941
+          ],
+          "correct_labels_per_typed_photo": [
+            -0.8919675925925925,
+            0.49696969696969706
+          ]
+        },
+        "frcnn+effnet": {
+          "location_recall_mean_source": [
+            -0.08898852777578918,
+            -0.016714783590984807
+          ],
+          "coverage_AB_mean_source": [
+            0.09157043508059026,
+            0.1676208796275538
+          ],
+          "correct_labels_per_typed_photo": [
+            0.816435185185185,
+            2.111296296296296
+          ]
+        },
+        "frcnn+convnext": {
+          "location_recall_mean_source": [
+            -0.09074242103459057,
+            -0.018169547661176903
+          ],
+          "coverage_AB_mean_source": [
+            0.06258920504470375,
+            0.12985596657935083
+          ],
+          "correct_labels_per_typed_photo": [
+            0.22479166666666633,
+            1.3666666666666663
+          ]
+        }
+      },
+      "T2": {
+        "yolo26s+effnet": {
+          "location_recall_mean_source": [
+            -0.00840990095899767,
+            -0.003857446741472772
+          ],
+          "coverage_AB_mean_source": [
+            0.15019690250175505,
+            0.1789203462244333
+          ],
+          "correct_labels_per_typed_photo": [
+            0.5736286031338573,
+            0.8881373012124074
+          ]
+        },
+        "rtdetr+effnet": {
+          "location_recall_mean_source": [
+            0.056465414997909406,
+            0.09837945116970827
+          ],
+          "coverage_AB_mean_source": [
+            -0.004571709038807429,
+            0.06599363575609292
+          ],
+          "correct_labels_per_typed_photo": [
+            0.19431377159756277,
+            0.7624375582345143
+          ]
+        },
+        "rtdetr+convnext": {
+          "location_recall_mean_source": [
+            0.09870503639472904,
+            0.14358418470957987
+          ],
+          "coverage_AB_mean_source": [
+            -0.05436181452820244,
+            0.003756405375446315
+          ],
+          "correct_labels_per_typed_photo": [
+            0.2730024067388689,
+            0.7193713450292397
+          ]
+        },
+        "frcnn+effnet": {
+          "location_recall_mean_source": [
+            -0.008579393488680344,
+            0.04148764660648215
+          ],
+          "coverage_AB_mean_source": [
+            -0.2169401304475873,
+            -0.15953384945824933
+          ],
+          "correct_labels_per_typed_photo": [
+            -0.9907980611465796,
+            -0.55747309392861
+          ]
+        },
+        "frcnn+convnext": {
+          "location_recall_mean_source": [
+            -0.003928197570414427,
+            0.046495640607638444
+          ],
+          "coverage_AB_mean_source": [
+            -0.09688456626923539,
+            -0.038721305164963256
+          ],
+          "correct_labels_per_typed_photo": [
+            -0.3770424716719656,
+            0.04236319340329845
+          ]
+        }
+      }
+    },
+    "references": {
+      "hyb_d1_served": {
+        "T1": {
+          "photos": 45,
+          "typed_photos": 45,
+          "lesion_gt": 2537,
+          "shown": 1420,
+          "ignored": 40,
+          "tp": 1025,
+          "fp": 355,
+          "duplicates": 5,
+          "location_precision": 0.7427536231884058,
+          "location_recall": 0.4040204966495861,
+          "fp_per_photo": 7.888888888888889,
+          "tier_A_shown": 136,
+          "tier_A_precision": 0.9191176470588235,
+          "tier_B_shown": 105,
+          "tier_B_precision": 0.9428571428571428,
+          "group_precision_A_or_B": 0.9543568464730291,
+          "coverage_A_on_found": 0.12878048780487805,
+          "coverage_A_or_B_on_found": 0.22634146341463415,
+          "shown_by_tier": {
+            "A": 132,
+            "B": 100,
+            "C": 793
+          },
+          "ece_displayed": 0.05845518672199172,
+          "ece_on_found": 0.09459482758620698,
+          "boxes_without_prob": 0,
+          "macro_f1_box_type": 0.08998479951377084,
+          "per_type": {
+            "closed_comedo": {
+              "shown_A": 12,
+              "precision_A": 0.9166666666666666,
+              "gt": 971
+            },
+            "open_comedo": {
+              "shown_A": 1,
+              "precision_A": 1.0,
+              "gt": 473
+            },
+            "papule": {
+              "shown_A": 94,
+              "precision_A": 0.9148936170212766,
+              "gt": 867
+            },
+            "pustule": {
+              "shown_A": 29,
+              "precision_A": 0.9310344827586207,
+              "gt": 192
+            },
+            "nodule": {
+              "shown_A": 0,
+              "precision_A": null,
+              "gt": 34
+            }
+          },
+          "confusion_A": {
+            "closed_comedo>closed_comedo": 11,
+            "closed_comedo>papule": 1,
+            "none>papule": 3,
+            "none>pustule": 1,
+            "open_comedo>closed_comedo": 1,
+            "open_comedo>open_comedo": 1,
+            "papule>papule": 86,
+            "papule>pustule": 1,
+            "pustule>papule": 4,
+            "pustule>pustule": 27
+          },
+          "reliability_displayed": [
+            {
+              "bin": [
+                0.8,
+                0.8666666666666667
+              ],
+              "n": 113,
+              "mean_prob": 0.8438707964601772,
+              "accuracy": 0.8938053097345132
+            },
+            {
+              "bin": [
+                0.8666666666666667,
+                0.9333333333333333
+              ],
+              "n": 122,
+              "mean_prob": 0.8919959016393441,
+              "accuracy": 0.9590163934426229
+            },
+            {
+              "bin": [
+                0.9333333333333333,
+                1.0
+              ],
+              "n": 6,
+              "mean_prob": 0.9552333333333333,
+              "accuracy": 1.0
+            }
+          ]
+        },
+        "T2": {
+          "photos": 284,
+          "typed_photos": 284,
+          "lesion_gt": 3739,
+          "shown": 2058,
+          "ignored": 110,
+          "tp": 1465,
+          "fp": 483,
+          "duplicates": 8,
+          "location_precision": 0.752053388090349,
+          "location_recall": 0.3918159935811714,
+          "fp_per_photo": 1.7007042253521127,
+          "tier_A_shown": 650,
+          "tier_A_precision": 0.8353846153846154,
+          "tier_B_shown": 0,
+          "tier_B_precision": null,
+          "group_precision_A_or_B": 0.8907692307692308,
+          "coverage_A_on_found": 0.39726962457337883,
+          "coverage_A_or_B_on_found": 0.39726962457337883,
+          "shown_by_tier": {
+            "A": 582,
+            "B": 0,
+            "C": 883
+          },
+          "ece_displayed": 0.03382123076923075,
+          "ece_on_found": 0.1298958762886597,
+          "boxes_without_prob": 0,
+          "macro_f1_box_type": 0.12144468483110119,
+          "per_type": {
+            "closed_comedo": {
+              "shown_A": 0,
+              "precision_A": null,
+              "gt": 125
+            },
+            "open_comedo": {
+              "shown_A": 19,
+              "precision_A": 0.7368421052631579,
+              "gt": 330
+            },
+            "papule": {
+              "shown_A": 177,
+              "precision_A": 0.7796610169491526,
+              "gt": 990
+            },
+            "pustule": {
+              "shown_A": 454,
+              "precision_A": 0.8612334801762115,
+              "gt": 2238
+            },
+            "nodule": {
+              "shown_A": 0,
+              "precision_A": null,
+              "gt": 56
+            }
+          },
+          "confusion_A": {
+            "none>open_comedo": 4,
+            "none>papule": 17,
+            "none>pustule": 47,
+            "open_comedo>open_comedo": 14,
+            "open_comedo>pustule": 2,
+            "papule>papule": 138,
+            "papule>pustule": 14,
+            "pustule>open_comedo": 1,
+            "pustule>papule": 22,
+            "pustule>pustule": 391
+          },
+          "reliability_displayed": [
+            {
+              "bin": [
+                0.6666666666666666,
+                0.7333333333333333
+              ],
+              "n": 99,
+              "mean_prob": 0.7205919191919197,
+              "accuracy": 0.8080808080808081
+            },
+            {
+              "bin": [
+                0.7333333333333333,
+                0.8
+              ],
+              "n": 241,
+              "mean_prob": 0.7668622406639004,
+              "accuracy": 0.8132780082987552
+            },
+            {
+              "bin": [
+                0.8,
+                0.8666666666666667
+              ],
+              "n": 202,
+              "mean_prob": 0.83360099009901,
+              "accuracy": 0.8415841584158416
+            },
+            {
+              "bin": [
+                0.8666666666666667,
+                0.9333333333333333
+              ],
+              "n": 97,
+              "mean_prob": 0.8977072164948456,
+              "accuracy": 0.8969072164948454
+            },
+            {
+              "bin": [
+                0.9333333333333333,
+                1.0
+              ],
+              "n": 11,
+              "mean_prob": 0.9496363636363636,
+              "accuracy": 0.9090909090909091
+            }
+          ]
+        },
+        "T4_auc": 0.6616022099447514,
+        "source": "reports/selfie_v1/final_evaluation/results.json (P11)"
+      },
+      "legacy_normal": {
+        "T1": {
+          "photos": 45,
+          "typed_photos": 45,
+          "lesion_gt": 2537,
+          "shown": 1837,
+          "ignored": 73,
+          "tp": 1214,
+          "fp": 550,
+          "duplicates": 7,
+          "location_precision": 0.6882086167800453,
+          "location_recall": 0.47851793456838787,
+          "fp_per_photo": 12.222222222222221,
+          "tier_A_shown": 1091,
+          "tier_A_precision": 0.693858845096242,
+          "tier_B_shown": 0,
+          "tier_B_precision": null,
+          "group_precision_A_or_B": 0.7158570119156737,
+          "coverage_A_on_found": 0.6589785831960461,
+          "coverage_A_or_B_on_found": 0.6589785831960461,
+          "shown_by_tier": {
+            "A": 800,
+            "B": 0,
+            "C": 414
+          },
+          "ece_displayed": 0.2559506874427132,
+          "ece_on_found": 0.007056625000000097,
+          "boxes_without_prob": 0,
+          "macro_f1_box_type": 0.3472216924056698,
+          "per_type": {
+            "closed_comedo": {
+              "shown_A": 406,
+              "precision_A": 0.6009852216748769,
+              "gt": 971
+            },
+            "open_comedo": {
+              "shown_A": 126,
+              "precision_A": 0.6904761904761905,
+              "gt": 473
+            },
+            "papule": {
+              "shown_A": 468,
+              "precision_A": 0.7564102564102564,
+              "gt": 867
+            },
+            "pustule": {
+              "shown_A": 89,
+              "precision_A": 0.797752808988764,
+              "gt": 192
+            },
+            "nodule": {
+              "shown_A": 2,
+              "precision_A": 0.5,
+              "gt": 34
+            }
+          },
+          "confusion_A": {
+            "closed_comedo>closed_comedo": 244,
+            "closed_comedo>open_comedo": 1,
+            "closed_comedo>papule": 4,
+            "closed_comedo>pustule": 3,
+            "nodule>nodule": 1,
+            "nodule>papule": 3,
+            "none>closed_comedo": 154,
+            "none>open_comedo": 36,
+            "none>papule": 94,
+            "none>pustule": 7,
+            "open_comedo>closed_comedo": 1,
+            "open_comedo>open_comedo": 87,
+            "open_comedo>papule": 3,
+            "papule>closed_comedo": 6,
+            "papule>nodule": 1,
+            "papule>open_comedo": 2,
+            "papule>papule": 354,
+            "papule>pustule": 8,
+            "pustule>closed_comedo": 1,
+            "pustule>papule": 10,
+            "pustule>pustule": 71
+          },
+          "reliability_displayed": [
+            {
+              "bin": [
+                0.8666666666666667,
+                0.9333333333333333
+              ],
+              "n": 306,
+              "mean_prob": 0.9060558823529414,
+              "accuracy": 0.630718954248366
+            },
+            {
+              "bin": [
+                0.9333333333333333,
+                1.0
+              ],
+              "n": 785,
+              "mean_prob": 0.9668650955414013,
+              "accuracy": 0.7184713375796178
+            }
+          ]
+        },
+        "source": "reports/selfie_v1/baseline/baseline_results.json (P05)"
+      },
+      "legacy_demo": {
+        "T1": {
+          "photos": 45,
+          "typed_photos": 45,
+          "lesion_gt": 2537,
+          "shown": 4579,
+          "ignored": 239,
+          "tp": 1754,
+          "fp": 2586,
+          "duplicates": 35,
+          "location_precision": 0.404147465437788,
+          "location_recall": 0.6913677571935357,
+          "fp_per_photo": 57.46666666666667,
+          "tier_A_shown": 4340,
+          "tier_A_precision": 0.34608294930875577,
+          "tier_B_shown": 0,
+          "tier_B_precision": null,
+          "group_precision_A_or_B": 0.3695852534562212,
+          "coverage_A_on_found": 1.0,
+          "coverage_A_or_B_on_found": 1.0,
+          "shown_by_tier": {
+            "A": 1754,
+            "B": 0,
+            "C": 0
+          },
+          "ece_displayed": 0.4903889631336405,
+          "ece_on_found": 0.021033865450399123,
+          "boxes_without_prob": 0,
+          "macro_f1_box_type": 0.445609190657439,
+          "per_type": {
+            "closed_comedo": {
+              "shown_A": 1887,
+              "precision_A": 0.2771595124536301,
+              "gt": 971
+            },
+            "open_comedo": {
+              "shown_A": 701,
+              "precision_A": 0.31383737517831667,
+              "gt": 473
+            },
+            "papule": {
+              "shown_A": 1454,
+              "precision_A": 0.4264099037138927,
+              "gt": 867
+            },
+            "pustule": {
+              "shown_A": 273,
+              "precision_A": 0.4652014652014652,
+              "gt": 192
+            },
+            "nodule": {
+              "shown_A": 25,
+              "precision_A": 0.48,
+              "gt": 34
+            }
+          },
+          "confusion_A": {
+            "closed_comedo>closed_comedo": 523,
+            "closed_comedo>open_comedo": 15,
+            "closed_comedo>papule": 39,
+            "closed_comedo>pustule": 34,
+            "nodule>nodule": 12,
+            "nodule>papule": 12,
+            "none>closed_comedo": 1302,
+            "none>nodule": 7,
+            "none>open_comedo": 452,
+            "none>papule": 737,
+            "none>pustule": 88,
+            "open_comedo>closed_comedo": 14,
+            "open_comedo>open_comedo": 220,
+            "open_comedo>papule": 15,
+            "papule>closed_comedo": 29,
+            "papule>nodule": 5,
+            "papule>open_comedo": 13,
+            "papule>papule": 620,
+            "papule>pustule": 24,
+            "pustule>closed_comedo": 19,
+            "pustule>nodule": 1,
+            "pustule>open_comedo": 1,
+            "pustule>papule": 31,
+            "pustule>pustule": 127
+          },
+          "reliability_displayed": [
+            {
+              "bin": [
+                0.26666666666666666,
+                0.3333333333333333
+              ],
+              "n": 4,
+              "mean_prob": 0.328725,
+              "accuracy": 0.0
+            },
+            {
+              "bin": [
+                0.3333333333333333,
+                0.4
+              ],
+              "n": 36,
+              "mean_prob": 0.3722916666666667,
+              "accuracy": 0.0
+            },
+            {
+              "bin": [
+                0.4,
+                0.4666666666666667
+              ],
+              "n": 92,
+              "mean_prob": 0.43927826086956534,
+              "accuracy": 0.14130434782608695
+            },
+            {
+              "bin": [
+                0.4666666666666667,
+                0.5333333333333333
+              ],
+              "n": 209,
+              "mean_prob": 0.49885837320574167,
+              "accuracy": 0.17703349282296652
+            },
+            {
+              "bin": [
+                0.5333333333333333,
+                0.6
+              ],
+              "n": 217,
+              "mean_prob": 0.5646152073732719,
+              "accuracy": 0.1935483870967742
+            },
+            {
+              "bin": [
+                0.6,
+                0.6666666666666666
+              ],
+              "n": 226,
+              "mean_prob": 0.6360898230088493,
+              "accuracy": 0.21238938053097345
+            },
+            {
+              "bin": [
+                0.6666666666666666,
+                0.7333333333333333
+              ],
+              "n": 247,
+              "mean_prob": 0.7029311740890688,
+              "accuracy": 0.19433198380566802
+            },
+            {
+              "bin": [
+                0.7333333333333333,
+                0.8
+              ],
+              "n": 317,
+              "mean_prob": 0.768016719242902,
+              "accuracy": 0.26813880126182965
+            },
+            {
+              "bin": [
+                0.8,
+                0.8666666666666667
+              ],
+              "n": 426,
+              "mean_prob": 0.8347319248826289,
+              "accuracy": 0.27230046948356806
+            },
+            {
+              "bin": [
+                0.8666666666666667,
+                0.9333333333333333
+              ],
+              "n": 757,
+              "mean_prob": 0.9036247027741083,
+              "accuracy": 0.3606340819022457
+            },
+            {
+              "bin": [
+                0.9333333333333333,
+                1.0
+              ],
+              "n": 1809,
+              "mean_prob": 0.9662205085682698,
+              "accuracy": 0.46434494195688225
+            }
+          ]
+        },
+        "source": "reports/selfie_v1/baseline/baseline_results.json (P05)"
+      }
+    }
   }
 }
