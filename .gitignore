@@ -8,6 +8,7 @@ datasets/
 dataset/
 runs/
 models/
+docs/
 reports/phase1_label_check/
 reports/phase1_predictions/
 reports/logs/
